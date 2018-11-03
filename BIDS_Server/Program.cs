@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using System.Net;
 using System.Net.WebSockets;
 using System.Threading;
-using System.Runtime.InteropServices;
 using TR.BIDScs;
 namespace BIDS_Server
 {
@@ -20,7 +15,7 @@ namespace BIDS_Server
     {
       Console.WriteLine("BIDS WebSocketサーバーアプリケーション");
       Console.WriteLine("ver : 0.0.1(Alpha)");
-      Console.WriteLine("ブラウザを開き、「http://trtec.s1006.xrea.com/TCP_SkyWay.html」にアクセスしてください。");
+      Console.WriteLine("ブラウザを開き、「http://trtec.s1006.xrea.com/ws_sw/index.html」にアクセスしてください。");
 
       SocketDo();
 

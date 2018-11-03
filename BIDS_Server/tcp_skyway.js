@@ -1,15 +1,18 @@
-﻿const peer = new Peer({
+﻿var UserID = window.prompt("希望するユーザーIDを入力してください", "");
+if (!UserID) UserID = Math.random().toString(36).slice(-12);
+const peer = new Peer(UserID, {
     key: _MYAPIKEY_,
+    id: UserID,
     debug: 0,
 });
-const DataConnection = {};
 
 peer.on('open', id => {
     console.log(id);
     var PID = document.getElementById('MyPeerID');
     PID.innerHTML = 'Peer ID : ' + id;
 });
-
+var ErDiv = document.getElementById('ErrorDiv');
+peer.on('error', error => { ErDiv.innerHTML += 'SkyWay : ' + error + '\n'; });
 var WSC = new WebSocket('ws://localhost:12835');
 WSC.close();
 function WSConnecter() {
@@ -37,6 +40,7 @@ function WSConnecter() {
     };
     WSC.onerror = function (error) {
         console.error('WebSocket エラー : ', error);
+        ErDiv.innerHTML += 'WebSocket : ' + error + '\n';
     };
 
 }
@@ -50,12 +54,10 @@ peer.on('connection', c => {
     console.log(c);
     //console.log(peer.connections);
     c.on('open',()=>{
-        DataConnection[c.remoteID] = c;
         console.log('SkyWay DataOpen : ', c);
     });
     c.on('close',()=>{
         console.log('SkyWay DataClose : ', c);
-        delete DataConnection[c.remoteID];
     });
     c.on('data',function(data){
         console.log('SkyWay DataGet : ', data);
