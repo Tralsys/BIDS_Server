@@ -3,10 +3,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
-// アセンブリに関連付けられている情報を変更するには、
+// 制御されます。アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("BIDS Server")]
-[assembly: AssemblyDescription("The Server Application of BIDS")]
+[assembly: AssemblyTitle("BIDS Server Library")]
+[assembly: AssemblyDescription("Library of BIDS Server")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Tech Otter")]
 [assembly: AssemblyProduct("BIDS Project")]
@@ -20,17 +20,17 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // このプロジェクトが COM に公開される場合、次の GUID が typelib の ID になります
-[assembly: Guid("760504a0-0e72-4e29-adf1-f0b68bd3b288")]
+[assembly: Guid("5a7bbf59-7d25-471e-aa59-41c79ce78d22")]
 
-// アセンブリのバージョン情報は次の 4 つの値で構成されています:
+// アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //
 //      メジャー バージョン
 //      マイナー バージョン
 //      ビルド番号
-//      Revision
+//      リビジョン
 //
 // すべての値を指定するか、次を使用してビルド番号とリビジョン番号を既定に設定できます
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.1")]
-[assembly: AssemblyFileVersion("1.0.1")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
