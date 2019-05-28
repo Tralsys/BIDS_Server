@@ -15,16 +15,16 @@ namespace BIDS_Server
     /*BIDS Server
      * HTML+JavaScriptとの間でWebSocketでの通信。
      */
-
+     
     static SMemLib SML = null;
     static CtrlInput CI = null;
     static bool IsLooping = true;
-    
+    const string VerNumStr = "011a";
     static void Main(string[] args)
     {
-      Console.WriteLine("BIDS WebSocketサーバーアプリケーション");
-      Console.WriteLine("ver : 011(Alpha)");
-      Console.WriteLine("011aバージョンでは、シリアル通信(serial)のみをサポートしています。");
+      Console.WriteLine("BIDS Server Application");
+      Console.WriteLine("ver : " + VerNumStr);
+      Console.WriteLine("In this version(" + VerNumStr + "), only Serial Connection is supported.");
       //SocketDo();
       SMemLib.BIDSSMemChanged += SMemLib_BIDSSMemChanged;
       SMemLib.OpenDChanged += SMemLib_OpenDChanged;
@@ -61,53 +61,88 @@ namespace BIDS_Server
               case "exit":
                 Console.WriteLine("exit command : Used when user want to close this program.  This command has no arguments.");
                 break;
+              case "ls":
+                Console.WriteLine("connection listing command : Print the list of the Name of alive connection.  This command has no arguments.");
+                break;
+              case "close":
+                Console.WriteLine("close connection command : Used when user want to close the connection.  User must set the Connection Name to be closed.");
+                break;
               default:
                 Console.WriteLine("Command not found.");
                 break;
             }
           }
-          else Console.WriteLine("The command \"man\" is needed to be used with the name of other command.  Please check the command you entered.");
+          else
+          {
+            Console.WriteLine("BIDS Server Application");
+            Console.WriteLine("ver : " + VerNumStr + "\n");
+            Console.WriteLine("close: Close the connection.");
+            Console.WriteLine("exit : close this program.");
+            Console.WriteLine("ls : Print the list of the Name of alive connection.");
+            Console.WriteLine("man : Print the mannual of command.");
+            Console.WriteLine("serial : Start the serial connection.  If you want to know more info, please do the command \"man serial\".");
+          }
           break;
         case "serial":
           Serial sl = new Serial();
-          sl.BSMDChanged += BSMDChanged;
+          sl.KeyCtrl += KeyCtrl;
           sl.HandleCtrl += HandleCtrl;
-          svlist.Add(new Serial());
           try
           {
             IBIDSsvSetUp(ref sl, in s);
+            svlist.Add(sl);
           }
           catch (Exception e)
           {
             Console.WriteLine(e);
-            svlist[svlist.Count - 1].Dispose();
-            svlist.RemoveAt(svlist.Count - 1);
+            sl.Dispose();
           }
           break;
+        case "ls":
+          if (svlist.Count > 0) for (int i = 0; i < svlist.Count; i++) Console.WriteLine(i.ToString() + " : " + svlist[i].Name);
+          else Console.WriteLine("No connection is alive.");
+          break;
         case "exit":
-          Parallel.For(0, svlist.Count, (i) => IBIDSsvDispose(i));
+          for (int i = 0; i < svlist.Count; i++) IBIDSsvDispose(i);
           IsLooping = false;
           break;
-        default:
-          for(int i = 0; i < svlist.Count; i++)
+        case "close":
+          if (svlist.Count > 0)
           {
-            if (svlist[i] != null)
+            for (int i = 0; i < svlist.Count; i++)
             {
-              if (cmd[0] == svlist[i].Name)
+              if (svlist[i].Name == cmd[1])
               {
-                switch (cmd[1])
-                {
-                  case "close":
-                    svlist[i].Dispose();
-                    svlist.RemoveAt(i);
-                    break;
-                }
+                svlist[i].Dispose();
+                svlist.RemoveAt(i);
               }
             }
           }
+          else Console.WriteLine("No connection is alive.");
+          break;
+        case "debug":
+          if (svlist.Count > 0)
+          {
+            for (int i = 0; i < svlist.Count; i++)
+            {
+              if (cmd.Length <= 1 || svlist[i].Name == cmd[1])
+              {
+                Console.WriteLine("debug start");
+                svlist[i].IsDebug = true;
+                Console.ReadKey();
+                svlist[i].IsDebug = false;
+                Console.WriteLine("debug end");
+              }
+            }
+          }
+          else Console.WriteLine("No connection is alive.");
+          break;
+        default:
+          Console.WriteLine("Command Not Found");
           break;
       }
     }
+
 
     private static void IBIDSsvDispose(int ind)
     {

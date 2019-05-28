@@ -28,6 +28,7 @@ namespace TR.BIDSsv
 
     int Version { get; }
     string Name { get; set; }
+    bool IsDebug { get; set; }
     bool Connect(in string args);
     void OnBSMDChanged(in BIDSSharedMemoryData data);
     void OnOpenDChanged(in OpenD data);
