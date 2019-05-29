@@ -327,7 +327,7 @@ namespace BIDS_Server
       oldBSMD = data;
     }
 
-    private static string Conp(object oldobj, object newobj) => Equals(oldobj, newobj) ? newobj.ToString() : string.Empty;
+    private static string Conp(object oldobj, object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
 
     public void OnOpenDChanged(in OpenD data)
     {
