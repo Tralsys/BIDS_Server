@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 using TR.BIDSsv;
 
@@ -44,6 +46,12 @@ namespace BIDS_Server
       set => CI?.SetHandD(CtrlInput.HandType.Power, value);
     }
     Thread ReadThread = null;
+
+    const int OpenDBias = 1000000;
+    const int ElapDBias = 100000;
+    const int DoorDBias = 10000;
+    const int HandDBias = 1000;
+
     public bool Connect(in string args)
     {
       SP = new SerialPort();
@@ -179,7 +187,6 @@ namespace BIDS_Server
       SP?.Dispose();
       Console.WriteLine(Name + " : " + SP?.IsOpen.ToString());
     }
-
     private void ReadDoing()
     {
       while (SP?.IsOpen == true && IsLooping)
@@ -236,24 +243,138 @@ namespace BIDS_Server
         }
       }
     }
+
+
+    BIDSSharedMemoryData oldBSMD = new BIDSSharedMemoryData();
+    List<int> AutoNumL = new List<int>();
+    OpenD oldOD = new OpenD();
+    PanelD oldPD = new PanelD();
+    List<int> PDAutoList = new List<int>();
+    SoundD oldSD = new SoundD();
+    List<int> SDAutoList = new List<int>();
     public void OnBSMDChanged(in BIDSSharedMemoryData data)
     {
-      //throw new NotImplementedException();
+      bool IsDClsd = data.IsDoorClosed;
+      Spec osp = oldBSMD.SpecData;
+      Spec nsp = data.SpecData;
+      State ost = oldBSMD.StateData;
+      State nst = data.StateData;
+      Hand oh = oldBSMD.HandleData;
+      Hand nh = data.HandleData;
+      TimeSpan ots = TimeSpan.FromMilliseconds(oldBSMD.StateData.T);
+      TimeSpan nts = TimeSpan.FromMilliseconds(data.StateData.T);
+      Parallel.ForEach(AutoNumL, (i) =>
+      {
+        string WriteStr = string.Empty;
+
+        
+        string chr = string.Empty;
+        int num = 0;
+        if (OpenDBias > i && i >= ElapDBias)
+        {
+          switch (i - ElapDBias)
+          {
+            case 0: WriteStr = Conp(ost.Z, nst.Z); break;
+            case 1: WriteStr = Conp(ost.V, nst.V); break;
+            case 2: WriteStr = Conp(ost.T, nst.T); break;
+            case 3: WriteStr = Conp(ost.BC, nst.BC); break;
+            case 4: WriteStr = Conp(ost.MR, nst.MR); break;
+            case 5: WriteStr = Conp(ost.ER, nst.ER); break;
+            case 6: WriteStr = Conp(ost.BP, nst.BP); break;
+            case 7: WriteStr = Conp(ost.SAP, nst.SAP); break;
+            case 8: WriteStr = Conp(ost.I, nst.I); break;
+            //case 9: WriteStr = Conp(ost.Z, nst.Z); break;
+            case 10: WriteStr = Conp(ots.Hours, nts.Hours); break;
+            case 11: WriteStr = Conp(ots.Minutes, nts.Minutes); break;
+            case 12: WriteStr = Conp(ots.Seconds, nts.Seconds); break;
+            case 13: WriteStr = Conp(ots.Milliseconds, nts.Milliseconds); break;
+          }
+          (chr, num) = ("E", i - ElapDBias);
+        }
+        else if (i >= DoorDBias)
+        {
+          switch (i - DoorDBias)
+          {
+            case 0: WriteStr = Conp(oldBSMD.IsDoorClosed ? 1 : 0, IsDClsd ? 1 : 0); break;
+          }
+          (chr, num) = ("D", i - DoorDBias);
+        }
+        else if (i >= HandDBias)
+        {
+          switch (i - HandDBias)
+          {
+            case 0: WriteStr = Conp(oh.B, nh.B); break;
+            case 1: WriteStr = Conp(oh.P, nh.P); break;
+            case 2: WriteStr = Conp(oh.R, nh.R); break;
+            case 3: WriteStr = Conp(oh.C, nh.C); break;
+          }
+          (chr, num) = ("H", i - HandDBias);
+        }
+        else if (OpenDBias > i)
+        {
+          switch (i)
+          {
+            case 0: WriteStr = Conp(osp.B, nsp.B); break;
+            case 1: WriteStr = Conp(osp.P, nsp.P); break;
+            case 2: WriteStr = Conp(osp.A, nsp.A); break;
+            case 3: WriteStr = Conp(osp.J, nsp.J); break;
+            case 4: WriteStr = Conp(osp.C, nsp.C); break;
+          }
+          (chr, num) = ("C", i % HandDBias);
+        }
+        if (WriteStr != string.Empty) SP?.WriteLine("TRI" + chr + num.ToString() + "X" + WriteStr);
+      });
+      oldBSMD = data;
     }
+
+    private static string Conp(object oldobj, object newobj) => Equals(oldobj, newobj) ? newobj.ToString() : string.Empty;
 
     public void OnOpenDChanged(in OpenD data)
     {
-      //throw new NotImplementedException();
+      oldOD = data;
     }
 
     public void OnPanelDChanged(in int[] data)
     {
-      //throw new NotImplementedException();
+      if (PDAutoList.Count > 0)
+      {
+        for (int i = 0; i < PDAutoList.Count; i++)
+        {
+          int ind = PDAutoList[i];
+          bool OldIndIs = ind < (oldPD.Panels != null ? oldPD.Length : 0);
+          bool NewIndIs = ind < data.Length;
+          int RetVal = -1;
+          if (OldIndIs && NewIndIs) { if (oldPD.Panels[ind] != data[ind]) RetVal = data[ind]; }//Old:True, New:True
+          else if (!OldIndIs) RetVal = NewIndIs ? data[ind] : -1;//Old:False / New:True=>data, New:False=>-1
+          else if (!NewIndIs) RetVal = 0;//Old:True, New:False => 0
+
+          if (RetVal >= 0) SP?.WriteLine("TRIP" + ind.ToString() + "X" + RetVal.ToString());
+        }
+      }
+      oldPD.Panels = data;
     }
 
     public void OnSoundDChanged(in int[] data)
     {
-      //throw new NotImplementedException();
+      if (oldSD.Sounds != null)
+      {
+        if (SDAutoList.Count > 0)
+        {
+          for (int i = 0; i < SDAutoList.Count; i++)
+          {
+            int ind = SDAutoList[i];
+            bool OldIndIs = ind < (oldSD.Sounds != null ? oldSD.Length : 0);
+            bool NewIndIs = ind < data.Length;
+            int RetVal = -1;
+            if (OldIndIs && NewIndIs) { if (oldSD.Sounds[ind] != data[ind]) RetVal = data[ind]; }//Old:True, New:True
+            else if (!OldIndIs) RetVal = NewIndIs ? data[ind] : -1;//Old:False / New:True=>data, New:False=>-1
+            else if (!NewIndIs) RetVal = 0;//Old:True, New:False => 0
+
+            if (RetVal >= 0) SP?.WriteLine("TRIP" + ind.ToString() + "X" + RetVal.ToString());
+          }
+        }
+      }
+      oldSD.Sounds = data;
     }
 
 
@@ -475,24 +596,124 @@ namespace BIDS_Server
                 case 0: return ReturnString + BSMD.HandleData.B;
                 case 1: return ReturnString + BSMD.HandleData.P;
                 case 2: return ReturnString + BSMD.HandleData.R;
-                //定速状態は予約
+                case 3: return ReturnString + BSMD.HandleData.C;//定速状態は予約
+                case 4:
+                  OpenD od = new OpenD();
+                  SML?.Read(out od);
+                  if (od.IsEnabled) return ReturnString + od.SelfBPosition.ToString();
+                  else return "TRE1";//SMem is not connected.
                 default: return "TRE2";
               }
-            case "P":
-              if (seri < 0) return "TRE2";
+            case "P":;
               PanelD pd;
               SML?.Read(out pd);
-              return ReturnString + (seri < pd.Length ? pd.Panels[seri] : 0).ToString();
+              if (seri < 0) return ReturnString + pd.Length.ToString();
+              else return ReturnString + (seri < pd.Length ? pd.Panels[seri] : 0).ToString();
             case "S":
-              if (seri > 255 || seri < 0) return "TRE2";
               SoundD sd;
               SML?.Read(out sd);
-              return ReturnString + (seri < sd.Length ? sd.Sounds[seri] : 0).ToString();
+              if (seri < 0) return ReturnString + sd.Length.ToString();
+              else return ReturnString + (seri < sd.Length ? sd.Sounds[seri] : 0).ToString();
             case "D":
-              if (BSMD.IsDoorClosed) return ReturnString + "0";
-              else return ReturnString + "1";
+              switch (seri)
+              {
+                case 0: return ReturnString + (BSMD.IsDoorClosed ? "1" : "0");
+                case 1: return ReturnString + "0";
+                case 2: return ReturnString + "0";
+                default: return "TRE2";
+              }
             default: return "TRE3";//記号部不正
           }
+        case "A"://Auto Send Add
+          int sera = 0;
+          try
+          {
+            sera = Convert.ToInt32(GetString.Substring(4));
+          }
+          catch (FormatException)
+          {
+            return "TRE6";//要求情報コード 文字混入
+          }
+          catch (OverflowException)
+          {
+            return "TRE5";//要求情報コード 変換オーバーフロー
+          }
+
+          int Bias = -1;
+          switch (GetString.Substring(3, 1))
+          {
+            case "C":
+              Bias = 0;
+              break;
+            case "H":
+              Bias = HandDBias;
+              break;
+            case "D":
+              Bias = DoorDBias;
+              break;
+            case "E":
+              Bias = ElapDBias;
+              break;
+            case "P":
+              if (!PDAutoList.Contains(sera)) PDAutoList.Add(sera);
+              return ReturnString + "0";
+            case "S":
+              if (!SDAutoList.Contains(sera)) SDAutoList.Add(sera);
+              return ReturnString + "0";
+          }
+
+
+          if (Bias >= 0)
+          {
+            if (!AutoNumL.Contains(Bias + sera)) AutoNumL.Add(Bias + sera);
+            return ReturnString + "0";
+          }
+          else return "TRE3";
+        case "D"://Auto Send Delete
+          int Biasd = -1;
+          int serd = 0;
+
+          try
+          {
+            serd = Convert.ToInt32(GetString.Substring(4));
+          }
+          catch (FormatException)
+          {
+            return "TRE6";//要求情報コード 文字混入
+          }
+          catch (OverflowException)
+          {
+            return "TRE5";//要求情報コード 変換オーバーフロー
+          }
+
+          switch (GetString.Substring(3, 1))
+          {
+            case "C":
+              Biasd = 0;
+              break;
+            case "H":
+              Biasd = HandDBias;
+              break;
+            case "D":
+              Biasd = DoorDBias;
+              break;
+            case "E":
+              Biasd = ElapDBias;
+              break;
+            case "P":
+              if (!PDAutoList.Contains(serd)) PDAutoList.Remove(serd);
+              return ReturnString + "0";
+            case "S":
+              if (!SDAutoList.Contains(serd)) SDAutoList.Remove(serd);
+              return ReturnString + "0";
+          }
+
+          if (Biasd > 0)
+          {
+            if (AutoNumL.Contains(Biasd + serd)) AutoNumL.Remove(Biasd + serd);
+            return ReturnString + "0";
+          }
+          else return "TRE3";
         default:
           return "TRE4";//識別子不正
       }

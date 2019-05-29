@@ -31,8 +31,11 @@ namespace BIDS_Server
       SMemLib.PanelDChanged += SMemLib_PanelDChanged;
       SMemLib.SoundDChanged += SMemLib_SoundDChanged;
       SML = new SMemLib(true, 0);
+      SML.ReadStart(0, 10);
       CI = new CtrlInput();
       do ReadLineDO(); while (IsLooping);
+      SML.ReadStop();
+      SML.Dispose();
       Console.WriteLine("Please press any key to exit...");
       Console.ReadKey();
     }
