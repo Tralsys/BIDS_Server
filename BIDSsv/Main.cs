@@ -19,17 +19,11 @@ namespace TR.BIDSsv
   }
   public interface IBIDSsv : IDisposable
   {
-    event EventHandler<HandleCtrlEvArgs> HandleCtrl;
-    event EventHandler<KeyCtrlEvArgs> KeyCtrl;
-    event EventHandler BSMDChanged;
-    event EventHandler OpenDChanged;
-    event EventHandler PanelDChanged;
-    event EventHandler SoundDChanged;
-
     int Version { get; }
-    string Name { get; set; }
+    string Name { get; }
     bool IsDebug { get; set; }
     bool Connect(in string args);
+    void Print(in string data);
     void OnBSMDChanged(in BIDSSharedMemoryData data);
     void OnOpenDChanged(in OpenD data);
     void OnPanelDChanged(in int[] data);
