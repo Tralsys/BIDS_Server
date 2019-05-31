@@ -103,6 +103,7 @@ namespace BIDS_Server
     {
       if (!IsStarted)
       {
+        for (int i = 1; i <= 9; i++) stateAllStr += ("X{" + i.ToString() + "}");
         SML = new SMemLib(true, 0);
         CI = new CtrlInput();
         SML?.ReadStart(5, Interval);
@@ -352,8 +353,7 @@ namespace BIDS_Server
       SML?.Dispose();
     }
 
-
-
+    static string stateAllStr = "{0}";
     static public string DataSelectTR(in string CName, in string GotString)
     {
       if (IsDebug) Console.Write("{0} << {1}", CName, GotString);
@@ -509,6 +509,9 @@ namespace BIDS_Server
             case "C":
               switch (seri)
               {
+                case -1:
+                  Spec spec = BSMD.SpecData;
+                  return ReturnString + string.Format("{0}X{1}X{2}X{3}X{4}", spec.B, spec.P, spec.A, spec.J, spec.C);
                 case 0:
                   return ReturnString + BSMD.SpecData.B.ToString();
                 case 1:
@@ -524,6 +527,15 @@ namespace BIDS_Server
             case "E":
               switch (seri)
               {
+                case -3://Time
+                  TimeSpan ts3 = TimeSpan.FromMilliseconds(BSMD.StateData.T);
+                  return ReturnString + string.Format("{0}:{1}:{2}.{3}", ts3.Hours, ts3.Minutes, ts3.Seconds, ts3.Milliseconds);
+                case -2://Pressure
+                  State st2 = BSMD.StateData;
+                  return ReturnString + string.Format("{0}X{1}X{2}X{3}X{4}", st2.BC, st2.MR, st2.ER, st2.BP, st2.SAP);
+                case -1://All
+                  State st1 = BSMD.StateData;
+                  return ReturnString + string.Format(stateAllStr, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
                 case 0: return ReturnString + BSMD.StateData.Z;
                 case 1: return ReturnString + BSMD.StateData.V;
                 case 2: return ReturnString + BSMD.StateData.T;
@@ -543,6 +555,9 @@ namespace BIDS_Server
             case "H":
               switch (seri)
               {
+                case -1:
+                  Hand hd1 = BSMD.HandleData;
+                  return ReturnString + string.Format("{0}X{1}X{2}X{3}", hd1.B, hd1.P, hd1.R, hd1.C);
                 case 0: return ReturnString + BSMD.HandleData.B;
                 case 1: return ReturnString + BSMD.HandleData.P;
                 case 2: return ReturnString + BSMD.HandleData.R;
@@ -555,7 +570,6 @@ namespace BIDS_Server
                 default: return "TRE2";
               }
             case "P":
-              ;
               PanelD pd;
               SML?.Read(out pd);
               if (seri < 0) return ReturnString + pd.Length.ToString();
@@ -573,6 +587,23 @@ namespace BIDS_Server
                 case 2: return ReturnString + "0";
                 default: return "TRE2";
               }
+            case "p":
+              PanelD pda;
+              SML?.Read(out pda);
+
+              ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
+              for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
+                ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]);
+              
+              return ReturnString;
+            case "s":
+              SoundD sda;
+              SML?.Read(out sda);
+              ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
+              for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
+                ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]);
+
+              return ReturnString;
             default: return "TRE3";//記号部不正
           }
         case "A"://Auto Send Add
