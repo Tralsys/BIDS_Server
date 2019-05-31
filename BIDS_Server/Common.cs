@@ -780,13 +780,274 @@ namespace BIDS_Server
     static public void DataGot(in string GotStr)
     {
       if (GotStr == null || GotStr == string.Empty) return;
-      if (!GotStr.StartsWith("TR") && !GotStr.StartsWith("TO")) return;
+      if (!GotStr.StartsWith("TR")) return;
       string[] GSA = GotStr.Replace("\n", string.Empty).Split('X');
-      switch (GSA[0].Substring(2, 1))
+      if (GSA[0].StartsWith("TRI"))
       {
-        case "I":
-          if (GSA[0].Substring(3, 1) == "D") if (IsDebug) Console.WriteLine(">>>{0}", GotStr);
-          break;
+        int seri = 0;
+        try
+        {
+          seri = Convert.ToInt32(GotStr.Substring(4));
+        }
+        catch (FormatException)
+        {
+          throw new Exception("TRE6");//要求情報コード 文字混入
+        }
+        catch (OverflowException)
+        {
+          throw new Exception("TRE5");//要求情報コード 変換オーバーフロー
+        }
+        switch (GotStr.Substring(3, 1))
+        {
+          case "C":
+            switch (seri)
+            {
+              case -1:
+                if (GSA.Length > 5)
+                {
+                  Spec spec;
+                  try
+                  {
+                    spec.B = int.Parse(GSA[1]);
+                    spec.P = int.Parse(GSA[2]);
+                    spec.A = int.Parse(GSA[3]);
+                    spec.J = int.Parse(GSA[4]);
+                    spec.C = int.Parse(GSA[5]);
+                    BIDSSharedMemoryData bsmd = BSMD;
+                    bsmd.SpecData = spec;
+                    BSMD = bsmd;
+                  }
+                  catch (Exception){ throw; }
+                }
+                break;
+              case 0:
+                try
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.SpecData.B = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                catch (Exception) { throw; }
+                break;
+              case 1:
+                try
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.SpecData.P = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                catch (Exception) { throw; }
+                break;
+              case 2:
+                try
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.SpecData.A = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                catch (Exception) { throw; }
+                break;
+              case 3:
+                try
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.SpecData.J = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                catch (Exception) { throw; }
+                break;
+              case 4:
+                try
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.SpecData.C = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                catch (Exception) { throw; }
+                break;
+              default: throw new Exception("TRE2");
+            }
+            break;
+          case "E":
+            switch (seri)
+            {
+              case -3://Time
+                if (GSA.Length > 4)
+                {
+                  TimeSpan ts3 = new TimeSpan(0, int.Parse(GSA[1]), int.Parse(GSA[2]), int.Parse(GSA[3]), int.Parse(GSA[4]));
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.T = (int)ts3.TotalMilliseconds;
+                  BSMD = bsmd;
+                }
+                break;
+              case -2://Pressure
+                if (GSA.Length > 5)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  int i = 1;
+                  bsmd.StateData.BC = float.Parse(GSA[i++]);
+                  bsmd.StateData.MR = float.Parse(GSA[i++]);
+                  bsmd.StateData.ER = float.Parse(GSA[i++]);
+                  bsmd.StateData.BP = float.Parse(GSA[i++]);
+                  bsmd.StateData.SAP = float.Parse(GSA[i++]);
+                  BSMD = bsmd;
+                }
+                break;
+              case -1://All
+                if (GSA.Length > 10)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  State st = bsmd.StateData;
+                  int i = 1;
+                  st.Z = double.Parse(GSA[i++]);
+                  st.V = float.Parse(GSA[i++]);
+                  st.T = int.Parse(GSA[i++]);
+                  st.BC = float.Parse(GSA[i++]);
+                  st.MR = float.Parse(GSA[i++]);
+                  st.ER = float.Parse(GSA[i++]);
+                  st.BP = float.Parse(GSA[i++]);
+                  st.SAP = float.Parse(GSA[i++]);
+                  st.I = float.Parse(GSA[i++]);
+                }
+                break;
+              case 0:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.Z = double.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 1:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.V = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 2:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.T = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 3:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.BC = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 4:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.MR = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 5:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.ER = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 6:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.BP = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 7:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.SAP = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 8:
+                if (GSA.Length >= 2)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.StateData.I = float.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              //case 9: return ReturnString + BSMD.StateData.Volt;//予約 電圧
+              case 10://Hour
+                break;
+              case 11:
+                break;
+              case 12:
+                break;
+              case 13:
+                break;
+              default: throw new Exception("TRE2");
+            }
+            break;
+          case "H":
+            switch (seri)
+            {
+              case -1:
+                Hand hd1 = BSMD.HandleData;
+                return ReturnString + string.Format("{0}X{1}X{2}X{3}", hd1.B, hd1.P, hd1.R, hd1.C);
+              case 0: return ReturnString + BSMD.HandleData.B;
+              case 1: return ReturnString + BSMD.HandleData.P;
+              case 2: return ReturnString + BSMD.HandleData.R;
+              case 3: return ReturnString + BSMD.HandleData.C;//定速状態は予約
+              case 4:
+                OpenD od = new OpenD();
+                SML?.Read(out od);
+                if (od.IsEnabled) return ReturnString + od.SelfBPosition.ToString();
+                else return "TRE1";//SMem is not connected.
+              default: return "TRE2";
+            }
+          case "P":
+            PanelD pd;
+            SML?.Read(out pd);
+            if (seri < 0) return ReturnString + pd.Length.ToString();
+            else return ReturnString + (seri < pd.Length ? pd.Panels[seri] : 0).ToString();
+          case "S":
+            SoundD sd;
+            SML?.Read(out sd);
+            if (seri < 0) return ReturnString + sd.Length.ToString();
+            else return ReturnString + (seri < sd.Length ? sd.Sounds[seri] : 0).ToString();
+          case "D":
+            switch (seri)
+            {
+              case 0: return ReturnString + (BSMD.IsDoorClosed ? "1" : "0");
+              case 1: return ReturnString + "0";
+              case 2: return ReturnString + "0";
+              default: return "TRE2";
+            }
+          case "p":
+            PanelD pda;
+            SML?.Read(out pda);
+
+            ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
+            for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
+              ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]);
+
+            return ReturnString;
+          case "s":
+            SoundD sda;
+            SML?.Read(out sda);
+            ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
+            for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
+              ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]);
+
+            return ReturnString;
+          default: throw new Exception("TRE3");//記号部不正
+        }
       }
     }
   }
