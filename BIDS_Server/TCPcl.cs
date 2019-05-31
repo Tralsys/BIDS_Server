@@ -11,7 +11,7 @@ namespace BIDS_Server
 {
   class TCPcl : IBIDSsv
   {
-    public int Version => 202;
+    public int Version { get; private set; } = 202;
     public string Name { get; private set; } = "tcpcl";
     public bool IsDebug { get; set; } = false;
 
@@ -139,6 +139,55 @@ namespace BIDS_Server
         NS = TC?.GetStream();
         NS.ReadTimeout = RTO;
         NS.WriteTimeout = WTO;
+
+        //Reconnect Process
+        if (rie.Port == TCPIO.DefPNum)
+        {
+          Console.WriteLine("{0} : Reconnect Process Start.", Name);
+          try
+          {
+            Print("TRV" + Version.ToString() + "\n");
+            while (IsLooping && TC?.Connected == true && NS?.DataAvailable == false) Thread.Sleep(1);
+            if (IsLooping)
+            {
+              string gs = Read();
+              if (gs?.StartsWith("TRV") != true)
+              {
+                IsLooping = false;
+                throw new Exception("Version Check Process Failed.");
+              }
+              else
+              {
+                string[] gsa = gs.Split(new string[] { "PN" }, StringSplitOptions.RemoveEmptyEntries);
+                int v = int.Parse(gsa[0].Replace("TRV", string.Empty));
+                Version = v < Version ? v : Version;
+                if (gsa.Length >= 2)
+                {
+                  PortNum = int.Parse(gsa[1]);
+                  if (PortNum != rie.Port)
+                  {
+                    NS?.Close();
+                    NS?.Dispose();
+                    TC?.Close();
+                    TC?.Dispose();
+                    TC = new TcpClient(SvAddr, PortNum);
+                    NS = TC?.GetStream();
+                    NS.ReadTimeout = RTO;
+                    NS.WriteTimeout = WTO;
+                  }
+                }
+              }
+            }
+            IPEndPoint rier = (IPEndPoint)TC.Client.RemoteEndPoint;
+            IPEndPoint lier = (IPEndPoint)TC.Client.LocalEndPoint;
+            Console.WriteLine("{0} : Reconnect Success to Addr={1} Port={2}, from Addr={3} Port={4}", Name, rier.Address, rier.Port, lier.Address, lier.Port);
+          }
+          catch (Exception e)
+          {
+            Console.WriteLine("{0} : ReConnect Process Failed.\n{1}", Name, e);
+          }
+        }
+        //Reconnect Process End
       }
       catch (Exception e)
       {
@@ -149,48 +198,22 @@ namespace BIDS_Server
         return;
       }
 
+
       (new Thread(() =>
       {
         while (TC?.Connected == true) Thread.Sleep(1);
         IsLooping = false;
       })).Start();
 
-      List<byte> RBytesLRec = new List<byte>();
 
       while (IsLooping)
       {
         if (TC?.Connected != true) continue;
-        List<byte> RBytesL = RBytesLRec;
         Print("TRID0\n");
         if (NS?.CanRead != true) continue;
-        try
-        {
-          while (NS?.DataAvailable == false && IsLooping) Thread.Sleep(1);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine("{0} : Error has occured at waiting process\n{1}", Name, e);
-        }
-        if (!IsLooping) continue;
-        byte[] b = new byte[1];
-        int nsreadr = 0;
-        while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
-        {
-          b = new byte[1];
-          nsreadr = NS.Read(b, 0, 1);
-          if (nsreadr <= 0) break;
-          RBytesL.Add(b[0]);
-        }
-        if (!RBytesL.Contains((byte)'\n'))
-        {
-          if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
-          else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-          break;
-        }
-        string ReadData = Enc.GetString(RBytesL.ToArray());
-        ReadData.TrimEnd('\n');
+        string ReadData = Read();
         if (ReadData.Contains("X")) Common.DataGot(ReadData);
-        if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
+        else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
         else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));
 
       }
@@ -201,7 +224,7 @@ namespace BIDS_Server
     public void Dispose()
     {
       IsLooping = false;
-      if (TD?.Join(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
+      if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
       NS?.Dispose();
       TC?.Dispose();
     }
@@ -226,6 +249,40 @@ namespace BIDS_Server
         Console.WriteLine("In Writing Process, An Error has occured on " + Name);
         Console.WriteLine(e);
       }
+    }
+
+    List<byte> RBytesLRec = new List<byte>();
+    string Read()
+    {
+      List<byte> RBytesL = RBytesLRec;
+      try
+      {
+        while (NS?.DataAvailable == false && IsLooping) Thread.Sleep(1);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine("{0} : Error has occured at waiting process\n{1}", Name, e);
+      }
+      if (!IsLooping) return string.Empty;
+      byte[] b = new byte[1];
+      int nsreadr = 0;
+
+      while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
+      {
+        b = new byte[1];
+        nsreadr = NS.Read(b, 0, 1);
+        if (nsreadr <= 0) break;
+        RBytesL.Add(b[0]);
+      }
+
+      if (!RBytesL.Contains((byte)'\n'))
+      {
+        if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
+        else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
+        return string.Empty;
+      }
+
+      return Enc.GetString(RBytesL.ToArray()).Replace("\n", string.Empty);
     }
 
     readonly string[] ArgInfo = new string[]

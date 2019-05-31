@@ -13,8 +13,9 @@ namespace BIDS_Server
   class TCPIO : IBIDSsv
   {
     //Wait Port : 14147
-    int PortNum = 14147;
-    public int Version => 202;
+    public const int DefPNum = 14147;
+    int PortNum = DefPNum;
+    public int Version { get; private set; } = 202;
 
     public string Name { get; private set; } = "tcpsv";
     public bool IsDebug { get; set; } = false;
@@ -120,18 +121,80 @@ namespace BIDS_Server
       TL = new TcpListener(IPAddress.Any, PortNum);
       TL.Start();
       Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, ((IPEndPoint)TL.LocalEndpoint).Port);
-      TD = new Thread(ReadDoing);
+      TD = PortNum != DefPNum ? new Thread(ReadDoing) : new Thread(ConnectDoing);
+      
       TD.Start();
       return true;
+    }
+    public int Connect(Encoding enc,int vnum , int wto = 1000, int rto = 10000)
+    {
+      Enc = enc;
+      WTO = wto;
+      RTO = rto;
+      Version = vnum;
+      TL = new TcpListener(IPAddress.Any, 0);
+      TL?.Start();
+      PortNum = ((IPEndPoint)TL.LocalEndpoint).Port;
+      Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, PortNum);
+
+      TD = new Thread(ReadDoing);
+
+      return PortNum;
     }
 
     public void Dispose()
     {
       IsLooping = false;
-      if (!TD.Join(5000)) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
+      if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
       NS?.Dispose();
       TC?.Dispose();
       TL?.Stop();
+    }
+
+    void ConnectDoing()
+    {
+      while (IsLooping)
+      {
+        while (IsLooping && TL?.Pending() == false) Thread.Sleep(1);
+        if (!IsLooping) continue;
+        try
+        {
+          TC = TL?.AcceptTcpClient();
+          NS = TC?.GetStream();
+          NS.ReadTimeout = RTO;
+          NS.WriteTimeout = WTO;
+        }
+        catch(Exception e)
+        {
+          Console.WriteLine("{0} : ConnectDoing Failed.\n{1}", Name, e);
+        }
+        string gs = Read();
+        if (gs.StartsWith("TRV"))
+        {
+          try
+          {
+            int v = int.Parse(gs.Replace("TRV", string.Empty));
+            int vnum = v < Version ? v : Version;
+            TCPIO tcp = new TCPIO();
+            int pn = tcp.Connect(Enc, vnum, WTO, RTO);
+            Print("TRV" + vnum.ToString() + "PN" + pn.ToString() + "\n");
+            tcp.Name = "tcp" + pn.ToString();
+            Common.Add(ref tcp);
+          }
+          catch (Exception e)
+          {
+            Console.WriteLine("{0} : Version Check Failed.\n{1}", Name, e);
+          }
+        }
+        else
+        {
+          Print("TRE\n");//Error を入れる
+        }
+        NS?.Close();
+        NS?.Dispose();
+        TC?.Close();
+        TC?.Dispose();
+      }
     }
 
     //https://dobon.net/vb/dotnet/internet/tcpclientserver.html
@@ -153,44 +216,55 @@ namespace BIDS_Server
         IsLooping = false;
       })).Start();
 
-      List<byte> RBytesLRec = new List<byte>();
 
       while (IsLooping)
       {
         if (TC?.Connected != true) continue;
-        List<byte> RBytesL = RBytesLRec;
-        try
-        {
-          while (NS?.DataAvailable == false && IsLooping) Thread.Sleep(1);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine("{0} : Error has occured at waiting process\n{1}", Name, e);
-        }
         if (!IsLooping) continue;
-        byte[] b = new byte[1];
-        int nsreadr = 0;
-        while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
-        {
-          b = new byte[1];
-          nsreadr = NS.Read(b, 0, 1);
-          if (nsreadr <= 0) break;
-          RBytesL.Add(b[0]);
-        }
-        if (!RBytesL.Contains((byte)'\n'))
-        {
-          RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-          break;
-        }
-        string ReadData = Enc.GetString(RBytesL.ToArray());
-        ReadData.TrimEnd('\n');
+        string ReadData = Read();
         if (ReadData.Contains("X")) Common.DataGot(ReadData);
-        if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
+        else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
         else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));
       }
       NS?.Close();
       TC?.Close();
 
+    }
+
+
+
+    List<byte> RBytesLRec = new List<byte>();
+    string Read()
+    {
+      List<byte> RBytesL = RBytesLRec;
+      try
+      {
+        while (NS?.DataAvailable == false && IsLooping) Thread.Sleep(1);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine("{0} : Error has occured at waiting process\n{1}", Name, e);
+      }
+      if (!IsLooping) return string.Empty;
+      byte[] b = new byte[1];
+      int nsreadr = 0;
+
+      while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
+      {
+        b = new byte[1];
+        nsreadr = NS.Read(b, 0, 1);
+        if (nsreadr <= 0) break;
+        RBytesL.Add(b[0]);
+      }
+
+      if (!RBytesL.Contains((byte)'\n'))
+      {
+        if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
+        else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
+        return string.Empty;
+      }
+
+      return Enc.GetString(RBytesL.ToArray()).Replace("\n", string.Empty);
     }
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }

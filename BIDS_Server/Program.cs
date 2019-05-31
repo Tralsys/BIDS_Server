@@ -13,7 +13,7 @@ namespace BIDS_Server
      */
      
     static bool IsLooping = true;
-    const string VerNumStr = "011a";
+    const string VerNumStr = "011a2";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
@@ -117,6 +117,9 @@ namespace BIDS_Server
           }
           break;
         case "ls": Console.Write(Common.PrintList()); break;
+        case "udp":
+          Console.WriteLine("UDP has not supported yet.");
+          break;
         case "exit":
           Common.Remove();
           IsLooping = false;

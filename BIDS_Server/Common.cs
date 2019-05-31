@@ -297,7 +297,7 @@ namespace BIDS_Server
         {
           Console.WriteLine(e);
         }
-        for (int i = 0; i < svlist.Count; i++)
+        for (int i = svlist.Count-1; i >= 0; i--)
           if (Name == svlist[i].Name)
           {
             try
@@ -309,12 +309,15 @@ namespace BIDS_Server
             {
               Console.WriteLine(e);
             }
-            return;
           }
       }
       else
       {
-        if (svlist.Count > 0) for (int i = 0; i < svlist.Count; i++) svlist[i]?.Dispose();
+        if (svlist.Count > 0) for (int i = svlist.Count - 1; i >= 0; i--)
+          {
+            svlist[i]?.Dispose();
+            svlist?.RemoveAt(i);
+          }
       }
     }
     static public void DebugDo() => DebugDo(string.Empty);
