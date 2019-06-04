@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>TR.BIDSsv.tcpcl</AssemblyName>
+    <RootNamespace>TR.BIDSsv</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
+    <ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
+    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
+  </ItemGroup>
+</Project>

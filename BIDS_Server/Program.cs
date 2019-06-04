@@ -2,26 +2,27 @@
 using System.Net;
 using System.Net.WebSockets;
 using System.Threading;
+using System.Reflection;
 using TR.BIDScs;
+using TR.BIDSsv;
+using System.IO;
+using TR;
 
 namespace BIDS_Server
 {
   class Program
   {
-    /*BIDS Server
-     * HTML+JavaScriptとの間でWebSocketでの通信。
-     */
-     
     static bool IsLooping = true;
-    const string VerNumStr = "011a2";
+    const string VerNumStr = "011a3";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
       Console.WriteLine("ver : " + VerNumStr);
-      Console.WriteLine("In this version(" + VerNumStr + "), only Serial Connection is supported.");
+
       Common.Start(5);
       do ReadLineDO(); while (IsLooping);
       Common.Dispose();
+
       Console.WriteLine("Please press any key to exit...");
       Console.ReadKey();
     }
@@ -37,15 +38,6 @@ namespace BIDS_Server
           {
             switch (cmd[1])
             {
-              case "serial":
-                (new Serial()).WriteHelp(in s);
-                break;
-              case "tcpsv":
-                (new TCPIO()).WriteHelp(in s);
-                break;
-              case "tcpcl":
-                (new TCPcl()).WriteHelp(in s);
-                break;
               case "exit":
                 Console.WriteLine("exit command : Used when user want to close this program.  This command has no arguments.");
                 break;
@@ -74,7 +66,7 @@ namespace BIDS_Server
           }
           break;
         case "serial":
-          Serial sl = new Serial();
+          /*Serial sl = new Serial();
           try
           {
             sl.Connect(s);
@@ -86,39 +78,27 @@ namespace BIDS_Server
             sl.Dispose();
             Common.Remove(sl.Name);
             
-          }
-          break;
-        case "tcpsv":
-          TCPIO tcp = new TCPIO();
-          try
-          {
-            tcp.Connect(s);
-            Common.Add(ref tcp);
-          }
-          catch (Exception e)
-          {
-            Console.WriteLine(e);
-            tcp?.Dispose();
-            Common.Remove(tcp.Name);
-
-          }
-          break;
-        case "tcpcl":
-          TCPcl tcl = new TCPcl();
-          try
-          {
-            tcl.Connect(s);
-            Common.Add(ref tcl);
-          }catch(Exception e)
-          {
-            Console.WriteLine(e);
-            tcl?.Dispose();
-            Common.Remove(tcl.Name);
-          }
+          }*/
           break;
         case "ls": Console.Write(Common.PrintList()); break;
-        case "udp":
-          Console.WriteLine("UDP has not supported yet.");
+        case "lsmod":
+          try
+          {
+            string[] fs = LSMod();
+            if (fs == null || fs.Length <= 0)
+            {
+              Console.WriteLine("There are no modules in the mods folder.");
+            }
+            else
+            {
+              for (int i = 0; i < fs.Length; i++)
+              {
+                string[] cn = fs[i].Split('.');
+                Console.WriteLine(" {0} : {1}", cn[cn.Length - 2], fs[i]);
+              }
+            }
+          }
+          catch (Exception e) { Console.WriteLine(e); }
           break;
         case "exit":
           Common.Remove();
@@ -139,6 +119,34 @@ namespace BIDS_Server
       }
     }
 
+    static string[] LSMod()
+    {
+      string[] fl = null;
+      try
+      {
+        fl = Directory.GetFiles(@"mods\", "*.dll");
+      }
+      catch (DirectoryNotFoundException)
+      {
+        Directory.CreateDirectory(@"mods");
+        Console.WriteLine("Created \"mods\" folder.");
+      }
+      
+      return fl;
+    }
+
+    //https://qiita.com/rita0222/items/609583c31cb7f0132086
+    static IBIDSsv LoadMod(string fname)
+    {
+      IBIDSsv ibs = null;
+      foreach(var t in Assembly.LoadFrom(@"mods\" + (fname ?? string.Empty)).GetTypes())
+      {
+        if (t.IsInterface) continue;
+        ibs = Activator.CreateInstance(t) as IBIDSsv;
+        if (ibs != null) return ibs;
+      }
+      return ibs;
+    }
 
     static async void SocketDo()
     {

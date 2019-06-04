@@ -1,30 +1,27 @@
 ﻿using System;
-using TR.BIDSSMemLib;
-using TR.BIDSsv;
-using System.Net.Sockets;
-using System.Threading;
-using System.Net;
-using System.Text;
-using System.IO;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using TR;
+using TR.BIDSsv;
+using TR.BIDSSMemLib;
 
-namespace BIDS_Server
+namespace BIDSsv.tcpcl
 {
-  class TCPIO : IBIDSsv
+  class TCPcl : IBIDSsv
   {
-    //Wait Port : 14147
-    public const int DefPNum = 14147;
-    int PortNum = DefPNum;
     public int Version { get; private set; } = 202;
-
-    public string Name { get; private set; } = "tcpsv";
+    public string Name { get; private set; } = "tcpcl";
     public bool IsDebug { get; set; } = false;
 
-    TcpListener TL = null;
+    int PortNum = Common.DefPNum;
+
     TcpClient TC = null;
     NetworkStream NS = null;
     Thread TD = null;
-
+    string SvAddr = "127.0.0.1";
     Encoding Enc = Encoding.Default;
     bool IsLooping = true;
     int WTO = 1000;
@@ -42,6 +39,12 @@ namespace BIDS_Server
           {
             switch (saa[0])
             {
+              case "A":
+                if (saa.Length > 1) SvAddr = saa[1];
+                break;
+              case "Address":
+                if (saa.Length > 1) SvAddr = saa[1];
+                break;
               case "E":
                 switch (int.Parse(saa[1]))
                 {
@@ -116,102 +119,89 @@ namespace BIDS_Server
 
             }
           }
-        }catch(Exception e) { Console.WriteLine("Error has occured on " + Name);Console.WriteLine(e); }
+        }
+        catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
       }
-      TL = new TcpListener(IPAddress.Any, PortNum);
-      TL.Start();
-      Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, ((IPEndPoint)TL.LocalEndpoint).Port);
-      TD = PortNum != DefPNum ? new Thread(ReadDoing) : new Thread(ConnectDoing);
-      
+
+      TD = new Thread(LoopDoing);
       TD.Start();
+
       return true;
     }
-    public int Connect(Encoding enc,int vnum , int wto = 1000, int rto = 10000)
-    {
-      Enc = enc;
-      WTO = wto;
-      RTO = rto;
-      Version = vnum;
-      TL = new TcpListener(IPAddress.Any, 0);
-      TL?.Start();
-      PortNum = ((IPEndPoint)TL.LocalEndpoint).Port;
-      Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, PortNum);
 
-      TD = new Thread(ReadDoing);
-
-      return PortNum;
-    }
-
-    public void Dispose()
-    {
-      IsLooping = false;
-      if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
-      NS?.Dispose();
-      TC?.Dispose();
-      TL?.Stop();
-    }
-
-    void ConnectDoing()
-    {
-      while (IsLooping)
-      {
-        while (IsLooping && TL?.Pending() == false) Thread.Sleep(1);
-        if (!IsLooping) continue;
-        try
-        {
-          TC = TL?.AcceptTcpClient();
-          NS = TC?.GetStream();
-          NS.ReadTimeout = RTO;
-          NS.WriteTimeout = WTO;
-        }
-        catch(Exception e)
-        {
-          Console.WriteLine("{0} : ConnectDoing Failed.\n{1}", Name, e);
-        }
-        string gs = Read();
-        if (gs.StartsWith("TRV"))
-        {
-          try
-          {
-            int v = int.Parse(gs.Replace("TRV", string.Empty));
-            int vnum = v < Version ? v : Version;
-            TCPIO tcp = new TCPIO();
-            int pn = tcp.Connect(Enc, vnum, WTO, RTO);
-            Print("TRV" + vnum.ToString() + "PN" + pn.ToString() + "\n");
-            tcp.Name = "tcp" + pn.ToString();
-            Common.Add(ref tcp);
-          }
-          catch (Exception e)
-          {
-            Console.WriteLine("{0} : Version Check Failed.\n{1}", Name, e);
-          }
-        }
-        else
-        {
-          Print("TRE\n");//Error を入れる
-        }
-        NS?.Close();
-        NS?.Dispose();
-        TC?.Close();
-        TC?.Dispose();
-      }
-    }
-
-    //https://dobon.net/vb/dotnet/internet/tcpclientserver.html
-    void ReadDoing()
+    void LoopDoing()
     {
       try
       {
-        TC = TL.AcceptTcpClient();
-        Console.WriteLine(Name + " : " + "Connected => Addr:{0}, Port:{1}", ((IPEndPoint)TC.Client.RemoteEndPoint).Address, ((IPEndPoint)TC.Client.RemoteEndPoint).Port);
+        TC = new TcpClient(SvAddr, PortNum);
+        IPEndPoint rie = (IPEndPoint)TC.Client.RemoteEndPoint;
+        IPEndPoint lie = (IPEndPoint)TC.Client.LocalEndPoint;
+        Console.WriteLine("{0} : Connected to Addr:{1} Port:{2}, from Addr:{3} Port:{4}", Name, rie.Address, rie.Port, lie.Address, lie.Port);
         NS = TC?.GetStream();
+        NS.ReadTimeout = RTO;
+        NS.WriteTimeout = WTO;
+
+        //Reconnect Process
+        if (rie.Port == Common.DefPNum)
+        {
+          Console.WriteLine("{0} : Reconnect Process Start.", Name);
+          try
+          {
+            Print("TRV" + Version.ToString() + "\n");
+            while (IsLooping && TC?.Connected == true && NS?.DataAvailable == false) Thread.Sleep(1);
+            if (IsLooping)
+            {
+              string gs = Read();
+              if (gs?.StartsWith("TRV") != true)
+              {
+                IsLooping = false;
+                throw new Exception("Version Check Process Failed.");
+              }
+              else
+              {
+                string[] gsa = gs.Split(new string[] { "PN" }, StringSplitOptions.RemoveEmptyEntries);
+                int v = int.Parse(gsa[0].Replace("TRV", string.Empty));
+                Version = v < Version ? v : Version;
+                if (gsa.Length >= 2)
+                {
+                  PortNum = int.Parse(gsa[1]);
+                  if (PortNum != rie.Port)
+                  {
+                    NS?.Close();
+                    NS?.Dispose();
+                    TC?.Close();
+                    TC?.Dispose();
+                    TC = new TcpClient(SvAddr, PortNum);
+                    NS = TC?.GetStream();
+                    NS.ReadTimeout = RTO;
+                    NS.WriteTimeout = WTO;
+                  }
+                }
+              }
+            }
+            IPEndPoint rier = (IPEndPoint)TC.Client.RemoteEndPoint;
+            IPEndPoint lier = (IPEndPoint)TC.Client.LocalEndPoint;
+            Console.WriteLine("{0} : Reconnect Success to Addr={1} Port={2}, from Addr={3} Port={4}", Name, rier.Address, rier.Port, lier.Address, lier.Port);
+          }
+          catch (Exception e)
+          {
+            Console.WriteLine("{0} : ReConnect Process Failed.\n{1}", Name, e);
+          }
+        }
+        //Reconnect Process End
       }
-      catch(Exception e)
+      catch (Exception e)
       {
-        Console.WriteLine("In connection waiting process, An Error has occured on " + Name);
+        Console.WriteLine(Name + " : TcpClient Open Failed");
         Console.WriteLine(e);
+
+        Common.Remove(Name);
+        return;
       }
-      (new Thread(() => {
+
+
+      (new Thread(() =>
+      {
         while (TC?.Connected == true) Thread.Sleep(1);
         IsLooping = false;
       })).Start();
@@ -220,18 +210,47 @@ namespace BIDS_Server
       while (IsLooping)
       {
         if (TC?.Connected != true) continue;
-        if (!IsLooping) continue;
+        Print("TRID0\n");
+        if (NS?.CanRead != true) continue;
         string ReadData = Read();
         if (ReadData.Contains("X")) Common.DataGot(ReadData);
         else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
         else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));
+
       }
       NS?.Close();
       TC?.Close();
-
     }
 
+    public void Dispose()
+    {
+      IsLooping = false;
+      if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
+      NS?.Dispose();
+      TC?.Dispose();
+    }
 
+    public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
+    public void OnOpenDChanged(in OpenD data) { }
+    public void OnPanelDChanged(in int[] data) { }
+    public void OnSoundDChanged(in int[] data) { }
+
+    public void Print(in string data)
+    {
+      if (TC?.Connected != true || NS?.CanWrite != true) return;
+      if (IsDebug) Console.Write("{0} >> {1}", Name, data);
+      try
+      {
+        byte[] wbytes = Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n"));
+        NS.WriteTimeout = WTO;
+        NS.Write(wbytes, 0, wbytes.Length);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine("In Writing Process, An Error has occured on " + Name);
+        Console.WriteLine(e);
+      }
+    }
 
     List<byte> RBytesLRec = new List<byte>();
     string Read()
@@ -267,39 +286,19 @@ namespace BIDS_Server
       return Enc.GetString(RBytesL.ToArray()).Replace("\n", string.Empty);
     }
 
-    public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
-    public void OnOpenDChanged(in OpenD data) { }
-    public void OnPanelDChanged(in int[] data) { }
-    public void OnSoundDChanged(in int[] data) { }
-
-    public void Print(in string data)
-    {
-      if (TC?.Connected != true || NS?.CanWrite != true) return;
-      if (IsDebug) Console.Write("{0} >> {1}", Name, data);
-      try
-      {
-        byte[] wbytes = Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n"));
-        NS?.Write(wbytes, 0, wbytes.Length);
-      }
-      catch (Exception e)
-      {
-        Console.WriteLine("In Writing Process, An Error has occured on " + Name);
-        Console.WriteLine(e);
-      }
-    }
-
     readonly string[] ArgInfo = new string[]
     {
       "Argument Format ... [Header(\"-\" or \"/\")][SettingName(B, P etc...)][Separater(\":\")][Setting(38400, 2 etc...)]",
+      "  -A or -Address : Set the ipv4 address of Server.  Default:127.0.0.1",
       "  -E or -Encoding : Set the Encoding Option.  Default:0  If you want More info about this argument, please read the source code.",
       "  -N or -Name : Set the Instance Name.  Default:\"tcp\"  If you don't set this option, this program maybe cause some bugs.",
-      "  -P or -PortName : Set PortNum.  Default:14147  Only Number is allowed in the setting.",
+      "  -P or -PortName : Set Server's PortNumber.  NOT CLIENT's PORTNUM.  Default:14147  Only Number is allowed in the setting.",
       "  -RTO or -ReadTimeout : Set the ReadTimeout Setting.  Default:10000",
       "  -WTO or -WriteTimeout : Set the WriteTimeout Setting.  Default:1000"
     };
     public void WriteHelp(in string args)
     {
-      Console.WriteLine("BIDS Server Program TCP Interface");
+      Console.WriteLine("BIDS Server Program TCP Interface (Client Side)");
       Console.WriteLine("Version : " + Version.ToString());
       Console.WriteLine("Copyright (C) Tetsu Otter 2019");
       foreach (string s in ArgInfo) Console.WriteLine(s);

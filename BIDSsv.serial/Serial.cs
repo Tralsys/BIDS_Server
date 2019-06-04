@@ -7,15 +7,10 @@ using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 using TR.BIDSsv;
 
-namespace BIDS_Server
+namespace TR.TCPsv
 {
   public class Serial : IBIDSsv
   {
-    public Serial()
-    {
-
-    }
-
     public int Version => 202;
     public bool IsDebug { get; set; } = false;
     public string Name { get; private set; } = "serial";
@@ -35,7 +30,7 @@ namespace BIDS_Server
       SP.WriteTimeout = 1000;
       SP.Encoding = Encoding.Default;
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
-      for(int i = 0; i < sa.Length; i++)
+      for (int i = 0; i < sa.Length; i++)
       {
         string[] saa = sa[i].Split(':');
         if (saa.Length > 0)
@@ -167,7 +162,7 @@ namespace BIDS_Server
           inputStr = SP?.ReadLine();
         }
         catch (TimeoutException) { continue; }
-        catch(Exception e)
+        catch (Exception e)
         {
           Console.WriteLine("Error has occured at ReadDoing on" + Name);
           Console.WriteLine(e);

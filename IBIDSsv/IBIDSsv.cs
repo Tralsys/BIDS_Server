@@ -1,12 +1,8 @@
 ﻿using System;
 using TR.BIDSSMemLib;
 
-namespace TR.BIDSsv
+namespace TR
 {
-  public class Main
-  {
-    static public readonly int Version = 202;
-  }
   public class HandleCtrlEvArgs : EventArgs
   {
     public int? Reverser;

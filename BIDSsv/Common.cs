@@ -4,16 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
-using TR.BIDSsv;
 
-namespace BIDS_Server
+namespace TR.BIDSsv
 {
   static public class UFunc
   {
     public static string Comp(object oldobj, object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
   }
+
   static public class Common
   {
+    static public readonly int Version = 202;
+    static public readonly int DefPNum = 14147;
+
+
     static public BIDSSharedMemoryData BSMD
     {
       get => (BIDSSharedMemoryData)SML?.Read<BIDSSharedMemoryData>();
@@ -255,7 +259,7 @@ namespace BIDS_Server
             }
 
 
-            if (WriteStr != string.Empty) 
+            if (WriteStr != string.Empty)
             {
               Parallel.For(0, svlist.Count, (s) =>
               {
@@ -268,9 +272,9 @@ namespace BIDS_Server
       }
     }
 
-    static internal void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
-    static internal void Remove() => Remove(string.Empty);
-    static internal void Remove(in string Name)
+    static public void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
+    static public void Remove() => Remove(string.Empty);
+    static public void Remove(in string Name)
     {
       if (Name != string.Empty)
       {
@@ -298,7 +302,7 @@ namespace BIDS_Server
         {
           Console.WriteLine(e);
         }
-        for (int i = svlist.Count-1; i >= 0; i--)
+        for (int i = svlist.Count - 1; i >= 0; i--)
           if (Name == svlist[i].Name)
           {
             try
@@ -358,7 +362,7 @@ namespace BIDS_Server
     {
       if (IsDebug) Console.Write("{0} << {1}", CName, GotString);
       string ReturnString = GotString.Replace("\n", string.Empty) + "X";
-      
+
       //0 1 2 3
       //T R X X
       switch (GotString.Substring(2, 1))
@@ -594,7 +598,7 @@ namespace BIDS_Server
               ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
               for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
                 ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]);
-              
+
               return ReturnString;
             case "s":
               SoundD sda;
@@ -696,7 +700,7 @@ namespace BIDS_Server
           }
           else return "TRE3";
         case "E":
-          //throw new Exception(GotString);
+        //throw new Exception(GotString);
         default:
           return "TRE4";//識別子不正
       }
@@ -817,7 +821,7 @@ namespace BIDS_Server
                     bsmd.SpecData = spec;
                     BSMD = bsmd;
                   }
-                  catch (Exception){ throw; }
+                  catch (Exception) { throw; }
                 }
                 break;
               case 0:
@@ -1052,7 +1056,7 @@ namespace BIDS_Server
             }
             break;
           case "P":
-            if (GSA.Length > 1 && seri >= 0 && seri < PD.Length) 
+            if (GSA.Length > 1 && seri >= 0 && seri < PD.Length)
               PD.Panels[seri] = int.Parse(GSA[1]);
             break;
           case "S":
@@ -1084,8 +1088,8 @@ namespace BIDS_Server
                 Array.Copy(PD.Panels, pda, PD.Length);
               }
               else pda = PD.Panels;
-              
-              for (int i = seri * 32; i < mx; i++) 
+
+              for (int i = seri * 32; i < mx; i++)
                 if (i < PD.Length) pda[i] = int.Parse(GSA[(i % 32) + 1]);
               PanelD pd = new PanelD() { Panels = pda };
               PD = pd;

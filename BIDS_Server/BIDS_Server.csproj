@@ -38,12 +38,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serial.cs" />
-    <Compile Include="TCPcl.cs" />
-    <Compile Include="TCPIO.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -68,6 +64,14 @@
     <ProjectReference Include="..\BIDSsv\BIDSsv.csproj">
       <Project>{5a7bbf59-7d25-471e-aa59-41c79ce78d22}</Project>
       <Name>BIDSsv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj">
+      <Project>{92610fab-b027-44f7-8253-25ade32bfd90}</Project>
+      <Name>IBIDSsv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BIDSsv.tcpsv\BIDSsv.tcpsv.csproj">
+      <Project>{c6c1536e-b548-4158-aa31-e143e5fd07ed}</Project>
+      <Name>BIDSsv.tcpsv</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
