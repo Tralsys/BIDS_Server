@@ -998,54 +998,117 @@ namespace BIDS_Server
             switch (seri)
             {
               case -1:
-                Hand hd1 = BSMD.HandleData;
-                return ReturnString + string.Format("{0}X{1}X{2}X{3}", hd1.B, hd1.P, hd1.R, hd1.C);
-              case 0: return ReturnString + BSMD.HandleData.B;
-              case 1: return ReturnString + BSMD.HandleData.P;
-              case 2: return ReturnString + BSMD.HandleData.R;
-              case 3: return ReturnString + BSMD.HandleData.C;//定速状態は予約
+                if (GSA.Length > 4)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.HandleData.B = int.Parse(GSA[1]);
+                  bsmd.HandleData.P = int.Parse(GSA[2]);
+                  bsmd.HandleData.R = int.Parse(GSA[3]);
+                  bsmd.HandleData.C = int.Parse(GSA[4]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 0:
+                if (GSA.Length > 1)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.HandleData.B = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 1:
+                if (GSA.Length > 1)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.HandleData.P = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 2:
+                if (GSA.Length > 1)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.HandleData.R = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
+              case 3:
+                if (GSA.Length > 1)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.HandleData.C = int.Parse(GSA[1]);
+                  BSMD = bsmd;
+                }
+                break;
               case 4:
-                OpenD od = new OpenD();
-                SML?.Read(out od);
-                if (od.IsEnabled) return ReturnString + od.SelfBPosition.ToString();
-                else return "TRE1";//SMem is not connected.
-              default: return "TRE2";
+                if (GSA.Length > 1)
+                {
+                  OpenD opd = OD;
+                  opd.SelfBPosition = int.Parse(GSA[1]);
+                  OD = opd;
+                }
+                break;
+              default: break;
             }
+            break;
           case "P":
-            PanelD pd;
-            SML?.Read(out pd);
-            if (seri < 0) return ReturnString + pd.Length.ToString();
-            else return ReturnString + (seri < pd.Length ? pd.Panels[seri] : 0).ToString();
+            if (GSA.Length > 1 && seri >= 0 && seri < PD.Length) 
+              PD.Panels[seri] = int.Parse(GSA[1]);
+            break;
           case "S":
-            SoundD sd;
-            SML?.Read(out sd);
-            if (seri < 0) return ReturnString + sd.Length.ToString();
-            else return ReturnString + (seri < sd.Length ? sd.Sounds[seri] : 0).ToString();
+            if (GSA.Length > 1 && seri >= 0 && seri < SD.Length)
+              SD.Sounds[seri] = int.Parse(GSA[1]);
+            break;
           case "D":
             switch (seri)
             {
-              case 0: return ReturnString + (BSMD.IsDoorClosed ? "1" : "0");
-              case 1: return ReturnString + "0";
-              case 2: return ReturnString + "0";
-              default: return "TRE2";
+              case 0:
+                if (GSA.Length > 1)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  bsmd.IsDoorClosed = GSA[1] == "1";
+                  BSMD = bsmd;
+                }
+                break;
+              default: break;
             }
+            break;
           case "p":
-            PanelD pda;
-            SML?.Read(out pda);
-
-            ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
-            for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
-              ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]);
-
-            return ReturnString;
+            if (GSA.Length > 32 && seri >= 0)
+            {
+              int mx = (seri + 1) * 32;
+              int[] pda;
+              if (PD.Length >= mx)
+              {
+                pda = new int[mx];
+                Array.Copy(PD.Panels, pda, PD.Length);
+              }
+              else pda = PD.Panels;
+              
+              for (int i = seri * 32; i < mx; i++) 
+                if (i < PD.Length) pda[i] = int.Parse(GSA[(i % 32) + 1]);
+              PanelD pd = new PanelD() { Panels = pda };
+              PD = pd;
+            }
+            break;
           case "s":
-            SoundD sda;
-            SML?.Read(out sda);
-            ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
-            for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
-              ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]);
+            if (GSA.Length > 32 && seri >= 0)
+            {
+              int mx = (seri + 1) * 32;
+              int[] sda;
+              if (SD.Length >= mx)
+              {
+                sda = new int[mx];
+                Array.Copy(SD.Sounds, sda, SD.Length);
+              }
+              else sda = SD.Sounds;
 
-            return ReturnString;
+              for (int i = seri * 32; i < mx; i++)
+                if (i < SD.Length) sda[i] = int.Parse(GSA[(i % 32) + 1]);
+              SoundD sd = new SoundD() { Sounds = sda };
+              SD = sd;
+            }
+            break;
           default: throw new Exception("TRE3");//記号部不正
         }
       }
