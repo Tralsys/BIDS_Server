@@ -20,6 +20,7 @@ namespace TR
     bool IsDebug { get; set; }
     bool Connect(in string args);
     void Print(in string data);
+    void Print(in byte[] data);
     void OnBSMDChanged(in BIDSSharedMemoryData data);
     void OnOpenDChanged(in OpenD data);
     void OnPanelDChanged(in int[] data);

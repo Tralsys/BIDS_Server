@@ -285,6 +285,11 @@ namespace TR.BIDSsv
         Console.WriteLine(e);
       }
     }
+    public void Print(in byte[] data)
+    {
+
+    }
+
 
     readonly string[] ArgInfo = new string[]
     {

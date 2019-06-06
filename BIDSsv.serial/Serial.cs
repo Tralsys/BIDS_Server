@@ -246,5 +246,9 @@ namespace TR.TCPsv
     private string DataSelectTO(in string GetString) => Common.DataSelectTO(in GetString);
 
     public void Print(in string data) => SPWriteLine(data);
+    public void Print(in byte[] data)
+    {
+
+    }
   }
 }

@@ -251,6 +251,10 @@ namespace BIDSsv.tcpcl
         Console.WriteLine(e);
       }
     }
+    public void Print(in byte[] data)
+    {
+
+    }
 
     List<byte> RBytesLRec = new List<byte>();
     string Read()
