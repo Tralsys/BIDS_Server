@@ -48,7 +48,13 @@ namespace BIDS_Server
                 Console.WriteLine("close connection command : Used when user want to close the connection.  User must set the Connection Name to be closed.");
                 break;
               default:
-                Console.WriteLine("Command not found.");
+                IBIDSsv ibsv = LoadMod(FindMod(cmd[1]));
+                if (ibsv != null)
+                {
+                  ibsv.WriteHelp(string.Empty);
+                  ibsv.Dispose();
+                }
+                else Console.WriteLine("Mod not found.");
                 break;
             }
           }
@@ -60,25 +66,8 @@ namespace BIDS_Server
             Console.WriteLine("exit : close this program.");
             Console.WriteLine("ls : Print the list of the Name of alive connection.");
             Console.WriteLine("man : Print the mannual of command.");
-            Console.WriteLine("serial : Start the serial connection.  If you want to know more info, please do the command \"man serial\".");
-            Console.WriteLine("tcpsv : Turn on the TCP Server.  If you want to know more info, please do the command \"man tcpsv\".");
-            Console.WriteLine("tcpcl : Connect to TCP Server.  If you want to know more info, please do the command \"man tcpcl\".");
+            Console.WriteLine("  If you want to check the manual of each mod, please check the mod name and type \"man + (mod name)\"");
           }
-          break;
-        case "serial":
-          /*Serial sl = new Serial();
-          try
-          {
-            sl.Connect(s);
-            Common.Add(ref sl);
-          }
-          catch (Exception e)
-          {
-            Console.WriteLine(e);
-            sl.Dispose();
-            Common.Remove(sl.Name);
-            
-          }*/
           break;
         case "ls": Console.Write(Common.PrintList()); break;
         case "lsmod":
@@ -114,7 +103,27 @@ namespace BIDS_Server
           else Common.DebugDo();
           break;
         default:
-          Console.WriteLine("Command Not Found");
+          string modn = FindMod(cmd[0]);
+          if (modn != null && modn != string.Empty)
+          {
+            IBIDSsv ibsv = LoadMod(modn);
+            if (ibsv != null)
+            {
+              try
+              {
+                ibsv.Connect(s);
+                Common.Add(ref ibsv);
+              }
+              catch (Exception e)
+              {
+                Console.WriteLine(e);
+                ibsv.Dispose();
+                Common.Remove(ibsv.Name);
+              }
+            }
+            else Console.WriteLine("The specified dll file does not implement the IBIDSsv interface.");
+          }
+          else Console.WriteLine("Command Not Found");
           break;
       }
     }
@@ -125,6 +134,10 @@ namespace BIDS_Server
       try
       {
         fl = Directory.GetFiles(@"mods\", "*.dll");
+        if (fl.Length > 0)
+        {
+          for (int i = 0; i < fl.Length; i++) fl[i] = fl[i].Replace(@"mods\", string.Empty);
+        }
       }
       catch (DirectoryNotFoundException)
       {
@@ -135,11 +148,29 @@ namespace BIDS_Server
       return fl;
     }
 
+    static string FindMod(string keyword)
+    {
+      string[] ml = LSMod();
+      for (int i = 0; i < ml.Length; i++)
+      {
+        string[] sa = ml[i].Split('.');
+        if (sa.Length >= 2 && sa[sa.Length - 2] == keyword) return ml[i];
+      }
+      return string.Empty;
+    }
+
     //https://qiita.com/rita0222/items/609583c31cb7f0132086
     static IBIDSsv LoadMod(string fname)
     {
       IBIDSsv ibs = null;
-      foreach(var t in Assembly.LoadFrom(@"mods\" + (fname ?? string.Empty)).GetTypes())
+      Assembly a = null;
+      try
+      {
+        a = Assembly.LoadFrom(@"mods\" + (fname ?? string.Empty));
+      }
+      catch(FileNotFoundException) { return null; }
+      catch(Exception) { throw; }
+      foreach(var t in a?.GetTypes())
       {
         if (t.IsInterface) continue;
         ibs = Activator.CreateInstance(t) as IBIDSsv;
