@@ -119,7 +119,7 @@ namespace TR.BIDSsv
         IsStarted = true;
       }
     }
-
+    
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted) return;
@@ -358,6 +358,103 @@ namespace TR.BIDSsv
     }
 
     static string stateAllStr = "{0}";
+    static public byte[] DataSelect(in string CName, in byte[] data, in Encoding enc)
+    {
+      if (data.Length < 5) return null;
+      List<byte> dbl = data.ToList();
+      for (int i = 0; i < dbl.Count; i++)
+      {
+        if (dbl[i] == '\r')
+        {
+          switch (dbl[i + 1])
+          {
+            case 0x01:
+              dbl[i] = (byte)'\n';
+              dbl.RemoveAt(i + 1);
+              break;
+            case 0x02:
+              dbl.RemoveAt(i + 1);
+              break;
+          }
+        }
+      }
+      byte[] ba = dbl.ToArray();
+      if (ba[0] == (byte)'T')
+      {
+        switch ((char)ba[1])
+        {
+          case 'R':
+            string sr = DataSelectTR(CName, enc.GetString(ba));
+            if (sr != null && sr != string.Empty) return enc.GetBytes(sr);
+            break;
+          case 'O':
+            string so = DataSelectTO(enc.GetString(ba));
+            if (so != null && so != string.Empty) return enc.GetBytes(so);
+            break;
+        }
+      }
+      else if (ba[0] == 0x54 && ba[1] == 0x52) 
+      {
+        switch (ba[2])
+        {
+          case 0x62://Info Data
+            switch (ba[3])
+            {
+              case 0x01://Spec
+                if (Convert.ToUInt16(ba.Skip(4).Take(2)) >= Version) return null;
+                else if (ba.Length >= 5 * 4) 
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  OpenD od = OD;
+                  Spec s = bsmd.SpecData;
+                  int i = 0;
+                  s.B = Convert.ToUInt16(ba.Skip(i += 8).Take(2));
+                  s.P = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
+                  s.A = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
+                  s.J = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
+                  s.C = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
+                  od.SelfBCount = Convert.ToUInt16(ba.Skip(i++).Take(2));
+                  bsmd.SpecData = s;
+                  BSMD = bsmd;
+                  OD = od;
+                }
+                else return ba;
+                break;
+              case 0x02://State
+                if (ba.Length >= 13 * 4)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  State s = bsmd.StateData;
+                  int i = 0;
+                  s.Z = Convert.ToDouble(ba.Skip(i += 4).Take(8));
+                  s.V = Convert.ToSingle(ba.Skip(i += 8).Take(4));
+                  s.I = Convert.ToSingle(ba.Skip(i += 4).Take(4));
+                  //s. = Convert.ToSingle(ba.Skip(i += 4).Take(4));WireVoltage
+                  s.BC = Convert.ToSingle(ba.Skip(i += 8).Take(4));
+                  s.MR = Convert.ToSingle(ba.Skip(i += 4).Take(4));
+                  s.ER = Convert.ToSingle(ba.Skip(i += 4).Take(4));
+                  s.BP = Convert.ToSingle(ba.Skip(i += 4).Take(4));
+                  s.SAP = Convert.ToSingle(ba.Skip(i += 4).Take(4));
+                  bsmd.IsDoorClosed = (ba[13 * 4] & 0b10000000) > 0;
+                  BSMD = bsmd;
+                }
+                else return ba;
+                break;
+              case 0x03://BVE5D
+                break;
+              case 0x04://OpenD
+                break;
+
+            }
+            break;
+          case 0x70://Panel Data
+            break;
+          case 0x73:
+            break;
+        }
+      }
+      return null;
+    }
     static public string DataSelectTR(in string CName, in string GotString)
     {
       if (IsDebug) Console.Write("{0} << {1}", CName, GotString);

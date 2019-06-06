@@ -248,7 +248,10 @@ namespace TR.TCPsv
     public void Print(in string data) => SPWriteLine(data);
     public void Print(in byte[] data)
     {
-
+      byte[] wa = new byte[data.Length + 1];
+      Array.Copy(data, wa, data.Length);
+      wa[data.Length] = (byte)'\n';
+      SP?.Write(wa, 0, wa.Length);
     }
   }
 }
