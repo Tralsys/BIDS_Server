@@ -87,6 +87,53 @@ namespace TR.BIDSsv
       remove => SMemLib.SoundDChanged -= value;
     }
 
+    public class AutoSendSetting
+    {
+      public const uint HeaderBasicConst = 0x54526201;
+      public const uint HeaderBasicCommon = 0x54526202;
+      public const uint HeaderBasicBVE5 = 0x54526203;
+      public const uint HeaderBasicOBVE = 0x54526204;
+      public const uint HeaderBasicHandle = 0x54526205;
+      public const uint HeaderPanel = 0x54527000;
+      public const uint HeaderSound = 0x54527300;
+
+      public bool BasicConstAS = false;
+      public bool BasicCommonAS = false;
+      public bool BasicBVE5AS = false;
+      public bool BasicOBVEAS = false;
+      public bool BasicHandleAS = false;
+      public bool BasicPanelAS = false;
+      public bool BasicSoundAS = false;
+
+      public byte[] BasicConst(in Spec s, in OpenD o)
+      {
+        return null;
+      }
+      public byte[] BasicCommon(in State s, byte DoorState, int SigNum)
+      {
+        return null;
+      }
+      public byte[] BasicBVE5(object o)
+      {
+        return null;
+      }
+      public byte[] BasicOBVE(OpenD o)
+      {
+        return null;
+      }
+      public byte[] BasicHandle(Hand h,int SelfB)
+      {
+        return null;
+      }
+      public byte[] BasicPanel(int[] a,int num)
+      {
+        return null;
+      }
+      public byte[] BasicSound(int[] a,int num)
+      {
+        return null;
+      }
+    }
 
     const int OpenDBias = 1000000;
     const int ElapDBias = 100000;
@@ -358,6 +405,11 @@ namespace TR.BIDSsv
     }
 
     static string stateAllStr = "{0}";
+    /// <summary></summary>
+    /// <param name="CName">Connection Name</param>
+    /// <param name="data">Got Data</param>
+    /// <param name="enc">Encording</param>
+    /// <returns>byte array to return, or array that calling program is needed to do something</returns>
     static public byte[] DataSelect(in string CName, in byte[] data, in Encoding enc)
     {
       if (data.Length < 5) return null;
@@ -384,8 +436,16 @@ namespace TR.BIDSsv
         switch ((char)ba[1])
         {
           case 'R':
-            string sr = DataSelectTR(CName, enc.GetString(ba));
-            if (sr != null && sr != string.Empty) return enc.GetBytes(sr);
+            string gs = enc.GetString(ba);
+            if (gs != null && gs != string.Empty)
+            {
+              if (gs.Contains("X")) DataGot(gs);
+              else
+              {
+                string sr = DataSelectTR(CName, gs);
+                if (sr != null && sr != string.Empty) return enc.GetBytes(sr);
+              }
+            }
             break;
           case 'O':
             string so = DataSelectTO(enc.GetString(ba));
@@ -444,13 +504,62 @@ namespace TR.BIDSsv
                 break;
               case 0x04://OpenD
                 break;
+              case 0x05://Handle
+                if (ba.Length >= 5 * 4)
+                {
+                  BIDSSharedMemoryData bsmd = BSMD;
+                  OpenD od = OD;
+                  Hand h = bsmd.HandleData;
+                  int i = 0;
+                  h.P = Convert.ToInt32(ba.Skip(i += 4).Take(4));
+                  h.B = Convert.ToInt32(ba.Skip(i += 4).Take(4));
+                  h.R = Convert.ToInt32(ba.Skip(i += 4).Take(4));
+                  od.SelfBPosition = Convert.ToInt32(ba.Skip(i += 4).Take(4));
+                  bsmd.HandleData = h;
+                  BSMD = bsmd;
+                  OD = od;
+                }
+                break;
 
             }
             break;
           case 0x70://Panel Data
+            if (ba.Length < 129 * 4) return null;
+            int pai = 0;
+            try
+            {
+              PanelD pd = PD;
+              pai = Convert.ToInt32(ba[3]);
+              if ((pai + 1) * 128 >= pd.Length)
+              {
+                int[] pa = new int[(pai + 1) * 128];
+                Array.Copy(pd.Panels, pa, pd.Length);
+                pd.Panels = pa;
+              }
+              Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = Convert.ToInt32(ba.Skip(4 + (4 * i)).Take(4)));
+              PD = pd;
+            }catch(Exception) { throw; }
             break;
-          case 0x73:
+          case 0x73://SoundData
+            if (ba.Length < 129 * 4) return null;
+            int sai = 0;
+            try
+            {
+              SoundD sd = SD;
+              sai = Convert.ToInt32(ba[3]);
+              if ((sai + 1) * 128 >= sd.Length)
+              {
+                int[] sa = new int[(sai + 1) * 128];
+                Array.Copy(sd.Sounds, sa, sd.Length);
+                sd.Sounds = sa;
+              }
+              Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = Convert.ToInt32(ba.Skip(4 + (4 * i)).Take(4)));
+              SD = sd;
+            }
+            catch (Exception) { throw; }
             break;
+          default:
+            return data;
         }
       }
       return null;

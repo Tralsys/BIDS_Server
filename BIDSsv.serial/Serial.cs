@@ -208,9 +208,20 @@ namespace TR.TCPsv
       }
     }
 
-
-
-    public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
+    Common.AutoSendSetting ass = new Common.AutoSendSetting();
+    BIDSSharedMemoryData bsmd = new BIDSSharedMemoryData();
+    OpenD od = new OpenD();
+    SoundD sd = new SoundD();
+    PanelD pd = new PanelD();
+    public void OnBSMDChanged(in BIDSSharedMemoryData data)
+    {
+      if (ass.BasicConstAS && !Equals(bsmd.SpecData, data.SpecData)) 
+      {
+        byte[] ba = ass.BasicConst(data.SpecData, od);
+        if (ba != null && ba.Length > 0) Print(ba);
+      }
+      bsmd = data;
+    }
     public void OnOpenDChanged(in OpenD data) { }
     public void OnPanelDChanged(in int[] data) { }
     public void OnSoundDChanged(in int[] data) { }
