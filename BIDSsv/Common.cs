@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
@@ -90,12 +91,17 @@ namespace TR.BIDSsv
     public class AutoSendSetting
     {
       public const uint HeaderBasicConst = 0x54526201;
+      public const uint BasicConstSize = 20;
       public const uint HeaderBasicCommon = 0x54526202;
+      public const uint BasicCommonSize = 53;
       public const uint HeaderBasicBVE5 = 0x54526203;
       public const uint HeaderBasicOBVE = 0x54526204;
       public const uint HeaderBasicHandle = 0x54526205;
+      public const uint BasicHandleSize = 20;
       public const uint HeaderPanel = 0x54527000;
+      public const uint PanelSize = 129 * sizeof(int);
       public const uint HeaderSound = 0x54527300;
+      public const uint SoundSize = PanelSize;
 
       public bool BasicConstAS = false;
       public bool BasicCommonAS = false;
@@ -105,33 +111,86 @@ namespace TR.BIDSsv
       public bool BasicPanelAS = false;
       public bool BasicSoundAS = false;
 
-      public byte[] BasicConst(in Spec s, in OpenD o)
+      static internal byte[] BasicConst(in Spec s, in OpenD o)
+      {
+        byte[] ba = new byte[BasicConstSize];
+        int i = 0;
+        Array.Copy(BitConverter.GetBytes((int)HeaderBasicConst), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((short)202), 0, ba, i += sizeof(short), sizeof(short));
+        Array.Copy(BitConverter.GetBytes((short)s.B), 0, ba, i += sizeof(short), sizeof(short));
+        Array.Copy(BitConverter.GetBytes((short)s.P), 0, ba, i += sizeof(short), sizeof(short));
+        Array.Copy(BitConverter.GetBytes((short)s.A), 0, ba, i += sizeof(short), sizeof(short));
+        Array.Copy(BitConverter.GetBytes((short)s.J), 0, ba, i += sizeof(short), sizeof(short));
+        Array.Copy(BitConverter.GetBytes((short)s.C), 0, ba, i += sizeof(short), sizeof(short));
+        Array.Copy(BitConverter.GetBytes((short)o.SelfBCount), 0, ba, i += sizeof(short), sizeof(short));
+        return ba;
+      }
+      static internal byte[] BasicCommon(in State s, byte DoorState, int SigNum = 0)
+      {
+        byte[] ba = new byte[BasicCommonSize];
+        int i = 0;
+        Array.Copy(BitConverter.GetBytes((int)HeaderBasicCommon), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((double)s.Z), 0, ba, i += sizeof(double), sizeof(double));
+        Array.Copy(BitConverter.GetBytes((float)s.V), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((float)s.I), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((float)0), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((int)s.T), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((float)s.BC), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((float)s.MR), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((float)s.ER), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((float)s.BP), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((float)s.SAP), 0, ba, i += sizeof(float), sizeof(float));
+        Array.Copy(BitConverter.GetBytes((int)SigNum), 0, ba, i += sizeof(int), sizeof(int));
+        ba[i] = DoorState;
+        return ba;
+      }
+      static internal byte[] BasicBVE5(object o)
       {
         return null;
       }
-      public byte[] BasicCommon(in State s, byte DoorState, int SigNum)
+      static internal byte[] BasicOBVE(OpenD o)
       {
-        return null;
+        byte[] ba = new byte[Marshal.SizeOf(new OpenD()) + 4];
+        Array.Copy(BitConverter.GetBytes((int)HeaderBasicOBVE), 0, ba, 0, sizeof(int));
+        IntPtr ip = new IntPtr();
+        Marshal.StructureToPtr(o, ip, true);
+        Marshal.Copy(ip, ba, 4, ba.Length);
+        return ba;
       }
-      public byte[] BasicBVE5(object o)
+      static internal byte[] BasicHandle(Hand h,int SelfB)
       {
-        return null;
+        byte[] ba = new byte[BasicHandleSize];
+        int i = 0;
+        Array.Copy(BitConverter.GetBytes((int)HeaderBasicHandle), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((int)h.P), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((int)h.B), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((int)h.R), 0, ba, i += sizeof(int), sizeof(int));
+        Array.Copy(BitConverter.GetBytes((int)SelfB), 0, ba, i += sizeof(int), sizeof(int));
+        return ba;
       }
-      public byte[] BasicOBVE(OpenD o)
+      static internal byte[] BasicPanel(int[] a,int num)
       {
-        return null;
+        byte[] ba = new byte[PanelSize];
+        Array.Copy(BitConverter.GetBytes((int)HeaderPanel), 0, ba, 0, sizeof(int));
+        ba[3] = (byte)num;
+        byte[] b = new byte[128 * sizeof(int)];
+        IntPtr ip = new IntPtr();
+        Marshal.StructureToPtr(b, ip, true);
+        Marshal.Copy(a, num * 128, ip, 128);
+        Array.Copy(b, 0, ba, 4, b.Length);
+        return ba;
       }
-      public byte[] BasicHandle(Hand h,int SelfB)
+      static internal byte[] BasicSound(int[] a, int num)
       {
-        return null;
-      }
-      public byte[] BasicPanel(int[] a,int num)
-      {
-        return null;
-      }
-      public byte[] BasicSound(int[] a,int num)
-      {
-        return null;
+        byte[] ba = new byte[SoundSize];
+        Array.Copy(BitConverter.GetBytes((int)HeaderSound), 0, ba, 0, sizeof(int));
+        ba[3] = (byte)num;
+        byte[] b = new byte[128 * sizeof(int)];
+        IntPtr ip = new IntPtr();
+        Marshal.StructureToPtr(b, ip, true);
+        Marshal.Copy(a, num * 128, ip, 128);
+        Array.Copy(b, 0, ba, 4, b.Length);
+        return ba;
       }
     }
 
@@ -167,155 +226,226 @@ namespace TR.BIDSsv
       }
     }
     
+    static private void ASPtr(byte[] ba)
+    {
+      if (ba != null && ba.Length > 0)
+        Parallel.For(0, svlist.Count, (i) => svlist[i]?.Print(ba));
+    }
+
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted) return;
-      if (svlist?.Count > 0) Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray));
-
-      if (SDAutoList.Count > 0 && svlist.Count > 0)
+      if (svlist?.Count > 0)
       {
-        Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
-        {
-          if (SDAutoList.Values.Contains(i))
-          {
-            int? Num = null;
-            if (e.OldArray.Length <= i) Num = e.NewArray[i];
-            else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+        Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray));
 
-            if (Num != null)
+        #region Byte Array Auto Sender
+        int al = Math.Max(e.OldArray.Length, e.NewArray.Length);
+        if (al % 128 != 0) al = ((int)Math.Floor((double)al / 128) + 1) * 128;
+
+        int[] oa = new int[al];
+        int[] na = new int[al];
+        Array.Copy(e.OldArray, oa, e.OldArray.Length);
+        Array.Copy(e.NewArray, na, e.NewArray.Length);
+
+        for (int i = 0; i < al; i += 128)
+        {
+          bool IsNEqual = false;
+          Parallel.For(0, 128, (j) =>
+          {
+            if (!IsNEqual) IsNEqual = oa[i + j] == na[i + j];
+          });
+          if (IsNEqual) ASPtr(AutoSendSetting.BasicSound(na, i));
+        }
+        #endregion
+
+        if (SDAutoList?.Count > 0)
+          Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+          {
+            if (SDAutoList.Values.Contains(i))
             {
-              Parallel.For(0, svlist.Count, (s) =>
+              int? Num = null;
+              if (e.OldArray.Length <= i) Num = e.NewArray[i];
+              else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+
+              if (Num != null)
               {
-                if (SDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                  svlist[s].Print("TRIS" + i.ToString() + "X" + Num.ToString());
-              });
+                Parallel.For(0, svlist.Count, (s) =>
+                {
+                  if (SDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
+                    svlist[s].Print("TRIS" + i.ToString() + "X" + Num.ToString());
+                });
+              }
             }
-          }
-        });
+          });
       }
+
     }
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted) return;
-      if (svlist?.Count > 0) Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray));
-
-      if (PDAutoList.Count > 0 && svlist.Count > 0)
+      if (svlist?.Count > 0)
       {
-        Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
-        {
-          if (PDAutoList.Values.Contains(i))
-          {
-            int? Num = null;
-            if (e.OldArray.Length <= i) Num = e.NewArray[i];
-            else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+        Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray));
 
-            if (Num != null)
+        #region Byte Array Auto Sender
+        int al = Math.Max(e.OldArray.Length, e.NewArray.Length);
+        if (al % 128 != 0) al = ((int)Math.Floor((double)al / 128) + 1) * 128;
+
+        int[] oa = new int[al];
+        int[] na = new int[al];
+        Array.Copy(e.OldArray, oa, e.OldArray.Length);
+        Array.Copy(e.NewArray, na, e.NewArray.Length);
+
+        for (int i = 0; i < al; i += 128)
+        {
+          bool IsNEqual = false;
+          Parallel.For(0, 128, (j) =>
+          {
+            if (!IsNEqual) IsNEqual = oa[i + j] == na[i + j];
+          });
+          if (IsNEqual) ASPtr(AutoSendSetting.BasicSound(na, i));
+        }
+        #endregion
+
+
+        if (PDAutoList?.Count > 0)
+          Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+          {
+            if (PDAutoList.Values.Contains(i))
             {
-              Parallel.For(0, svlist.Count, (s) =>
+              int? Num = null;
+              if (e.OldArray.Length <= i) Num = e.NewArray[i];
+              else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+
+              if (Num != null)
               {
-                if (PDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                  svlist[s].Print("TRIP" + i.ToString() + "X" + Num.ToString());
-              });
+                Parallel.For(0, svlist.Count, (s) =>
+                {
+                  if (PDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
+                    svlist[s].Print("TRIP" + i.ToString() + "X" + Num.ToString());
+                });
+              }
             }
-          }
-        });
+          });
       }
     }
-    private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e) { if (!IsStarted) return; if (svlist?.Count > 0) Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(in e.NewData)); }
+    private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e)
+    {
+      if (!IsStarted) return;
+      if (svlist?.Count > 0)
+      {
+        if (!Equals(e.OldData.SelfBPosition, e.NewData.SelfBPosition))
+          ASPtr(AutoSendSetting.BasicHandle(BSMD.HandleData, e.NewData.SelfBPosition));
+
+        Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(in e.NewData));
+      }
+    }
     private static void Common_BSMDChanged(object sender, SMemLib.BSMDChangedEArgs e)
     {
       if (!IsStarted) return;
-      if (svlist?.Count > 0) Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData));
-
-      if (AutoNumL?.Count > 0 && svlist?.Count > 0)
+      if (svlist?.Count > 0)
       {
-        bool IsDClsdo = e.OldData.IsDoorClosed;
-        bool IsDClsd = e.NewData.IsDoorClosed;
-        Spec osp = e.OldData.SpecData;
-        Spec nsp = e.NewData.SpecData;
-        State ost = e.OldData.StateData;
-        State nst = e.NewData.StateData;
-        Hand oh = e.OldData.HandleData;
-        Hand nh = e.NewData.HandleData;
-        TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
-        TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
-        ICollection<int> IC = AutoNumL.Values;
-        ICollection<int> ICR = default;
-        Parallel.For(0, IC.Count, (ind) =>
+        Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData));
+
+        if (!Equals(e.OldData.SpecData, e.NewData.SpecData))
+          ASPtr(AutoSendSetting.BasicConst(e.NewData.SpecData, OD));
+        if (!Equals(e.OldData.StateData, e.NewData.StateData) || e.OldData.IsDoorClosed != e.NewData.IsDoorClosed)
+          ASPtr(AutoSendSetting.BasicCommon(e.NewData.StateData, (byte)(e.NewData.IsDoorClosed ? 1 : 0)));
+        if (!Equals(e.NewData.HandleData, e.OldData.HandleData))
+          ASPtr(AutoSendSetting.BasicHandle(e.NewData.HandleData, OD.SelfBPosition));
+
+        if (AutoNumL?.Count > 0)
         {
-          int i = IC.ElementAt(ind);
-          if (!ICR.Contains(i))
+          bool IsDClsdo = e.OldData.IsDoorClosed;
+          bool IsDClsd = e.NewData.IsDoorClosed;
+          Spec osp = e.OldData.SpecData;
+          Spec nsp = e.NewData.SpecData;
+          State ost = e.OldData.StateData;
+          State nst = e.NewData.StateData;
+          Hand oh = e.OldData.HandleData;
+          Hand nh = e.NewData.HandleData;
+          TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
+          TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
+          ICollection<int> IC = AutoNumL.Values;
+          ICollection<int> ICR = default;
+
+          Parallel.For(0, IC.Count, (ind) =>
           {
-            ICR.Add(i);
+            int i = IC.ElementAt(ind);
+            if (!ICR.Contains(i))
+            {
+              ICR.Add(i);
 
-            string WriteStr = string.Empty;
-            string chr = string.Empty;
-            int num = 0;
+              string WriteStr = string.Empty;
+              string chr = string.Empty;
+              int num = 0;
 
-            if (OpenDBias > i && i >= ElapDBias)
-            {
-              switch (i - ElapDBias)
+              if (OpenDBias > i && i >= ElapDBias)
               {
-                case 0: WriteStr = UFunc.Comp(ost.Z, nst.Z); break;
-                case 1: WriteStr = UFunc.Comp(ost.V, nst.V); break;
-                case 2: WriteStr = UFunc.Comp(ost.T, nst.T); break;
-                case 3: WriteStr = UFunc.Comp(ost.BC, nst.BC); break;
-                case 4: WriteStr = UFunc.Comp(ost.MR, nst.MR); break;
-                case 5: WriteStr = UFunc.Comp(ost.ER, nst.ER); break;
-                case 6: WriteStr = UFunc.Comp(ost.BP, nst.BP); break;
-                case 7: WriteStr = UFunc.Comp(ost.SAP, nst.SAP); break;
-                case 8: WriteStr = UFunc.Comp(ost.I, nst.I); break;
-                //case 9: WriteStr = UFunc.Comp(ost.Z, nst.Z); break;
-                case 10: WriteStr = UFunc.Comp(ots.Hours, nts.Hours); break;
-                case 11: WriteStr = UFunc.Comp(ots.Minutes, nts.Minutes); break;
-                case 12: WriteStr = UFunc.Comp(ots.Seconds, nts.Seconds); break;
-                case 13: WriteStr = UFunc.Comp(ots.Milliseconds, nts.Milliseconds); break;
+                switch (i - ElapDBias)
+                {
+                  case 0: WriteStr = UFunc.Comp(ost.Z, nst.Z); break;
+                  case 1: WriteStr = UFunc.Comp(ost.V, nst.V); break;
+                  case 2: WriteStr = UFunc.Comp(ost.T, nst.T); break;
+                  case 3: WriteStr = UFunc.Comp(ost.BC, nst.BC); break;
+                  case 4: WriteStr = UFunc.Comp(ost.MR, nst.MR); break;
+                  case 5: WriteStr = UFunc.Comp(ost.ER, nst.ER); break;
+                  case 6: WriteStr = UFunc.Comp(ost.BP, nst.BP); break;
+                  case 7: WriteStr = UFunc.Comp(ost.SAP, nst.SAP); break;
+                  case 8: WriteStr = UFunc.Comp(ost.I, nst.I); break;
+                  //case 9: WriteStr = UFunc.Comp(ost.Z, nst.Z); break;
+                  case 10: WriteStr = UFunc.Comp(ots.Hours, nts.Hours); break;
+                  case 11: WriteStr = UFunc.Comp(ots.Minutes, nts.Minutes); break;
+                  case 12: WriteStr = UFunc.Comp(ots.Seconds, nts.Seconds); break;
+                  case 13: WriteStr = UFunc.Comp(ots.Milliseconds, nts.Milliseconds); break;
+                }
+                (chr, num) = ("E", i - ElapDBias);
               }
-              (chr, num) = ("E", i - ElapDBias);
-            }
-            else if (i >= DoorDBias)
-            {
-              switch (i - DoorDBias)
+              else if (i >= DoorDBias)
               {
-                case 0: WriteStr = UFunc.Comp(IsDClsdo ? 1 : 0, IsDClsd ? 1 : 0); break;
+                switch (i - DoorDBias)
+                {
+                  case 0: WriteStr = UFunc.Comp(IsDClsdo ? 1 : 0, IsDClsd ? 1 : 0); break;
+                }
+                (chr, num) = ("D", i - DoorDBias);
               }
-              (chr, num) = ("D", i - DoorDBias);
-            }
-            else if (i >= HandDBias)
-            {
-              switch (i - HandDBias)
+              else if (i >= HandDBias)
               {
-                case 0: WriteStr = UFunc.Comp(oh.B, nh.B); break;
-                case 1: WriteStr = UFunc.Comp(oh.P, nh.P); break;
-                case 2: WriteStr = UFunc.Comp(oh.R, nh.R); break;
-                case 3: WriteStr = UFunc.Comp(oh.C, nh.C); break;
+                switch (i - HandDBias)
+                {
+                  case 0: WriteStr = UFunc.Comp(oh.B, nh.B); break;
+                  case 1: WriteStr = UFunc.Comp(oh.P, nh.P); break;
+                  case 2: WriteStr = UFunc.Comp(oh.R, nh.R); break;
+                  case 3: WriteStr = UFunc.Comp(oh.C, nh.C); break;
+                }
+                (chr, num) = ("H", i - HandDBias);
               }
-              (chr, num) = ("H", i - HandDBias);
-            }
-            else if (OpenDBias > i)
-            {
-              switch (i)
+              else if (OpenDBias > i)
               {
-                case 0: WriteStr = UFunc.Comp(osp.B, nsp.B); break;
-                case 1: WriteStr = UFunc.Comp(osp.P, nsp.P); break;
-                case 2: WriteStr = UFunc.Comp(osp.A, nsp.A); break;
-                case 3: WriteStr = UFunc.Comp(osp.J, nsp.J); break;
-                case 4: WriteStr = UFunc.Comp(osp.C, nsp.C); break;
+                switch (i)
+                {
+                  case 0: WriteStr = UFunc.Comp(osp.B, nsp.B); break;
+                  case 1: WriteStr = UFunc.Comp(osp.P, nsp.P); break;
+                  case 2: WriteStr = UFunc.Comp(osp.A, nsp.A); break;
+                  case 3: WriteStr = UFunc.Comp(osp.J, nsp.J); break;
+                  case 4: WriteStr = UFunc.Comp(osp.C, nsp.C); break;
+                }
+                (chr, num) = ("C", i % HandDBias);
               }
-              (chr, num) = ("C", i % HandDBias);
-            }
 
 
-            if (WriteStr != string.Empty)
-            {
-              Parallel.For(0, svlist.Count, (s) =>
+              if (WriteStr != string.Empty)
               {
-                if (SDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                  svlist[s].Print("TRIS" + num.ToString() + "X" + WriteStr);
-              });
+                Parallel.For(0, svlist.Count, (s) =>
+                {
+                  if (SDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
+                    svlist[s].Print("TRIS" + num.ToString() + "X" + WriteStr);
+                });
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
 
@@ -413,24 +543,7 @@ namespace TR.BIDSsv
     static public byte[] DataSelect(in string CName, in byte[] data, in Encoding enc)
     {
       if (data.Length < 5) return null;
-      List<byte> dbl = data.ToList();
-      for (int i = 0; i < dbl.Count; i++)
-      {
-        if (dbl[i] == '\r')
-        {
-          switch (dbl[i + 1])
-          {
-            case 0x01:
-              dbl[i] = (byte)'\n';
-              dbl.RemoveAt(i + 1);
-              break;
-            case 0x02:
-              dbl.RemoveAt(i + 1);
-              break;
-          }
-        }
-      }
-      byte[] ba = dbl.ToArray();
+      byte[] ba = BIDSBAtoBA(data);
       if (ba[0] == (byte)'T')
       {
         switch ((char)ba[1])
@@ -1322,6 +1435,61 @@ namespace TR.BIDSsv
           default: throw new Exception("TRE3");//記号部不正
         }
       }
+    }
+
+    /// <summary>Convert from Native Byte Array to BIDS Communication Byte Array Format</summary>
+    /// <param name="ba">Array to Converted</param>
+    /// <returns>Converted Array</returns>
+    static public byte[] BAtoBIDSBA(in byte[] ba)
+    {
+      List<byte> dbl = ba.ToList();
+      for(int i = 0; i < ba.Count(); i++)
+      {
+        switch (dbl[i])
+        {
+          case (byte)'\n':
+            dbl.RemoveAt(i);
+            byte[] r1 = new byte[2] { (byte)'\r', 0x01 };
+            dbl.InsertRange(i, r1);
+            i++;
+            break;
+          case (byte)'\r':
+            i++;
+            dbl.Insert(i, 0x02);
+            break;
+        }
+      }
+      dbl.Add((byte)'\n');
+      return dbl.ToArray();
+    }
+    /// <summary>Convert from BIDS Communication Byte Array Format to Native Byte Array</summary>
+    /// <param name="ba">Array to Converted</param>
+    /// <returns>Converted Array</returns>
+    static public byte[] BIDSBAtoBA(in byte[] ba)
+    {
+      if (ba.Length > 1)
+      {
+        List<byte> dbl = ba.ToList();
+        dbl.RemoveAt(dbl.Count - 1);
+        for (int i = 0; i < dbl.Count; i++)
+        {
+          if (dbl[i] == '\r')
+          {
+            switch (dbl[i + 1])
+            {
+              case 0x01:
+                dbl[i] = (byte)'\n';
+                dbl.RemoveAt(i + 1);
+                break;
+              case 0x02:
+                dbl.RemoveAt(i + 1);
+                break;
+            }
+          }
+        }
+        return dbl.ToArray();
+      }
+      else return ba;
     }
   }
 }

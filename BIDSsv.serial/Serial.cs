@@ -2,6 +2,7 @@
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 using TR.BIDSsv;
 
@@ -208,20 +209,7 @@ namespace TR.TCPsv
       }
     }
 
-    Common.AutoSendSetting ass = new Common.AutoSendSetting();
-    BIDSSharedMemoryData bsmd = new BIDSSharedMemoryData();
-    OpenD od = new OpenD();
-    SoundD sd = new SoundD();
-    PanelD pd = new PanelD();
-    public void OnBSMDChanged(in BIDSSharedMemoryData data)
-    {
-      if (ass.BasicConstAS && !Equals(bsmd.SpecData, data.SpecData)) 
-      {
-        byte[] ba = ass.BasicConst(data.SpecData, od);
-        if (ba != null && ba.Length > 0) Print(ba);
-      }
-      bsmd = data;
-    }
+    public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
     public void OnOpenDChanged(in OpenD data) { }
     public void OnPanelDChanged(in int[] data) { }
     public void OnSoundDChanged(in int[] data) { }
@@ -259,9 +247,13 @@ namespace TR.TCPsv
     public void Print(in string data) => SPWriteLine(data);
     public void Print(in byte[] data)
     {
-      byte[] wa = new byte[data.Length + 1];
-      Array.Copy(data, wa, data.Length);
-      wa[data.Length] = (byte)'\n';
+      byte[] wa = Common.BAtoBIDSBA(data);
+      if (data[data.Length - 1] != (byte)'\n')
+      {
+        wa = new byte[data.Length + 1];
+        Array.Copy(data, wa, data.Length);
+        wa[data.Length] = (byte)'\n';
+      }
       SP?.Write(wa, 0, wa.Length);
     }
   }
