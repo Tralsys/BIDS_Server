@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 using TR.BIDSsv;
 
-namespace TR.TCPsv
+namespace TR.BIDSsv
 {
   public class Serial : IBIDSsv
   {
