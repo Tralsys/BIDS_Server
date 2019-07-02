@@ -12,4 +12,8 @@
     <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /I/Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)BIDS_Server\bin\$(ConfigurationName)\mods\&quot;" />
+  </Target>
+
 </Project>

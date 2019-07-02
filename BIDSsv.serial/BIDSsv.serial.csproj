@@ -60,4 +60,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /I/Y "$(TargetPath)" "$(SolutionDir)BIDS_Server\bin\$(ConfigurationName)\mods\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

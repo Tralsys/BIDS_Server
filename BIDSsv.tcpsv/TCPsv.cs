@@ -287,7 +287,9 @@ namespace TR.BIDSsv
     }
     public void Print(in byte[] data)
     {
-
+      if (TC?.Connected != true || NS?.CanWrite != true) return;
+      byte[] ba = Common.BAtoBIDSBA(data);
+      if (ba != null && ba.Length > 0) NS?.Write(ba, 0, ba.Length);
     }
 
 

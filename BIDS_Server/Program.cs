@@ -170,12 +170,17 @@ namespace BIDS_Server
       }
       catch(FileNotFoundException) { return null; }
       catch(Exception) { throw; }
-      foreach(var t in a?.GetTypes())
+      try
       {
-        if (t.IsInterface) continue;
-        ibs = Activator.CreateInstance(t) as IBIDSsv;
-        if (ibs != null) return ibs;
+        foreach (var t in a?.GetTypes())
+        {
+          if (t.IsInterface) continue;
+          ibs = Activator.CreateInstance(t) as IBIDSsv;
+          if (ibs != null) return ibs;
+        }
       }
+      catch (ReflectionTypeLoadException e) { foreach (var ex in e.LoaderExceptions) Console.WriteLine(ex); }
+      catch (Exception e) { Console.WriteLine(e); }
       return ibs;
     }
 
