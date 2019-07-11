@@ -103,13 +103,13 @@ namespace TR.BIDSsv
       public const uint HeaderSound = 0x54527300;
       public const uint SoundSize = PanelSize;
 
-      public bool BasicConstAS = false;
-      public bool BasicCommonAS = false;
-      public bool BasicBVE5AS = false;
-      public bool BasicOBVEAS = false;
-      public bool BasicHandleAS = false;
-      public bool BasicPanelAS = false;
-      public bool BasicSoundAS = false;
+      public static bool BasicConstAS = false;
+      public static bool BasicCommonAS = false;
+      public static bool BasicBVE5AS = false;
+      public static bool BasicOBVEAS = false;
+      public static bool BasicHandleAS = false;
+      public static bool BasicPanelAS = false;
+      public static bool BasicSoundAS = false;
 
       static internal byte[] BasicConst(in Spec s, in OpenD o)
       {

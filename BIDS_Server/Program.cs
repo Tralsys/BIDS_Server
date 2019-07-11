@@ -38,6 +38,14 @@ namespace BIDS_Server
           {
             switch (cmd[1])
             {
+              case "auto":
+                Console.WriteLine("auto sending process turn on command : auto send will start when this command is entered.");
+                Console.WriteLine("  Option : bve5, common, const, handle, obve, panel, sound");
+                break;
+              case "autodel":
+                Console.WriteLine("auto sending process turn off command : auto send will stop when this command is entered.");
+                Console.WriteLine("  Option : bve5, common, const, handle, obve, panel, sound");
+                break;
               case "exit":
                 Console.WriteLine("exit command : Used when user want to close this program.  This command has no arguments.");
                 break;
@@ -62,6 +70,7 @@ namespace BIDS_Server
           {
             Console.WriteLine("BIDS Server Application");
             Console.WriteLine("ver : " + VerNumStr + "\n");
+            Console.WriteLine("auto : Set the Auto Sending Function");
             Console.WriteLine("close: Close the connection.");
             Console.WriteLine("exit : close this program.");
             Console.WriteLine("ls : Print the list of the Name of alive connection.");
@@ -89,6 +98,47 @@ namespace BIDS_Server
           }
           catch (Exception e) { Console.WriteLine(e); }
           break;
+        case "auto":
+          foreach(string str in cmd)
+          {
+            if (str == null || str == string.Empty) continue;
+            if (str.StartsWith("/") || str.StartsWith("-"))
+            {
+              switch(str.Remove(0, 1).Substring(0,3))
+              {
+                case "com": Common.AutoSendSetting.BasicCommonAS = true; Console.WriteLine("Common Data Autosend Enabled"); break;
+                case "bve": Common.AutoSendSetting.BasicBVE5AS = true; Console.WriteLine("BVE5 Data Autosend Enabled"); break;
+                case "obv": Common.AutoSendSetting.BasicOBVEAS = true; Console.WriteLine("OBVE Data Autosend Enabled"); break;
+                case "pan": Common.AutoSendSetting.BasicPanelAS = true; Console.WriteLine("Panel Data Autosend Enabled"); break;
+                case "sou": Common.AutoSendSetting.BasicPanelAS = true; Console.WriteLine("Sound Data Autosend Enabled"); break;
+                case "con": Common.AutoSendSetting.BasicConstAS = true; Console.WriteLine("Const Data Autosend Enabled"); break;
+                case "han": Common.AutoSendSetting.BasicHandleAS = true; Console.WriteLine("Handle Data Autosend Enabled"); break;
+                default: Console.WriteLine("Option Not Found : {0}", str); break;
+              }
+            }
+          }
+          break;
+        case "autodel":
+          foreach (string str in cmd)
+          {
+            if (str == null || str == string.Empty) continue;
+            if (str.StartsWith("/") || str.StartsWith("-"))
+            {
+              switch (str.Remove(0, 1).Substring(0, 3))
+              {
+                case "com": Common.AutoSendSetting.BasicCommonAS = false; Console.WriteLine("Common Data Autosend Disabled"); break;
+                case "bve": Common.AutoSendSetting.BasicBVE5AS = false; Console.WriteLine("BVE5 Data Autosend Disabled"); break;
+                case "obv": Common.AutoSendSetting.BasicOBVEAS = false; Console.WriteLine("OBVE Data Autosend Disabled"); break;
+                case "pan": Common.AutoSendSetting.BasicPanelAS = false; Console.WriteLine("Panel Data Autosend Disabled"); break;
+                case "sou": Common.AutoSendSetting.BasicPanelAS = false; Console.WriteLine("Sound Data Autosend Disabled"); break;
+                case "con": Common.AutoSendSetting.BasicConstAS = false; Console.WriteLine("Const Data Autosend Disabled"); break;
+                case "han": Common.AutoSendSetting.BasicHandleAS = false; Console.WriteLine("Handle Data Autosend Disabled"); break;
+                default: Console.WriteLine("Option Not Found : {0}", str); break;
+              }
+            }
+          }
+          break;
+
         case "exit":
           Common.Remove();
           IsLooping = false;
