@@ -40,9 +40,9 @@ namespace TR.BIDSsv
       set => SML?.Write(in value);
     }
 
-    static public Hand Ctrl_Hand
+    static public Hands Ctrl_Hand
     {
-      get => CI?.GetHandD() ?? new Hand();
+      get => CI?.GetHandD() ?? new Hands();
       set => CI?.SetHandD(ref value);
     }
     static public bool[] Ctrl_Key

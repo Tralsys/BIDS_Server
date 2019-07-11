@@ -273,7 +273,7 @@ namespace TR.BIDSsv
     public void Print(in string data)
     {
       if (TC?.Connected != true || NS?.CanWrite != true) return;
-      if (IsDebug) Console.Write("{0} >> {1}", Name, data);
+      if (IsDebug) Console.WriteLine("{0} >> {1}", Name, data);
       try
       {
         byte[] wbytes = Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n"));
