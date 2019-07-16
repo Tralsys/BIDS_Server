@@ -535,14 +535,14 @@ namespace TR.BIDSsv
     }
 
     static string stateAllStr = "{0}";
-    /// <summary></summary>
+    /// <summary>Classify the data</summary>
     /// <param name="CName">Connection Name</param>
     /// <param name="data">Got Data</param>
     /// <param name="enc">Encording</param>
     /// <returns>byte array to return, or array that calling program is needed to do something</returns>
     static public byte[] DataSelect(in string CName, in byte[] data, in Encoding enc)
     {
-      if (data.Length < 5) return null;
+      if (data == null || data.Length < 5) return null;
       byte[] ba = BIDSBAtoBA(data);
       if (ba[0] == (byte)'T')
       {
@@ -555,13 +555,13 @@ namespace TR.BIDSsv
               if (gs.Contains("X")) DataGot(gs);
               else
               {
-                string sr = DataSelectTR(CName, gs);
+                string sr = DataSelTR(CName, gs);
                 if (sr != null && sr != string.Empty) return enc.GetBytes(sr);
               }
             }
             break;
           case 'O':
-            string so = DataSelectTO(enc.GetString(ba));
+            string so = DataSelTO(enc.GetString(ba));
             if (so != null && so != string.Empty) return enc.GetBytes(so);
             break;
         }
@@ -677,7 +677,8 @@ namespace TR.BIDSsv
       }
       return null;
     }
-    static public string DataSelectTR(in string CName, in string GotString)
+
+    static private string DataSelTR(in string CName, in string GotString)
     {
       if (IsDebug) Console.Write("{0} << {1}", CName, GotString);
       string ReturnString = GotString.Replace("\n", string.Empty) + "X";
@@ -1024,7 +1025,7 @@ namespace TR.BIDSsv
           return "TRE4";//識別子不正
       }
     }
-    static public string DataSelectTO(in string GotStr)
+    static private string DataSelTO(in string GotStr)
     {
       string GotString = GotStr.Replace("\n", string.Empty);
       string ThirdStr = GotString.Substring(2, 1);
@@ -1100,7 +1101,14 @@ namespace TR.BIDSsv
       }
       return GotString;
     }
-    static public void DataGot(in string GotStr)
+
+    [Obsolete("Please use the \"DataSelect\" Method.")]
+    static public string DataSelectTR(in string CN, in string GotStr) => DataSelTR(CN, GotStr);
+
+    [Obsolete("Please use the \"DataSelect\" Method.")]
+    static public string DataSelectTO(in string GotString) => DataSelTO(GotString);
+
+    static private void DataGot(in string GotStr)
     {
       if (GotStr == null || GotStr == string.Empty) return;
       if (!GotStr.StartsWith("TR")) return;

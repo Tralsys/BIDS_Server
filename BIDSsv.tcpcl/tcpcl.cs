@@ -210,13 +210,14 @@ namespace BIDSsv.tcpcl
       while (IsLooping)
       {
         if (TC?.Connected != true) continue;
-        Print("TRID0\n");
+        //Print("TRID0\n");
         if (NS?.CanRead != true) continue;
-        string ReadData = Read();
+        /*string ReadData = Read();
         if (ReadData.Contains("X")) Common.DataGot(ReadData);
         else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
-        else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));
-
+        else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));*/
+        byte[] ba = Common.DataSelect(Name, ReadByte(), Enc);
+        if (ba != null && ba.Length > 0) Print(ba);
       }
       NS?.Close();
       TC?.Close();
@@ -259,7 +260,9 @@ namespace BIDSsv.tcpcl
     }
 
     List<byte> RBytesLRec = new List<byte>();
-    string Read()
+    string Read() => Enc.GetString(ReadByte()).Replace("\n", string.Empty);
+
+    byte[] ReadByte()
     {
       List<byte> RBytesL = RBytesLRec;
       try
@@ -268,9 +271,9 @@ namespace BIDSsv.tcpcl
       }
       catch (Exception e)
       {
-        Console.WriteLine("{0} : Error has occured at waiting process\n{1}", Name, e);
+        Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
       }
-      if (!IsLooping) return string.Empty;
+      if (!IsLooping) return null;
       byte[] b = new byte[1];
       int nsreadr = 0;
 
@@ -286,10 +289,9 @@ namespace BIDSsv.tcpcl
       {
         if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
         else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-        return string.Empty;
+        return null;
       }
-
-      return Enc.GetString(RBytesL.ToArray()).Replace("\n", string.Empty);
+      return RBytesL.ToArray();
     }
 
     readonly string[] ArgInfo = new string[]

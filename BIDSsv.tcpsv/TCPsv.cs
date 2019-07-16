@@ -219,10 +219,11 @@ namespace TR.BIDSsv
       {
         if (TC?.Connected != true) continue;
         if (!IsLooping) continue;
-        string ReadData = Read();
+        /*string ReadData = Read();
         if (ReadData.Contains("X")) Common.DataGot(ReadData);
         else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
-        else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));
+        else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));*/
+        byte[] ba = Common.DataSelect(Name, ReadByte(), Enc);
       }
       NS?.Close();
       TC?.Close();
@@ -232,7 +233,9 @@ namespace TR.BIDSsv
 
 
     List<byte> RBytesLRec = new List<byte>();
-    string Read()
+    string Read() => Enc.GetString(ReadByte()).Replace("\n", string.Empty);
+    
+    byte[] ReadByte()
     {
       List<byte> RBytesL = RBytesLRec;
       try
@@ -241,9 +244,9 @@ namespace TR.BIDSsv
       }
       catch (Exception e)
       {
-        Console.WriteLine("{0} : Error has occured at waiting process\n{1}", Name, e);
+        Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
       }
-      if (!IsLooping) return string.Empty;
+      if (!IsLooping) return null;
       byte[] b = new byte[1];
       int nsreadr = 0;
 
@@ -259,12 +262,10 @@ namespace TR.BIDSsv
       {
         if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
         else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-        return string.Empty;
+        return null;
       }
-
-      return Enc.GetString(RBytesL.ToArray()).Replace("\n", string.Empty);
+      return RBytesL.ToArray();
     }
-
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
     public void OnOpenDChanged(in OpenD data) { }
     public void OnPanelDChanged(in int[] data) { }
