@@ -4,6 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>TR.BIDSsv.tcpcl</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
+    <Authors>Tetsu Otter</Authors>
+    <Company>Tech Otter</Company>
+    <Product>BIDS Project</Product>
+    <Copyright>Copyright 2019 Tetsu Otter</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

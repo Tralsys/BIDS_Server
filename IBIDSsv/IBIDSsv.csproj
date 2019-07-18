@@ -1,9 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>TR.IBIDSsv</AssemblyName>
     <RootNamespace>TR</RootNamespace>
+    <Authors>Tetsu Otter</Authors>
+    <Company>Tech Otter</Company>
+    <Product>BIDS Project</Product>
+    <Copyright>Copyright 2019 Tetsu Otter</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
