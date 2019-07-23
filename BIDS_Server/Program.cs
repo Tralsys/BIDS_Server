@@ -13,7 +13,7 @@ namespace BIDS_Server
   class Program
   {
     static bool IsLooping = true;
-    const string VerNumStr = "011a3";
+    const string VerNumStr = "011b";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
@@ -52,6 +52,9 @@ namespace BIDS_Server
               case "ls":
                 Console.WriteLine("connection listing command : Print the list of the Name of alive connection.  This command has no arguments.");
                 break;
+              case "lsmods":
+                Console.WriteLine("mods listing command : Print the list of the Name of mods you can use.  This command has no arguments.");
+                break;
               case "close":
                 Console.WriteLine("close connection command : Used when user want to close the connection.  User must set the Connection Name to be closed.");
                 break;
@@ -74,12 +77,13 @@ namespace BIDS_Server
             Console.WriteLine("close: Close the connection.");
             Console.WriteLine("exit : close this program.");
             Console.WriteLine("ls : Print the list of the Name of alive connection.");
+            Console.WriteLine("lsmods : Print the list of the Name of mods you can use.");
             Console.WriteLine("man : Print the mannual of command.");
             Console.WriteLine("  If you want to check the manual of each mod, please check the mod name and type \"man + (mod name)\"");
           }
           break;
         case "ls": Console.Write(Common.PrintList()); break;
-        case "lsmod":
+        case "lsmods":
           try
           {
             string[] fs = LSMod();
