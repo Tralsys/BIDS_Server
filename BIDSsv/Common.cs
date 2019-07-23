@@ -200,9 +200,12 @@ namespace TR.BIDSsv
     const int HandDBias = 1000;
 
     static private List<IBIDSsv> svlist = new List<IBIDSsv>();
-    static private IDictionary<string, int> PDAutoList = default;
-    static private IDictionary<string, int> SDAutoList = default;
-    static private IDictionary<string, int> AutoNumL = default;
+    //static private IDictionary<string, int> PDAutoList = new Dictionary<string, int>();
+    //static private IDictionary<string, int> SDAutoList = new Dictionary<string, int>();
+    //static private IDictionary<string, int> AutoNumL = new Dictionary<string, int>();
+    static private ASList PDAutoList = new ASList();
+    static private ASList SDAutoList = new ASList();
+    static private ASList AutoNumL = new ASList();
     static private SMemLib SML = null;
     static private CtrlInput CI = null;
 
@@ -961,17 +964,17 @@ namespace TR.BIDSsv
               Bias = ElapDBias;
               break;
             case "P":
-              if (!PDAutoList.Contains(new KeyValuePair<string, int>(CName, sera))) PDAutoList.Add(CName, sera);
+              if (PDAutoList?.Contains(new KeyValuePair<string, int>(CName, sera)) != true) PDAutoList.Add(CName, sera);
               return ReturnString + "0";
             case "S":
-              if (!SDAutoList.Contains(new KeyValuePair<string, int>(CName, sera))) SDAutoList.Add(CName, sera);
+              if (SDAutoList?.Contains(new KeyValuePair<string, int>(CName, sera)) != true) SDAutoList.Add(CName, sera);
               return ReturnString + "0";
           }
 
 
           if (Bias >= 0)
           {
-            if (!AutoNumL.Contains(new KeyValuePair<string, int>(CName, Bias + sera))) AutoNumL.Add(CName, Bias + sera);
+            if (AutoNumL?.Contains(new KeyValuePair<string, int>(CName, Bias + sera)) != true) AutoNumL.Add(CName, Bias + sera);
             return ReturnString + "0";
           }
           else return "TRE3";
@@ -1016,6 +1019,7 @@ namespace TR.BIDSsv
           if (Biasd > 0)
           {
             if (AutoNumL.Contains(new KeyValuePair<string, int>(CName, Biasd + serd))) AutoNumL.Remove(new KeyValuePair<string, int>(CName, Biasd + serd));
+            
             return ReturnString + "0";
           }
           else return "TRE3";
@@ -1498,6 +1502,51 @@ namespace TR.BIDSsv
         return dbl.ToArray();
       }
       else return ba;
+    }
+  }
+
+  internal class ASList
+  {
+    private List<string> SL;
+    private List<int> IL;
+    public int Count { get => SL.Count; }
+    public List<string> Keys { get => SL; }
+    public List<int> Values { get => IL; }
+    public ASList()
+    {
+      SL = new List<string>();
+      IL = new List<int>();
+    }
+
+    public bool Contains(KeyValuePair<string, int> k) => Contains(k.Key, k.Value);
+    public bool Contains(string key, int value)
+    {
+      bool result = false;
+      Parallel.For(0, SL.Count, (i) =>
+      {
+        if (SL[i] == key && IL[i] == value) result = true;
+      });
+      return result;
+    }
+
+    public void Remove(KeyValuePair<string, int> k) => Remove(k.Key, k.Value);
+    public void Remove(string key, int? value = null)
+    {
+      if (SL == null || SL.Count <= 0) return;
+      for (int i = SL.Count - 1; i >= 0; i--)
+      {
+        if (SL[i] == key && (value == null || IL[i] == value))
+        {
+          SL.RemoveAt(i);
+          IL.RemoveAt(i);
+        }
+      }
+    }
+
+    public void Add(string key, int value)
+    {
+      SL.Add(key);
+      IL.Add(value);
     }
   }
 }
