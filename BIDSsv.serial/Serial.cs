@@ -22,11 +22,15 @@ namespace TR.BIDSsv
     public bool Connect(in string args)
     {
       SP = new SerialPort();
+
+      SP.ReadBufferSize = 64;
+      SP.WriteBufferSize = 64;
+
       SP.BaudRate = 19200;
       SP.RtsEnable = true;
       SP.DtrEnable = true;
-      SP.ReadTimeout = 100;
-      SP.WriteTimeout = 1000;
+      SP.ReadTimeout = 5000;
+      SP.WriteTimeout = 5000;
       SP.Encoding = Encoding.Default;
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
       for (int i = 0; i < sa.Length; i++)
@@ -169,7 +173,8 @@ namespace TR.BIDSsv
         }
         if (inputStr != null && inputStr.Length > 4)
         {
-          if (IsDebug) Console.WriteLine(Name + " : Get > " + inputStr);
+          if (IsDebug) Console.WriteLine(Name + " : Get > " + inputStr + "\n");
+          byte[] debugBA = SP.Encoding.GetBytes(inputStr);
           if (inputStr.StartsWith("TO")) SPWriteLine(DataSelectTO(in inputStr));
           if (inputStr.StartsWith("TR"))
           {
@@ -200,6 +205,7 @@ namespace TR.BIDSsv
         if (IsDebug) Console.WriteLine(Name + " : Set > " + s);
         try
         {
+          Thread.Sleep(10);
           SP.WriteLine(s);
         }
         catch (Exception e)
@@ -247,14 +253,14 @@ namespace TR.BIDSsv
     public void Print(in string data) => SPWriteLine(data);
     public void Print(in byte[] data)
     {
-      byte[] wa = Common.BAtoBIDSBA(data);
+      /*byte[] wa = Common.BAtoBIDSBA(data);
       if (data[data.Length - 1] != (byte)'\n')
       {
         wa = new byte[data.Length + 1];
         Array.Copy(data, wa, data.Length);
         wa[data.Length] = (byte)'\n';
       }
-      SP?.Write(wa, 0, wa.Length);
+      SP?.Write(wa, 0, wa.Length);*/
     }
   }
 }

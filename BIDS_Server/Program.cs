@@ -13,7 +13,7 @@ namespace BIDS_Server
   class Program
   {
     static bool IsLooping = true;
-    const string VerNumStr = "011b";
+    const string VerNumStr = "011c";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
@@ -155,6 +155,11 @@ namespace BIDS_Server
         case "debug":
           if (cmd.Length >= 2) Common.DebugDo(cmd[1]);
           else Common.DebugDo();
+          break;
+        case "print":
+          if (cmd.Length >= 3)
+            for (int i = 2; i < cmd.Length; i++)
+              if (Common.Print(cmd[1], cmd[i]) != true) break;
           break;
         default:
           string modn = FindMod(cmd[0]);

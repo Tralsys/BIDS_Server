@@ -168,28 +168,38 @@ namespace TR.BIDSsv
         Array.Copy(BitConverter.GetBytes((int)SelfB), 0, ba, i, sizeof(int));
         return ba;
       }
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="a">Source Array</param>
+      /// <param name="num">Start Index</param>
+      /// <returns>Result Array</returns>
       static internal byte[] BasicPanel(int[] a,int num)
       {
+        IntPtr ip = Marshal.AllocHGlobal(a.Length * sizeof(int));//Refer : http://schima.hatenablog.com/entry/20090512/1242139542
+        Marshal.Copy(a, num, ip, Math.Min(128, a.Length - num));
+
         byte[] ba = new byte[PanelSize];
-        Array.Copy(BitConverter.GetBytes((int)HeaderPanel), 0, ba, 0, sizeof(int));
-        ba[3] = (byte)num;
-        byte[] b = new byte[128 * sizeof(int)];
-        IntPtr ip = new IntPtr();
-        Marshal.StructureToPtr(b, ip, true);
-        Marshal.Copy(a, num * 128, ip, 128);
-        Array.Copy(b, 0, ba, 4, b.Length);
+        Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
+
+        byte[] b = BitConverter.GetBytes((int)HeaderPanel);
+        if (BitConverter.IsLittleEndian) Array.Reverse(b);
+        b[3] = (byte)num;
+        Array.Copy(b, 0, ba, 0, b.Length);
         return ba;
       }
       static internal byte[] BasicSound(int[] a, int num)
       {
+        IntPtr ip = Marshal.AllocHGlobal(a.Length * sizeof(int));//Refer : http://schima.hatenablog.com/entry/20090512/1242139542
+        Marshal.Copy(a, num * 128, ip, Math.Min(128, a.Length - (num * 128)));
+
         byte[] ba = new byte[SoundSize];
-        Array.Copy(BitConverter.GetBytes((int)HeaderSound), 0, ba, 0, sizeof(int));
-        ba[3] = (byte)num;
-        byte[] b = new byte[128 * sizeof(int)];
-        IntPtr ip = new IntPtr();
-        Marshal.StructureToPtr(b, ip, true);
-        Marshal.Copy(a, num * 128, ip, 128);
-        Array.Copy(b, 0, ba, 4, b.Length);
+        Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
+
+        byte[] b = BitConverter.GetBytes((int)HeaderPanel);
+        if (BitConverter.IsLittleEndian) Array.Reverse(b);
+        b[3] = (byte)num;
+        Array.Copy(b, 0, ba, 0, b.Length);
         return ba;
       }
     }
@@ -219,7 +229,7 @@ namespace TR.BIDSsv
         for (int i = 1; i <= 9; i++) stateAllStr += ("X{" + i.ToString() + "}");
         SML = new SMemLib(true, 0);
         CI = new CtrlInput();
-        SML?.ReadStart(5, Interval);
+        SML?.ReadStart(0, Interval);
 
         BSMDChanged += Common_BSMDChanged;
         OpenDChanged += Common_OpenDChanged;
@@ -237,6 +247,7 @@ namespace TR.BIDSsv
 
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
+      return;
       if (!IsStarted) return;
       if (svlist?.Count > 0)
       {
@@ -294,7 +305,7 @@ namespace TR.BIDSsv
         #region Byte Array Auto Sender
         int al = Math.Max(e.OldArray.Length, e.NewArray.Length);
         if (al % 128 != 0) al = ((int)Math.Floor((double)al / 128) + 1) * 128;
-
+        if (al < 128) al = 128;
         int[] oa = new int[al];
         int[] na = new int[al];
         Array.Copy(e.OldArray, oa, e.OldArray.Length);
@@ -307,7 +318,7 @@ namespace TR.BIDSsv
           {
             if (!IsNEqual) IsNEqual = oa[i + j] == na[i + j];
           });
-          if (IsNEqual) ASPtr(AutoSendSetting.BasicSound(na, i));
+          if (IsNEqual) ASPtr(AutoSendSetting.BasicPanel(na, i));
         }
         #endregion
 
@@ -520,6 +531,29 @@ namespace TR.BIDSsv
         Console.WriteLine("Debug End");
       }
       else Console.WriteLine("DebugDo : There are no connection.");
+    }
+
+    static public bool Print(string Name, string Command)
+    {
+      if (Name != null && Name != string.Empty)
+      {
+        for (int i = svlist.Count - 1; i >= 0; i--)
+          if (Name == svlist[i].Name)
+          {
+            try
+            {
+              svlist[i].Print(Command);
+            }
+            catch (Exception e)
+            {
+              Console.WriteLine(e);
+              return false;
+            }
+          }
+      }
+      else return false;
+
+      return true;
     }
 
     static public string PrintList()
