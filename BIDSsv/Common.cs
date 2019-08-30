@@ -999,10 +999,10 @@ namespace TR.BIDSsv
               break;
             case "P":
               if (PDAutoList?.Contains(new KeyValuePair<string, int>(CName, sera)) != true) PDAutoList.Add(CName, sera);
-              return ReturnString + "0";
+              return ReturnString + (SML.Panels.Length > sera ? SML.Panels.Panels[sera] : 0).ToString();
             case "S":
               if (SDAutoList?.Contains(new KeyValuePair<string, int>(CName, sera)) != true) SDAutoList.Add(CName, sera);
-              return ReturnString + "0";
+              return ReturnString + (SML.Sounds.Length > sera ? SML.Sounds.Sounds[sera] : 0).ToString();
           }
 
 
