@@ -247,7 +247,6 @@ namespace TR.BIDSsv
 
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
-      return;
       if (!IsStarted) return;
       if (svlist?.Count > 0)
       {

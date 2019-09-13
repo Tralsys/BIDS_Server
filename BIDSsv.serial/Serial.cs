@@ -32,6 +32,7 @@ namespace TR.BIDSsv
       SP.ReadTimeout = 5000;
       SP.WriteTimeout = 5000;
       SP.Encoding = Encoding.Default;
+      SP.NewLine = "\n";
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
       for (int i = 0; i < sa.Length; i++)
       {
@@ -164,17 +165,32 @@ namespace TR.BIDSsv
         {
           inputStr = SP?.ReadLine();
         }
-        catch (TimeoutException) { continue; }
+        catch (TimeoutException)
+        {
+          try
+          {
+            inputStr = SP?.ReadTo("\r");
+          }
+          catch (TimeoutException)
+          {
+            continue;
+          }catch(Exception e)
+          {
+            Console.WriteLine("Error has occured at ReadDoing(\\r) on" + Name);
+            Console.WriteLine(e);
+          }
+
+        }
         catch (Exception e)
         {
-          Console.WriteLine("Error has occured at ReadDoing on" + Name);
+          Console.WriteLine("Error has occured at ReadDoing(\\n) on" + Name);
           Console.WriteLine(e);
           continue;
         }
         if (inputStr != null && inputStr.Length > 4)
         {
           if (IsDebug) Console.WriteLine(Name + " : Get > " + inputStr + "\n");
-          byte[] debugBA = SP.Encoding.GetBytes(inputStr);
+          //byte[] debugBA = SP.Encoding.GetBytes(inputStr);
           if (inputStr.StartsWith("TO")) SPWriteLine(DataSelectTO(in inputStr));
           if (inputStr.StartsWith("TR"))
           {
