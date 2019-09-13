@@ -15,6 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common.DataSel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Common.DataSel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.CtrlIOcs\BIDSSMemLib.CtrlIOcs.csproj" />
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.rw\BIDSSMemLib.rw.csproj" />
