@@ -11,6 +11,67 @@ namespace TR.BIDSsv
   static public class UFunc
   {
     public static string Comp(object oldobj, object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
+
+    public static byte[] toBytes(int arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(float arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(double arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(bool arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(uint arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(short arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(ushort arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(long arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(ulong arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
+    public static byte[] toBytes(char arg)
+    {
+      byte[] ba = BitConverter.GetBytes(arg);
+      if (BitConverter.IsLittleEndian) Array.Reverse(ba);
+      return ba;
+    }
   }
 
   static public partial class Common

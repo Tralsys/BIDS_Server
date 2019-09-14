@@ -19,7 +19,6 @@ namespace TR.BIDSsv
     public bool IsDebug { get; set; } = false;
 
     UdpClient UC = null;
-    Thread TD = null;
     Encoding Enc = Encoding.Default;
     bool IsLooping = true;
 
