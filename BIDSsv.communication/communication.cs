@@ -10,7 +10,7 @@ namespace TR.BIDSsv
   public class communication : IBIDSsv
   {
     private int PortNum = 9032;
-    IPAddress Addr = null;
+    IPAddress Addr = IPAddress.Any;
     public int Version { get; private set; } = 100;
     public string Name { get; private set; } = "communication";
     public bool IsDebug { get; set; } = false;
@@ -54,7 +54,8 @@ namespace TR.BIDSsv
       }
       try
       {
-        UC = new UdpClient(PortNum);
+        UC = new UdpClient(new IPEndPoint(IPAddress.Any, PortNum));
+        if (Addr != IPAddress.Any) UC?.Connect(Addr, PortNum);
       }
       catch (Exception e)
       {
@@ -102,7 +103,8 @@ namespace TR.BIDSsv
     public void Dispose()
     {
       var ipep = new IPEndPoint(IPAddress.Any, PortNum);
-      UC?.EndReceive(null, ref ipep);
+      //UC?.EndReceive(null, ref ipep);
+      
       UC?.Close();
       UC?.Dispose();
     }
@@ -112,7 +114,7 @@ namespace TR.BIDSsv
     public void OnBSMDChanged(in BIDSSharedMemoryData data)
     {
       if (!IsWriteable) return;
-      UC?.BeginSend(Common.CommunicationBAGet(Common.BSMDtoComStr(data, data.StateData.T - oldT), PDA, SDA), Common.ComStrSize + (Common.PSArrSize * 2), null, null);
+      UC?.Send(Common.CommunicationBAGet(Common.BSMDtoComStr(data, data.StateData.T - oldT), PDA, SDA), Common.ComStrSize + (Common.PSArrSize * 2));
       oldT = data.StateData.T;
     }
 

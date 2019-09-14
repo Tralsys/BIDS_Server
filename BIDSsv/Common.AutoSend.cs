@@ -136,7 +136,7 @@ namespace TR.BIDSsv
       static internal byte[] BasicSound(int[] a, int num)
       {
         IntPtr ip = Marshal.AllocHGlobal(a.Length * sizeof(int));//Refer : http://schima.hatenablog.com/entry/20090512/1242139542
-        Marshal.Copy(a, num * 128, ip, Math.Min(128, a.Length - (num * 128)));
+        Marshal.Copy(a, num, ip, Math.Min(128, a.Length - num));
 
         byte[] ba = new byte[SoundSize];
         Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
