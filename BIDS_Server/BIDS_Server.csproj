@@ -69,10 +69,6 @@
       <Project>{92610fab-b027-44f7-8253-25ade32bfd90}</Project>
       <Name>IBIDSsv</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BIDSsv.tcpsv\BIDSsv.tcpsv.csproj">
-      <Project>{c6c1536e-b548-4158-aa31-e143e5fd07ed}</Project>
-      <Name>BIDSsv.tcpsv</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

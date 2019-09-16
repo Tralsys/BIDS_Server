@@ -302,12 +302,12 @@ namespace TR.BIDSsv
                 default: return "TRE2";
               }
             case "P":
-              PanelD pd;
+              PanelD pd = new PanelD();
               SML?.Read(out pd);
               if (seri < 0) return ReturnString + pd.Length.ToString();
               else return ReturnString + (seri < pd.Length ? pd.Panels[seri] : 0).ToString();
             case "S":
-              SoundD sd;
+              SoundD sd = new SoundD();
               SML?.Read(out sd);
               if (seri < 0) return ReturnString + sd.Length.ToString();
               else return ReturnString + (seri < sd.Length ? sd.Sounds[seri] : 0).ToString();
@@ -320,7 +320,7 @@ namespace TR.BIDSsv
                 default: return "TRE2";
               }
             case "p":
-              PanelD pda;
+              PanelD pda = new PanelD();
               SML?.Read(out pda);
 
               ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
@@ -329,7 +329,7 @@ namespace TR.BIDSsv
 
               return ReturnString;
             case "s":
-              SoundD sda;
+              SoundD sda = new SoundD();
               SML?.Read(out sda);
               ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
               for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)

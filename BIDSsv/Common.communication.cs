@@ -55,6 +55,8 @@ namespace TR.BIDSsv
       ip = Marshal.AllocHGlobal(PSArrSize);
       Marshal.Copy(ba, ComStrSize, ip, PSArrSize);
       Marshal.Copy(ip, PA, 0, 256);
+      Marshal.FreeHGlobal(ip);
+      ip = Marshal.AllocHGlobal(PSArrSize);
       Marshal.Copy(ba, ComStrSize + PSArrSize, ip, PSArrSize);
       Marshal.Copy(ip, SA, 0, 256);
       Marshal.FreeHGlobal(ip);
@@ -74,7 +76,7 @@ namespace TR.BIDSsv
       int[] pda = new int[256];
       int[] sda = new int[256];
       Array.Copy(PD, 0, pda, 0, Math.Min(pda.Length, PD.Length));
-      Array.Copy(SD, 0, pda, 0, Math.Min(sda.Length, SD.Length));
+      Array.Copy(SD, 0, sda, 0, Math.Min(sda.Length, SD.Length));
 
       byte[] ba = new byte[ComStrSize + (PSArrSize * 2)];
 
@@ -86,6 +88,8 @@ namespace TR.BIDSsv
       ip = Marshal.AllocHGlobal(PSArrSize);
       Marshal.Copy(pda, 0, ip, 256);
       Marshal.Copy(ip, ba, ComStrSize, PSArrSize);
+      Marshal.FreeHGlobal(ip);
+      ip = Marshal.AllocHGlobal(PSArrSize);
       Marshal.Copy(sda, 0, ip, 256);
       Marshal.Copy(ip, ba, ComStrSize + PSArrSize, PSArrSize);
       Marshal.FreeHGlobal(ip);
