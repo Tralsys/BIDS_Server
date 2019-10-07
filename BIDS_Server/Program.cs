@@ -3,7 +3,7 @@ using System.Reflection;
 using TR.BIDSsv;
 using System.IO;
 using TR;
-
+using System.IO.Ports;
 namespace BIDS_Server
 {
   class Program
