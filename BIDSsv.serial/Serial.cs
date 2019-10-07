@@ -29,8 +29,8 @@ namespace TR.BIDSsv
       SP.BaudRate = 19200;
       SP.RtsEnable = true;
       SP.DtrEnable = true;
-      SP.ReadTimeout = 5000;
-      SP.WriteTimeout = 5000;
+      SP.ReadTimeout = 20;
+      SP.WriteTimeout = 500;
       SP.Encoding = Encoding.Default;
       SP.NewLine = "\n";
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
@@ -187,7 +187,7 @@ namespace TR.BIDSsv
           Console.WriteLine(e);
           continue;
         }
-        if (inputStr != null && inputStr.Length > 4)
+        if (inputStr != null && inputStr.Length > 3)
         {
           if (IsDebug) Console.WriteLine(Name + " : Get > " + inputStr + "\n");
           //byte[] debugBA = SP.Encoding.GetBytes(inputStr);
