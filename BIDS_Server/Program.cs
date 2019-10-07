@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Net;
-using System.Net.WebSockets;
-using System.Threading;
 using System.Reflection;
-using TR.BIDScs;
 using TR.BIDSsv;
 using System.IO;
 using TR;
@@ -243,7 +239,7 @@ namespace BIDS_Server
       return ibs;
     }
 
-    static async void SocketDo()
+    /*static async void SocketDo()
     {
       HttpListener HL = new HttpListener();
       HL.Prefixes.Add("http://localhost:12835/");
@@ -320,6 +316,6 @@ namespace BIDS_Server
           HLC.Response.Close();
         }
       }
-    }
+    }*/
   }
 }

@@ -45,10 +45,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Documents\GitHub\BIDScs\BIDScs.csproj">
-      <Project>{b8b55ab6-4cc2-43f7-af30-aff35436785c}</Project>
-      <Name>BIDScs</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.CtrlIOcs\BIDSSMemLib.CtrlIOcs.csproj">
       <Project>{cc54107a-9aac-4396-912d-7af81c3571b0}</Project>
       <Name>BIDSSMemLib.CtrlIOcs</Name>
