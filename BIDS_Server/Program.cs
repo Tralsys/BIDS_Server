@@ -4,6 +4,8 @@ using TR.BIDSsv;
 using System.IO;
 using TR;
 using System.IO.Ports;
+using System.Threading.Tasks;
+
 namespace BIDS_Server
 {
   class Program
