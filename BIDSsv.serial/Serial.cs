@@ -8,7 +8,7 @@ using TR.BIDSsv;
 
 namespace TR.BIDSsv
 {
-  public class Serial : IBIDSsv
+  public class Serial : TR.IBIDSsv
   {
     public int Version => 202;
     public bool IsDebug { get; set; } = false;

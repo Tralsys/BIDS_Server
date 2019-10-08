@@ -1,66 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D4F23958-EB41-46EE-9E52-B99270505956}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TR.BIDSsv</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>TR.BIDSsv.serial</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <RootNamespace>TR.BIDSsv</RootNamespace>
+    <Authors>Tetsu Otter</Authors>
+    <Company>Tech Otter</Company>
+    <Product>BIDS Project</Product>
+    <Copyright>Copyright 2019 Tetsu Otter</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
+    <PackageReference Include="System.IO.Ports" Version="4.4.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Serial.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
+    <ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
+    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.CtrlIOcs\BIDSSMemLib.CtrlIOcs.csproj">
-      <Project>{cc54107a-9aac-4396-912d-7af81c3571b0}</Project>
-      <Name>BIDSSMemLib.CtrlIOcs</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.rw\BIDSSMemLib.rw.csproj">
-      <Project>{ae16cc76-b20e-4425-a0c5-fdc24ebacc73}</Project>
-      <Name>BIDSSMemLib.rw</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj">
-      <Project>{8c8917ff-842b-49b2-a9b5-f59ae12f19d6}</Project>
-      <Name>BIDSSMemLib.structs</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BIDSsv\BIDSsv.csproj">
-      <Project>{5a7bbf59-7d25-471e-aa59-41c79ce78d22}</Project>
-      <Name>BIDSsv</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj">
-      <Project>{92610fab-b027-44f7-8253-25ade32bfd90}</Project>
-      <Name>IBIDSsv</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /I/Y "$(TargetPath)" "$(SolutionDir)BIDS_Server\bin\$(ConfigurationName)\mods\"</PostBuildEvent>
-  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /I/Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)BIDS_Server\bin\$(ConfigurationName)\mods\&quot;" />
+  </Target>
 </Project>
