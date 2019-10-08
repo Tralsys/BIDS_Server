@@ -60,32 +60,32 @@ namespace TR.BIDSsv
       {
         byte[] ba = new byte[BasicConstSize];
         int i = 0;
-        Array.Copy(BitConverter.GetBytes((int)HeaderBasicConst), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((short)202), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(BitConverter.GetBytes((short)s.B), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(BitConverter.GetBytes((short)s.P), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(BitConverter.GetBytes((short)s.A), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(BitConverter.GetBytes((short)s.J), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(BitConverter.GetBytes((short)s.C), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(BitConverter.GetBytes((short)o.SelfBCount), 0, ba, i, sizeof(short));
+        Array.Copy(UFunc.GetBytes((int)HeaderBasicConst), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((short)202), 0, ba, i, sizeof(short)); i += sizeof(short);
+        Array.Copy(UFunc.GetBytes((short)s.B), 0, ba, i, sizeof(short)); i += sizeof(short);
+        Array.Copy(UFunc.GetBytes((short)s.P), 0, ba, i, sizeof(short)); i += sizeof(short);
+        Array.Copy(UFunc.GetBytes((short)s.A), 0, ba, i, sizeof(short)); i += sizeof(short);
+        Array.Copy(UFunc.GetBytes((short)s.J), 0, ba, i, sizeof(short)); i += sizeof(short);
+        Array.Copy(UFunc.GetBytes((short)s.C), 0, ba, i, sizeof(short)); i += sizeof(short);
+        Array.Copy(UFunc.GetBytes((short)o.SelfBCount), 0, ba, i, sizeof(short));
         return ba;
       }
       static internal byte[] BasicCommon(in State s, byte DoorState, int SigNum = 0)
       {
         byte[] ba = new byte[BasicCommonSize];
         int i = 0;
-        Array.Copy(BitConverter.GetBytes((int)HeaderBasicCommon), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((double)s.Z), 0, ba, i, sizeof(double)); i += sizeof(double);
-        Array.Copy(BitConverter.GetBytes((float)s.V), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((float)s.I), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((float)0), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((int)s.T), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((float)s.BC), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((float)s.MR), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((float)s.ER), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((float)s.BP), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((float)s.SAP), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(BitConverter.GetBytes((int)SigNum), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((int)HeaderBasicCommon), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((double)s.Z), 0, ba, i, sizeof(double)); i += sizeof(double);
+        Array.Copy(UFunc.GetBytes((float)s.V), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)s.I), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)0), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((int)s.T), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((float)s.BC), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)s.MR), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)s.ER), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)s.BP), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)s.SAP), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((int)SigNum), 0, ba, i, sizeof(int)); i += sizeof(int);
         ba[i] = DoorState;
         return ba;
       }
@@ -96,7 +96,7 @@ namespace TR.BIDSsv
       static internal byte[] BasicOBVE(OpenD o)
       {
         byte[] ba = new byte[Marshal.SizeOf(new OpenD()) + 4];
-        Array.Copy(BitConverter.GetBytes((int)HeaderBasicOBVE), 0, ba, 0, sizeof(int));
+        Array.Copy(UFunc.GetBytes((int)HeaderBasicOBVE), 0, ba, 0, sizeof(int));
         IntPtr ip = new IntPtr();
         Marshal.StructureToPtr(o, ip, true);
         Marshal.Copy(ip, ba, 4, ba.Length);
@@ -106,11 +106,11 @@ namespace TR.BIDSsv
       {
         byte[] ba = new byte[BasicHandleSize];
         int i = 0;
-        Array.Copy(BitConverter.GetBytes((int)HeaderBasicHandle), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((int)h.P), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((int)h.B), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((int)h.R), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(BitConverter.GetBytes((int)SelfB), 0, ba, i, sizeof(int));
+        Array.Copy(UFunc.GetBytes((int)HeaderBasicHandle), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((int)h.P), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((int)h.B), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((int)h.R), 0, ba, i, sizeof(int)); i += sizeof(int);
+        Array.Copy(UFunc.GetBytes((int)SelfB), 0, ba, i, sizeof(int));
         return ba;
       }
       /// <summary>
@@ -127,10 +127,8 @@ namespace TR.BIDSsv
         byte[] ba = new byte[PanelSize];
         Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
 
-        byte[] b = BitConverter.GetBytes((int)HeaderPanel);
-        if (BitConverter.IsLittleEndian) Array.Reverse(b);
-        b[3] = (byte)num;
-        Array.Copy(b, 0, ba, 0, b.Length);
+        Array.Copy(UFunc.GetBytes((int)HeaderPanel), 0, ba, 0, sizeof(int));
+        ba[3] = (byte)num;
         return ba;
       }
       static internal byte[] BasicSound(int[] a, int num)
@@ -141,10 +139,8 @@ namespace TR.BIDSsv
         byte[] ba = new byte[SoundSize];
         Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
 
-        byte[] b = BitConverter.GetBytes((int)HeaderPanel);
-        if (BitConverter.IsLittleEndian) Array.Reverse(b);
-        b[3] = (byte)num;
-        Array.Copy(b, 0, ba, 0, b.Length);
+        Array.Copy(UFunc.GetBytes((int)HeaderSound), 0, ba, 0, sizeof(int));
+        ba[3] = (byte)num;
         return ba;
       }
     }
