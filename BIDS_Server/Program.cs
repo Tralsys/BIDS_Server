@@ -3,6 +3,7 @@ using System.Reflection;
 using TR.BIDSsv;
 using System.IO;
 using TR;
+using System.Threading.Tasks;
 
 namespace BIDS_Server
 {
@@ -16,6 +17,39 @@ namespace BIDS_Server
       Console.WriteLine("ver : " + VerNumStr);
 
       Common.Start(5);
+
+      for (int i = 0; i < args.Length; i++) Console.WriteLine("{0}[{1}] :: {2}", "args", i, args[i]);
+      if (args?.Length > 0)
+      {
+        for(int i = 0; i < args.Length; i++)
+        {
+          if (args[i].StartsWith("/"))
+          {
+            continue;
+          }
+          if (args[i].StartsWith("-"))
+          {
+            continue;
+          }
+          if (args[i].EndsWith(".bsvcmd"))
+          {
+            Console.WriteLine("args[{0}] : {1} => BIDS_Server Command preset file", i, args[i]);
+            using (StreamReader sr = new StreamReader(args[i]))
+            {
+              string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+              if (sa?.Length > 0) Parallel.For(0, sa.Length, (pi) =>
+              {
+                Console.WriteLine("do {0}[{1}] : {2}", args[i], pi, sa[pi]);
+                ReadLineDO(sa[pi]);
+              });
+              else Console.WriteLine("{0} : There is no command in the file.", args[i]);
+            }
+
+            continue;
+          }
+        }
+      }
+
       do ReadLineDO(); while (IsLooping);
       Common.Dispose();
 
@@ -23,9 +57,9 @@ namespace BIDS_Server
       Console.ReadKey();
     }
 
-    static void ReadLineDO()
+    static void ReadLineDO(string arg = null)
     {
-      string s = Console.ReadLine();
+      string s = arg ?? Console.ReadLine();
       string[] cmd = s.ToLower().Split(' ');
       switch (cmd[0])
       {
