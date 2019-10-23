@@ -2,14 +2,15 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
   public class communication : IBIDSsv
   {
-    private int PortNum = 9032;
+    const int DefPNum = 9032;
+    private int PortNum = DefPNum;
+    private int RemotePNum = DefPNum;
     IPAddress Addr = IPAddress.Any;
     public int Version { get; private set; } = 100;
     public string Name { get; private set; } = "communication";
@@ -47,6 +48,12 @@ namespace TR.BIDSsv
               case "Port":
                 if (saa.Length > 1) PortNum = int.Parse(saa[1]);
                 break;
+              case "RemotePort":
+                if (saa.Length > 1) RemotePNum = int.Parse(saa[1]);
+                break;
+              case "RP":
+                if (saa.Length > 1) RemotePNum = int.Parse(saa[1]);
+                break;
             }
           }
         }
@@ -55,7 +62,7 @@ namespace TR.BIDSsv
       try
       {
         UC = new UdpClient(new IPEndPoint(IPAddress.Any, PortNum));
-        if (Addr != IPAddress.Any) UC?.Connect(Addr, PortNum);
+        if (Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
       }
       catch (Exception e)
       {
@@ -65,6 +72,7 @@ namespace TR.BIDSsv
       UC?.BeginReceive(ReceivedDoing, UC);
       return true;
     }
+
     SocketException sexc;
     private void ReceivedDoing(IAsyncResult ar)
     {
@@ -77,7 +85,7 @@ namespace TR.BIDSsv
       }
       catch (SocketException e)
       {
-        if (!Equals(sexc.Message, e.Message)) Console.WriteLine("{0} : Receieve Error => {1}", Name, e);
+        if (!Equals(sexc.ErrorCode, e.ErrorCode)) Console.WriteLine("{0} : Receieve Error({2}) => {1}", Name, e, e.ErrorCode);
         sexc = e;
       }
       catch (ObjectDisposedException)
@@ -96,18 +104,25 @@ namespace TR.BIDSsv
         Common.PD = new PanelD() { Panels = pda };
         Common.SD = new SoundD() { Sounds = sda };
       }
+      else
+      {
+        Common.DataSelect(Name, rba, Encoding.Default);
+      }
 
       uc?.BeginReceive(ReceivedDoing, uc);
     }
 
-    public void Dispose()
+    protected virtual void Dispose(bool tf)
     {
-      var ipep = new IPEndPoint(IPAddress.Any, PortNum);
-      //UC?.EndReceive(null, ref ipep);
-      
-      UC?.Close();
+      if (!tf) UC?.Close();
       UC?.Dispose();
     }
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
     int[] PDA = new int[256];
     int[] SDA = new int[256];
     int oldT = 0;
@@ -119,12 +134,14 @@ namespace TR.BIDSsv
     }
 
     public void OnOpenDChanged(in OpenD data) { }
+
     public void OnPanelDChanged(in int[] data)
     {
       if (!IsWriteable) return;
       Array.Copy(data, 0, PDA, 0, Math.Min(256, data.Length));
       if (data.Length < 256) Array.Clear(PDA, data.Length, 256 - data.Length);
     }
+
     public void OnSoundDChanged(in int[] data)
     {
       if (!IsWriteable) return;
@@ -134,26 +151,26 @@ namespace TR.BIDSsv
 
 
 
-    public void Print(in string data) => throw new NotImplementedException();
+    public void Print(in string data) => Print(Encoding.Default.GetBytes(data));
 
     public void Print(in byte[] data)
     {
-      /*
+      if (Addr == IPAddress.Any) return;
+      
       if (UC != null && data?.Length > 0)
       {
-        if (BitConverter.ToUInt32(data, 0) == Common.CommunicationStructHeader)
-        {
-          UC.Send(data, data.Length);
-        }
-      }*/
+        UC.Send(data, data.Length);
+      }
     }
 
     readonly string[] ArgInfo = new string[]
     {
-      "Argument Format ... [Header(\"-\" or \"/\")][SettingName(B, P etc...)][Separater(\":\")][Setting(38400, 2 etc...)]",
+      "Argument Format ... [Header(\"-\" or \"/\") + SettingName(B, P etc...) + Separater(\":\") + Setting(38400, 2 etc...)]",
       "  -A or -Address : Set the Address to send to.  If you don't set this option, this program will run as a Reader Only.",
-      "  -P or -Port : Set the Sending Port.  If you don't set this option, this program uses \"9032\" as the Port Number.",
+      "  -P or -Port : Set the Sending(Local) Port.  If you don't set this option, this program uses \"9032\" as the Local Port Number.",
+      "  -RP or -RemotePort : Set the Remote Port.  If you don't set this option, this program uses \"9032\" as the Remote Port Number.",
       "  -N or -Name : Set the Connection Name."
+
     };
     public void WriteHelp(in string args)
     {
