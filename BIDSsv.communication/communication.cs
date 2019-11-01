@@ -155,11 +155,12 @@ namespace TR.BIDSsv
 
     public void Print(in byte[] data)
     {
-      if (Addr == IPAddress.Any) return;
+      if (!IsWriteable) return;
       
       if (UC != null && data?.Length > 0)
       {
-        UC.Send(data, data.Length);
+        byte[] wa = Common.BAtoBIDSBA(data);
+        UC.Send(wa, wa.Length);
       }
     }
 

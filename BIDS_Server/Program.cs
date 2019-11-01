@@ -32,6 +32,7 @@ namespace BIDS_Server
           {
             continue;
           }
+
           if (args[i].EndsWith(".bsvcmd"))
           {
             Console.WriteLine("args[{0}] : {1} => BIDS_Server Command preset file", i, args[i]);
@@ -48,6 +49,8 @@ namespace BIDS_Server
 
             continue;
           }
+
+          ReadLineDO(args[0]);
         }
       }
 
@@ -58,10 +61,10 @@ namespace BIDS_Server
       Console.ReadKey();
     }
 
-    static void ReadLineDO(string arg = null)
+    static void ReadLineDO() => ReadLineDO(Console.ReadLine());
+    static void ReadLineDO(string s)
     {
-      string s = arg ?? Console.ReadLine();
-      string[] cmd = s.ToLower().Split(' ');
+      string[] cmd = s?.ToLower().Split(' ');
       switch (cmd[0])
       {
         case "man":
@@ -213,7 +216,7 @@ namespace BIDS_Server
             }
             else Console.WriteLine("The specified dll file does not implement the IBIDSsv interface.");
           }
-          else Console.WriteLine("Command Not Found");
+          else Console.WriteLine("Command({0}) Not Found", cmd[0]);
           break;
       }
     }

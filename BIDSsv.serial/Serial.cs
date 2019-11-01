@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace TR.BIDSsv
 
     SerialPort SP = null;
     bool IsLooping = true;
+    bool IsBinaryAllowed = false;
 
     Thread ReadThread = null;
 
@@ -46,6 +48,12 @@ namespace TR.BIDSsv
               break;
             case "BaudRate":
               SP.BaudRate = int.Parse(saa[1]);
+              break;
+            case "BS":
+              IsBinaryAllowed = true;
+              break;
+            case "BinarySender":
+              IsBinaryAllowed = true;
               break;
             case "DataBits":
               SP.DataBits = int.Parse(saa[1]);
@@ -161,6 +169,19 @@ namespace TR.BIDSsv
       while (SP?.IsOpen == true && IsLooping)
       {
         string inputStr = null;
+        if (IsBinaryAllowed)
+        {
+          int btr = SP.BytesToRead;
+          if (btr <= 0)
+          {
+            Thread.Sleep(1);
+            continue;
+          }
+          byte[] ba = new byte[btr];
+          SP.Read(ba, 0, ba.Length);
+          Print(Common.DataSelect(Name, ba, SP.Encoding));
+          continue;
+        }
         try
         {
           inputStr = SP?.ReadLine();
@@ -216,12 +237,12 @@ namespace TR.BIDSsv
 
     void SPWriteLine(string s)
     {
+      if (string.IsNullOrWhiteSpace(s)) return;
       if (SP != null)
       {
         if (IsDebug) Console.WriteLine(Name + " : Set > " + s);
         try
         {
-          Thread.Sleep(10);
           SP.WriteLine(s);
         }
         catch (Exception e)
@@ -241,6 +262,7 @@ namespace TR.BIDSsv
     {
       "Argument Format ... [Header(\"-\" or \"/\")][SettingName(B, P etc...)][Separater(\":\")][Setting(38400, 2 etc...)]",
       "  -B or -BaudRate : Set BaudRate.  If you don\'t set this command, the BaudRate is set to 19200.",
+      "  -BS or -BinarySender : Allow to send the binary data.",
       "  -DataBits : Set the DataBit Count Option.  Default:8  If you want More info about this argument, please read the source code.",
       "  -DTR : Set the RTS (Data Terminal Ready) Signal Option.  Default:1  0:Disabled, 1:Enabled",
       "  -E or -Encoding : Set the Encoding Option.  Default:0  If you want More info about this argument, please read the source code.",
@@ -269,14 +291,10 @@ namespace TR.BIDSsv
     public void Print(in string data) => SPWriteLine(data);
     public void Print(in byte[] data)
     {
-      /*byte[] wa = Common.BAtoBIDSBA(data);
-      if (data[data.Length - 1] != (byte)'\n')
-      {
-        wa = new byte[data.Length + 1];
-        Array.Copy(data, wa, data.Length);
-        wa[data.Length] = (byte)'\n';
-      }
-      SP?.Write(wa, 0, wa.Length);*/
+      if (!IsBinaryAllowed) return;
+      if (data == null || data.Length <= 0) return;
+      byte[] wa = Common.BAtoBIDSBA(data);
+      SP?.Write(wa, 0, wa.Length);
     }
   }
 }

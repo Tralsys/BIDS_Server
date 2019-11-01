@@ -442,7 +442,7 @@ namespace TR.BIDSsv
     /// <returns>byte array to return, or array that calling program is needed to do something</returns>
     static public byte[] DataSelect(in string CName, in byte[] data, in Encoding enc)
     {
-      if (data == null || data.Length < 5) return null;
+      if (data == null || data.Length < 4) return null;
       byte[] ba = BIDSBAtoBA(data);
       if (ba[0] == (byte)'T')
       {
