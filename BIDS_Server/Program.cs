@@ -50,7 +50,7 @@ namespace BIDS_Server
             continue;
           }
 
-          ReadLineDO(args[0]);
+          ReadLineDO(args[i]);
         }
       }
 
