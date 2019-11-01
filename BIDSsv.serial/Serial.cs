@@ -116,6 +116,34 @@ namespace TR.BIDSsv
             case "Name":
               Name = saa[1];
               break;
+            case "NL":
+              switch (int.Parse(saa[1]))
+              {
+                case 0:
+                  SP.NewLine = "\n";
+                  break;
+                case 1:
+                  SP.NewLine = "\r";
+                  break;
+                case 2:
+                  SP.NewLine = "\r\n";
+                  break;
+              }
+              break;
+            case "NewLine":
+              switch (int.Parse(saa[1]))
+              {
+                case 0:
+                  SP.NewLine = "\n";
+                  break;
+                case 1:
+                  SP.NewLine = "\r";
+                  break;
+                case 2:
+                  SP.NewLine = "\r\n";
+                  break;
+              }
+              break;
             case "P":
               SP.PortName = "COM" + int.Parse(saa[1]);
               break;
@@ -188,23 +216,11 @@ namespace TR.BIDSsv
         }
         catch (TimeoutException)
         {
-          try
-          {
-            inputStr = SP?.ReadTo("\r");
-          }
-          catch (TimeoutException)
-          {
-            continue;
-          }catch(Exception e)
-          {
-            Console.WriteLine("Error has occured at ReadDoing(\\r) on" + Name);
-            Console.WriteLine(e);
-          }
-
+          continue;
         }
         catch (Exception e)
         {
-          Console.WriteLine("Error has occured at ReadDoing(\\n) on" + Name);
+          Console.WriteLine("Error has occured at ReadDoing on" + Name);
           Console.WriteLine(e);
           continue;
         }
@@ -268,6 +284,7 @@ namespace TR.BIDSsv
       "  -E or -Encoding : Set the Encoding Option.  Default:0  If you want More info about this argument, please read the source code.",
       "  -HandShake : Set the HandShake Option.  Default:0  If you want More info about this argument, please read the source code.",
       "  -N or -Name : Set the Instance Name.  Default:\"serial\"  If you don't set this option, this program maybe cause some bugs.",
+      "  -NL or -NewLine : Set the NewLine Char.  Default:0 (0:\\n, 1:\\r, 2:\\r\\n)",
       "  -P or -PortName : Set PortName.  You must set this option.  \"COM\" is unneeded in the Setting.  Only Number is allowed in the setting.",
       "  -Parity : Set the Parity Option.  Default:0  If you want More info about this argument, please read the source code.",
       "  -RTO or ReadTimeout : Set the ReadTimeout time option.  Default:100",
