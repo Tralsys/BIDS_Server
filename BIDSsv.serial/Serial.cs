@@ -260,7 +260,7 @@ namespace TR.BIDSsv
 
     readonly string[] ArgInfo = new string[]
     {
-      "Argument Format ... [Header(\"-\" or \"/\")][SettingName(B, P etc...)][Separater(\":\")][Setting(38400, 2 etc...)]",
+      "Argument Format ... Header(\"-\" or \"/\") + SettingName(B, P etc...) + [Separater(\":\") + Setting(38400, 2 etc...)]",
       "  -B or -BaudRate : Set BaudRate.  If you don\'t set this command, the BaudRate is set to 19200.",
       "  -BS or -BinarySender : Allow to send the binary data.",
       "  -DataBits : Set the DataBit Count Option.  Default:8  If you want More info about this argument, please read the source code.",
