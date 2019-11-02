@@ -5,13 +5,14 @@ using System.IO;
 using TR;
 using System.IO.Ports;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace BIDS_Server
 {
   class Program
   {
     static bool IsLooping = true;
-    const string VerNumStr = "011c";
+    const string VerNumStr = "011c1";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
@@ -39,11 +40,12 @@ namespace BIDS_Server
             using (StreamReader sr = new StreamReader(args[i]))
             {
               string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-              if (sa?.Length > 0) Parallel.For(0, sa.Length, (pi) =>
-              {
-                Console.WriteLine("do {0}[{1}] : {2}", args[i], pi, sa[pi]);
-                ReadLineDO(sa[pi]);
-              });
+              if (sa?.Length > 0)
+                for (int pi = 0; pi < sa.Length; pi++)
+                {
+                  Console.WriteLine("do {0}[{1}] : {2}", args[i], pi, sa[pi]);
+                  ReadLineDO(sa[pi]);
+                }
               else Console.WriteLine("{0} : There is no command in the file.", args[i]);
             }
 
@@ -92,6 +94,9 @@ namespace BIDS_Server
               case "close":
                 Console.WriteLine("close connection command : Used when user want to close the connection.  User must set the Connection Name to be closed.");
                 break;
+              case "delay":
+                Console.WriteLine("insert pause command : Insert Pause function.  You can set 0 ~ Int.Max[ms]");
+                break;
               default:
                 IBIDSsv ibsv = LoadMod(FindMod(cmd[1]));
                 if (ibsv != null)
@@ -109,6 +114,7 @@ namespace BIDS_Server
             Console.WriteLine("ver : " + VerNumStr + "\n");
             Console.WriteLine("auto : Set the Auto Sending Function");
             Console.WriteLine("close: Close the connection.");
+            Console.WriteLine("delay : insert delay function.");
             Console.WriteLine("exit : close this program.");
             Console.WriteLine("ls : Print the list of the Name of alive connection.");
             Console.WriteLine("lsmods : Print the list of the Name of mods you can use.");
@@ -194,6 +200,9 @@ namespace BIDS_Server
           if (cmd.Length >= 3)
             for (int i = 2; i < cmd.Length; i++)
               if (Common.Print(cmd[1], cmd[i]) != true) break;
+          break;
+        case "delay":
+          Thread.Sleep(int.Parse(cmd[1]));
           break;
         default:
           string modn = FindMod(cmd[0]);
