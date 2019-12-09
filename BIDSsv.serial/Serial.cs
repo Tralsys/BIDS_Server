@@ -119,36 +119,50 @@ namespace TR.BIDSsv
             case "NL":
               switch (int.Parse(saa[1]))
               {
-                case 0:
-                  SP.NewLine = "\n";
-                  break;
                 case 1:
                   SP.NewLine = "\r";
                   break;
                 case 2:
                   SP.NewLine = "\r\n";
+                  break;
+                default:
+                  SP.NewLine = "\n";
                   break;
               }
               break;
             case "NewLine":
               switch (int.Parse(saa[1]))
               {
-                case 0:
-                  SP.NewLine = "\n";
-                  break;
                 case 1:
                   SP.NewLine = "\r";
                   break;
                 case 2:
                   SP.NewLine = "\r\n";
                   break;
+                default:
+                  SP.NewLine = "\n";
+                  break;
               }
               break;
             case "P":
-              SP.PortName = "COM" + int.Parse(saa[1]);
+              try
+              {
+                SP.PortName = "COM" + int.Parse(saa[1]);
+              }
+              catch (FormatException)
+              {
+                SP.PortName = saa[1];
+              }
               break;
             case "Port":
-              SP.PortName = "COM" + int.Parse(saa[1]);
+              try
+              {
+                SP.PortName = "COM" + int.Parse(saa[1]);
+              }
+              catch (FormatException)
+              {
+                SP.PortName = saa[1];
+              }
               break;
             case "Parity":
               SP.Parity = (Parity)int.Parse(saa[1]);
