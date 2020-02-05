@@ -34,9 +34,13 @@ namespace TR.BIDSsv
       else if (ThirdStr == "K")
       {
         int KNum = 0;
+        int[] ka = null;
         try
         {
           KNum = Convert.ToInt32(GotString.Substring(3).Replace("D", string.Empty).Replace("U", string.Empty));
+          ka = GIPI.GetBtJobNum(KNum);
+          if (!(ka?.Length > 0)) return GotString;
+          KNum = 0;
         }
         catch (FormatException)
         {
@@ -48,11 +52,19 @@ namespace TR.BIDSsv
         }
         if (GotString.EndsWith("D"))
         {
-          CI?.SetIsKeyPushed(KNum, true);
+          while (ka?.Length > KNum)
+          {
+            CI?.SetIsKeyPushed(ka[KNum], true);
+            KNum++;
+          }
         }
         if (GotString.EndsWith("U"))
         {
-          CI?.SetIsKeyPushed(KNum, false);
+          while (ka?.Length > KNum)
+          {
+            CI?.SetIsKeyPushed(ka[KNum], false);
+            KNum++;
+          }
         }
       }
       else
@@ -585,6 +597,7 @@ namespace TR.BIDSsv
 
     [Obsolete("Please use the \"DataSelect\" Method.")]
     static public string DataSelectTO(in string GotString) => DataSelTO(GotString);
+
 
   }
 }

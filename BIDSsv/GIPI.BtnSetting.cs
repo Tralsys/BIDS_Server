@@ -66,6 +66,7 @@ namespace TR.BIDSsv
       return true;
     }
 
+    static public int[] GetBtJobNum(int Num) => GetBtJobNum((uint)Num);
     static public int[] GetBtJobNum(uint Num)
     {
       if (!(BtnAssignList?.Count > 0)) return null;
