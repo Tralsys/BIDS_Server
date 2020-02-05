@@ -27,28 +27,12 @@ namespace BIDS_Server
         {
           if (args[i].StartsWith("/"))
           {
+            //do some process
             continue;
           }
           if (args[i].StartsWith("-"))
           {
-            continue;
-          }
-
-          if (args[i].EndsWith(".bsvcmd"))
-          {
-            Console.WriteLine("args[{0}] : {1} => BIDS_Server Command preset file", i, args[i]);
-            using (StreamReader sr = new StreamReader(args[i]))
-            {
-              string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-              if (sa?.Length > 0)
-                for (int pi = 0; pi < sa.Length; pi++)
-                {
-                  Console.WriteLine("do {0}[{1}] : {2}", args[i], pi, sa[pi]);
-                  ReadLineDO(sa[pi]);
-                }
-              else Console.WriteLine("{0} : There is no command in the file.", args[i]);
-            }
-
+            //do some process
             continue;
           }
 
@@ -66,6 +50,35 @@ namespace BIDS_Server
     static void ReadLineDO() => ReadLineDO(Console.ReadLine());
     static void ReadLineDO(string s)
     {
+      if (s.EndsWith(".bsvcmd"))
+      {
+        Console.WriteLine("{0} => BIDS_Server Command preset file", s);
+        using (StreamReader sr = new StreamReader(s))
+        {
+          string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+          if (sa?.Length > 0)
+            for (int pi = 0; pi < sa.Length; pi++)
+            {
+              Console.WriteLine("do {0}[{1}] : {2}", s, pi, sa[pi]);
+              ReadLineDO(sa[pi]);
+            }
+          else Console.WriteLine("{0} : There is no command in the file.", s);
+        }
+
+        return;
+      }
+
+      if (s.EndsWith(".btsetting"))
+      {
+        Console.WriteLine("{0} => Button assignment setting file to keep the compatibility with GIPI", s);
+        using (StreamReader sr = new StreamReader(s))
+        {
+          GIPI.LoadFromStream(sr);
+        }
+
+        return;
+      }
+
       string[] cmd = s?.ToLower().Split(' ');
       switch (cmd[0])
       {
