@@ -80,7 +80,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToInt32(ab, 0);
+      return BitConverter.ToInt32(ba, 0);
     }
     public static float GetFloat(this byte[] ab, int ind = 0)
     {
@@ -91,7 +91,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToSingle(ab, 0);
+      return BitConverter.ToSingle(ba, 0);
     }
     public static double GetDouble(this byte[] ab, int ind = 0)
     {
@@ -102,7 +102,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToDouble(ab, 0);
+      return BitConverter.ToDouble(ba, 0);
     }
     public static bool GetBool(this byte[] ab, int ind = 0)
     {
@@ -113,7 +113,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToBoolean(ab, 0);
+      return BitConverter.ToBoolean(ba, 0);
     }
     public static uint GetUInt(this byte[] ab, int ind = 0)
     {
@@ -124,7 +124,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToUInt32(ab, 0);
+      return BitConverter.ToUInt32(ba, 0);
     }
     public static short GetShort(this byte[] ab, int ind = 0)
     {
@@ -135,7 +135,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToInt16(ab, 0);
+      return BitConverter.ToInt16(ba, 0);
     }
     public static ushort GetUShort(this byte[] ab, int ind = 0)
     {
@@ -146,7 +146,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToUInt16(ab, 0);
+      return BitConverter.ToUInt16(ba, 0);
     }
     public static long GetLong(this byte[] ab, int ind = 0)
     {
@@ -157,7 +157,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToInt64(ab, 0);
+      return BitConverter.ToInt64(ba, 0);
     }
     public static ulong GetULong(this byte[] ab, int ind = 0)
     {
@@ -168,7 +168,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToUInt64(ab, 0);
+      return BitConverter.ToUInt64(ba, 0);
     }
     public static char GetChar(this byte[] ab, int ind = 0)
     {
@@ -179,7 +179,7 @@ namespace TR.BIDSsv
       Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
       if (isLE) Array.Reverse(ba);
 
-      return BitConverter.ToChar(ab, 0);
+      return BitConverter.ToChar(ba, 0);
     }
 
     public static byte[] GetBytes(this in int arg) => ToBytes(arg);
