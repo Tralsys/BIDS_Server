@@ -9,6 +9,8 @@ namespace TR.BIDSsv
 {
   static public partial class Common
   {
+    static readonly byte[] ZeroX4 = new byte[]{ 0, 0, 0, 0 };
+
     static private string DataSelTO(in string GotStr)
     {
       string GotString = GotStr.Replace("\n", string.Empty);
@@ -478,27 +480,28 @@ namespace TR.BIDSsv
             break;
         }
       }
-      else if (ba[0] == 0x54 && ba[1] == 0x52)
+      else if (ba[0] == 't' && ba[1] == 'r')//t:0x74, r:0x72
       {
+        if (ba.Length < 6) return null;
         switch (ba[2])
         {
           case 0x62://Info Data
             switch (ba[3])
             {
               case 0x01://Spec
-                if (Convert.ToUInt16(ba.Skip(4).Take(2)) >= Version) return null;
-                else if (ba.Length >= 5 * 4)
+                if (ba.GetShort(4) >= Version) return null;
+                else if (ba.Length >= AutoSendSetting.BasicConstSize)
                 {
                   BIDSSharedMemoryData bsmd = BSMD;
                   OpenD od = OD;
                   Spec s = bsmd.SpecData;
                   int i = 0;
-                  s.B = Convert.ToUInt16(ba.Skip(i += 8).Take(2));
-                  s.P = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
-                  s.A = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
-                  s.J = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
-                  s.C = Convert.ToUInt16(ba.Skip(i += 2).Take(2));
-                  od.SelfBCount = Convert.ToUInt16(ba.Skip(i++).Take(2));
+                  s.B = ba.GetShort(i += 8);
+                  s.P = ba.GetShort(i += 2);
+                  s.A = ba.GetShort(i += 2);
+                  s.J = ba.GetShort(i += 2);
+                  s.C = ba.GetShort(i += 2);
+                  od.SelfBCount = ba.GetShort(i++);
                   bsmd.SpecData = s;
                   BSMD = bsmd;
                   OD = od;
@@ -506,20 +509,20 @@ namespace TR.BIDSsv
                 else return ba;
                 break;
               case 0x02://State
-                if (ba.Length >= 13 * 4)
+                if (ba.Length >= AutoSendSetting.BasicCommonSize)
                 {
                   BIDSSharedMemoryData bsmd = BSMD;
                   State s = bsmd.StateData;
                   int i = 0;
-                  s.Z = Convert.ToDouble(ba.Skip(i += 4).Take(8));
-                  s.V = Convert.ToSingle(ba.Skip(i += 8).Take(4));
-                  s.I = Convert.ToSingle(ba.Skip(i += 4).Take(4));
-                  //s. = Convert.ToSingle(ba.Skip(i += 4).Take(4));WireVoltage
-                  s.BC = Convert.ToSingle(ba.Skip(i += 8).Take(4));
-                  s.MR = Convert.ToSingle(ba.Skip(i += 4).Take(4));
-                  s.ER = Convert.ToSingle(ba.Skip(i += 4).Take(4));
-                  s.BP = Convert.ToSingle(ba.Skip(i += 4).Take(4));
-                  s.SAP = Convert.ToSingle(ba.Skip(i += 4).Take(4));
+                  s.Z = ba.GetDouble(i += 4);
+                  s.V = ba.GetFloat(i += 8);
+                  s.I = ba.GetFloat(i += 4);
+                  //s. = ba.GetFloat(i += 4).Take(4).ToArray());WireVoltage
+                  s.BC = ba.GetFloat(i += 8);
+                  s.MR = ba.GetFloat(i += 4);
+                  s.ER = ba.GetFloat(i += 4);
+                  s.BP = ba.GetFloat(i += 4);
+                  s.SAP = ba.GetFloat(i += 4);
                   bsmd.IsDoorClosed = (ba[13 * 4] & 0b10000000) > 0;
                   BSMD = bsmd;
                 }
@@ -530,7 +533,7 @@ namespace TR.BIDSsv
               case 0x04://OpenD
                 break;
               case 0x05://Handle
-                if (ba.Length >= 5 * 4)
+                if (ba.Length >= AutoSendSetting.BasicHandleSize)
                 {
                   BIDSSharedMemoryData bsmd = BSMD;
                   OpenD od = OD;
@@ -561,7 +564,7 @@ namespace TR.BIDSsv
                 Array.Copy(pd.Panels, pa, pd.Length);
                 pd.Panels = pa;
               }
-              Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = Convert.ToInt32(ba.Skip(4 + (4 * i)).Take(4)));
+              Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = ba.GetInt(4 + (4 * i)));
               PD = pd;
             }
             catch (Exception) { throw; }
@@ -579,7 +582,7 @@ namespace TR.BIDSsv
                 Array.Copy(sd.Sounds, sa, sd.Length);
                 sd.Sounds = sa;
               }
-              Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = Convert.ToInt32(ba.Skip(4 + (4 * i)).Take(4)));
+              //Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = Convert.ToInt32((ba.Skip(4 + (4 * i)).Take(4))?.ToArray() ?? ZeroX4));
               SD = sd;
             }
             catch (Exception) { throw; }
