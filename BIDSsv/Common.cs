@@ -90,32 +90,10 @@ namespace TR.BIDSsv
     static public void Remove() => Remove(string.Empty);
     static public void Remove(in string Name)
     {
+      if (!(svlist?.Count > 0)) return;
       if (Name != string.Empty)
       {
-        try
-        {
-          if (PDAutoList?.Count > 0) PDAutoList.Remove(Name);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine(e);
-        }
-        try
-        {
-          if (SDAutoList?.Count > 0) SDAutoList.Remove(Name);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine(e);
-        }
-        try
-        {
-          if (AutoNumL?.Count > 0) AutoNumL.Remove(Name);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine(e);
-        }
+        ASRemove(Name);
         for (int i = svlist.Count - 1; i >= 0; i--)
           if (Name == svlist[i].Name)
           {
@@ -132,12 +110,49 @@ namespace TR.BIDSsv
       }
       else
       {
-        if (svlist.Count > 0) for (int i = svlist.Count - 1; i >= 0; i--)
-          {
-            svlist[i]?.Dispose();
-            svlist?.RemoveAt(i);
-          }
+        for (int i = svlist.Count - 1; i >= 0; i--)
+        {
+          svlist[i]?.Dispose();
+          svlist?.RemoveAt(i);
+        }
       }
+    }
+    static public void Remove(in IBIDSsv sv)
+    {
+      if (sv == null || !(svlist?.Count > 0)) return;
+      string Name = sv.Name;
+      ASRemove(Name);
+
+      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", Name, svlist.Remove(sv) ? "done." : "failed (not found?)");
+    }
+
+    static private void ASRemove(in string Name)
+    {
+      try
+      {
+        if (PDAutoList?.Count > 0) PDAutoList.Remove(Name);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e);
+      }
+      try
+      {
+        if (SDAutoList?.Count > 0) SDAutoList.Remove(Name);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e);
+      }
+      try
+      {
+        if (AutoNumL?.Count > 0) AutoNumL.Remove(Name);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e);
+      }
+
     }
     static public void DebugDo() => DebugDo(string.Empty);
     static public void DebugDo(in string Name)
@@ -564,8 +579,8 @@ namespace TR.BIDSsv
       if (ba.Length > 1)
       {
         List<byte> dbl = ba.ToList();
-        dbl.RemoveAt(dbl.Count - 1);
-        for (int i = 0; i < dbl.Count; i++)
+        //dbl.RemoveAt(dbl.Count - 1);
+        for (int i = 0; i < dbl.Count - 1; i++)
         {
           if (dbl[i] == '\r')
           {
