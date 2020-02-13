@@ -122,6 +122,8 @@ namespace TR.BIDSsv
       static internal byte[] BasicPanel(int[] a, int SttInd)
       {
         byte[] ba = new byte[PanelSize];
+        Array.Copy(HeaderPanel.GetBytes(), 0, ba, 0, sizeof(uint));
+        ba[3] = (byte)(SttInd / 128);
 
         Parallel.For(0, 128, (i) =>
           {
@@ -129,8 +131,6 @@ namespace TR.BIDSsv
             Array.Copy(a[i].GetBytes(), 0, ba, (i + 1) * sizeof(int), sizeof(int));
           });
 
-        Array.Copy(HeaderPanel.GetBytes(), 0, ba, 0, sizeof(uint));
-        ba[3] = (byte)(SttInd / 128);
         return ba;
       }
       static internal byte[] BasicSound(int[] a, int SttInd)
@@ -223,7 +223,6 @@ namespace TR.BIDSsv
         #region Byte Array Auto Sender
         int al = Math.Max(e.OldArray.Length, e.NewArray.Length);
         if (al % 128 != 0) al = ((int)Math.Floor((double)al / 128) + 1) * 128;
-        if (al < 128) al = 128;
         int[] oa = new int[al];
         int[] na = new int[al];
         Array.Copy(e.OldArray, oa, e.OldArray.Length);
@@ -232,11 +231,12 @@ namespace TR.BIDSsv
         for (int i = 0; i < al; i += 128)
         {
           bool IsNEqual = false;
-          Parallel.For(0, 128, (j) =>
+          /*Parallel.For(0, 128, (j) =>
           {
             if (!IsNEqual) IsNEqual = oa[i + j] == na[i + j];
           });
-          if (IsNEqual) ASPtr(AutoSendSetting.BasicPanel(na, i));
+          if (IsNEqual) ASPtr(AutoSendSetting.BasicPanel(na, i));*/
+          if (na.Skip(i).Take(128).SequenceEqual(oa.Skip(i).Take(128))) ASPtr(AutoSendSetting.BasicPanel(na, i));
         }
         #endregion
 
