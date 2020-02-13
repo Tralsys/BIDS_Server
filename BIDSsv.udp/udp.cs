@@ -9,28 +9,33 @@ namespace TR.BIDSsv
 {
   public class udp : IBIDSsv
   {
-    //use multicast
-    //Refer : https://dobon.net/vb/dotnet/internet/udpclient.html
-    readonly int PortNum = Common.DefPNum;
-    const string MultiAddr = "239.0.8.32";
-    readonly byte[] MultiAddrByte = new byte[] { 239, 0, 8, 32 };
     public int Version { get; private set; } = 202;
     public string Name { get; private set; } = "udp";
-    public bool IsDebug { get; set; } = false;
+    public bool IsDebug {
+      get => isDbg;
+      set
+      {
+        isDbg = value;
+        if (udpc != null) udpc.IsDebugging = value;
+      }
 
-    UdpClient UC = null;
+    }
+    private bool isDbg = false;
     Encoding Enc = Encoding.Default;
-    bool IsLooping = true;
-
+    udpcom udpc = null;
     public bool Connect(in string args)
     {
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
+      IPAddress rip = IPAddress.Broadcast;
+      IPAddress lip = IPAddress.Any;
+      ushort rport = (ushort)Common.DefPNum;
+      ushort lport = (ushort)Common.DefPNum;
       for (int i = 0; i < sa.Length; i++)
       {
-        string[] saa = sa[i].Split(':');
+        string[] saa = sa[i].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
         try
         {
-          if (saa.Length > 0)
+          if (saa?.Length > 0)
           {
             switch (saa[0])
             {
@@ -86,113 +91,42 @@ namespace TR.BIDSsv
               case "Name":
                 if (saa.Length > 1) Name = saa[1];
                 break;
+              case "RIP":
+                if (saa.Length > 1) rip = IPAddress.Parse(saa[1]);
+                break;
+              case "RemoteIP":
+                if (saa.Length > 1) rip = IPAddress.Parse(saa[1]);
+                break;
+              case "LIP":
+                if (saa.Length > 1) lip = IPAddress.Parse(saa[1]);
+                break;
+              case "LocalIP":
+                if (saa.Length > 1) lip = IPAddress.Parse(saa[1]);
+                break;
+              case "RPort":
+                if (saa.Length > 1) rport = ushort.Parse(saa[1]);
+                break;
+              case "LPort":
+                if (saa.Length > 1) lport = ushort.Parse(saa[1]);
+                break;
             }
           }
         }
         catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
       }
-      try
-      {
-        UC = new UdpClient(PortNum);
-        UC.JoinMulticastGroup(new IPAddress(MultiAddrByte));
-      }
-      catch (Exception e)
-      {
-        Console.WriteLine("{0} : {1}", Name, e);
-        return false;
-      }
-      //TD = new Thread(ReadDoing);
-      //TD.Start();
-      UC?.BeginReceive(ReceivedDoing, UC);
+      Console.WriteLine("{0} : Connect try ... read_on>{1}:{2} send_to>{3}:{4}", Name, lip, lport, rip, rport);
+      udpc = new udpcom(new IPEndPoint(lip, lport), new IPEndPoint(rip, rport));
+      udpc.DataGotEv += Udpc_DataGotEv;
       return true;
     }
 
-    private void ReceivedDoing(IAsyncResult iar)
+    private void Udpc_DataGotEv(object sender, UDPGotEvArgs e)
     {
-      UdpClient uc = (UdpClient)iar.AsyncState;
-      IPEndPoint ipep = null;
-      byte[] rba = new byte[] { 0x00 };
-      try
-      {
-        rba = Common.BIDSBAtoBA(uc?.EndReceive(iar, ref ipep));
-      }
-      catch (SocketException e)
-      {
-        if (!Equals(sexc.Message, e.Message)) Console.WriteLine("{0} : Receieve Error => {1}", Name, e);
-        sexc = e;
-      }
-      catch (ObjectDisposedException)
-      {
-        Console.WriteLine("{0} (ReceivedDoing) : This connection is already closed.", Name);
-        Common.Remove(Name);
-        return;
-      }
+      if (e.DataLen <= 0) return;
 
-      if (rba != null) rba = Common.DataSelect(Name, rba, Enc);
-      if (rba != null && rba.Length != 0) Print(rba);
-
-      UC?.BeginReceive(ReceivedDoing, UC);
-    }
-
-    private void ReadDoing()
-    {
-      while (IsLooping)
-      {
-        byte[] BA = Common.DataSelect(Name, ReadByte(), Enc);
-        if (BA != null && BA.Length != 0) Print(BA);
-      }
-    }
-
-    public void Dispose()
-    {
-      IsLooping = false;
-      
-      //if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine("{0} : ReadThread is not closed.  It may cause some bugs.", Name);
-      //TD?.Interrupt();
-      UC?.DropMulticastGroup(new IPAddress(MultiAddrByte));
-      UC?.Close();
-      UC?.Dispose();
-      UC = null;
-    }
-
-    public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
-
-    public void OnOpenDChanged(in OpenD data) { }
-
-    public void OnPanelDChanged(in int[] data) { }
-
-    public void OnSoundDChanged(in int[] data) { }
-
-    SocketException sexc = null;
-    Exception exc = null;
-    string ReadString()
-    {
-      string s = Enc.GetString(ReadByte());
-      if (IsDebug) Console.WriteLine("{0} << {1}", Name, s);
-      return s;
-    }
-    byte[] ReadByte()
-    {
-      try
-      {
-        
-        byte[] ba;
-        IPEndPoint ipep = new IPEndPoint(new IPAddress(MultiAddrByte), PortNum);
-        ba = Common.BIDSBAtoBA(UC?.ReceiveAsync().Result.Buffer);
-        if (IsDebug) Console.WriteLine("{0} : Got from {1}:{2}\n>>{3}", Name, ipep.Address, ipep.Port, ba);
-        return ba;
-      }
-      catch (SocketException e)
-      {
-        if (!Equals(e.Message, sexc.Message)) Console.WriteLine("{0} : {1}", Name, e);
-        sexc = e;
-      }
-      catch (Exception e)
-      {
-        if (!Equals(e.Message, exc.Message)) Console.WriteLine("{0} : {1}", Name, e);
-        exc = e;
-      }
-      return null;
+      byte[] ba = Common.BIDSBAtoBA(e.Data);
+      ba = Common.DataSelect(Name, ba, Enc);
+      if (ba?.Length > 0) Print(ba);
     }
 
     public void Print(in string data)
@@ -207,39 +141,17 @@ namespace TR.BIDSsv
         Console.WriteLine("{0} : {1}", Name, e);
       }
     }
-
-    public void Print(in byte[] data)
-    {
-      if (UC == null) return;
-      byte[] ba = Common.BAtoBIDSBA(data);
-      if (ba != null && ba.Length > 0) UC?.BeginSend(ba, ba.Length, SendedDoing, UC);
-    }
-
-    private void SendedDoing(IAsyncResult ar)
-    {
-      UdpClient uc = (UdpClient)ar.AsyncState;
-      try
-      {
-        uc?.EndSend(ar);
-      }
-      catch (SocketException e)
-      {
-        if (!Equals(sexc.Message, e.Message)) Console.WriteLine("{0} (SendedDoing) : Send Error => {1}", Name, e);
-        sexc = e;
-      }
-      catch (ObjectDisposedException)
-      {
-        Console.WriteLine("{0} : This connection is already closed.", Name);
-        Common.Remove(Name);
-        return;
-      }
-    }
+    public void Print(in byte[] data) => udpc.DataSend(data);
 
     readonly string[] ArgInfo = new string[]
     {
       "Argument Format ... [Header(\"-\" or \"/\")][SettingName(B, P etc...)][Separater(\":\")][Setting(38400, 2 etc...)]",
       "  -E or -Encoding : Set the Encoding Option.  Default:0  If you want More info about this argument, please read the source code.",
-      "  -N or -Name : Set the Instance Name.  Default:\"udp\"  If you don't set this option, this program maybe cause some bugs."
+      "  -N or -Name : Set the Instance Name.  Default:\"udp\"  If you don't set this option, this program maybe cause some bugs.",
+      "  -RIP or -RemoteIP : Set the IP Address to communicate with.  If you don't set this option, this program starts broadcast communication.",
+      "  -LIP or -LocalIP : Set the IP Address to send from.",
+      "  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)",
+      "  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)"
     };
     public void WriteHelp(in string args)
     {
@@ -248,5 +160,45 @@ namespace TR.BIDSsv
       Console.WriteLine("Copyright (C) Tetsu Otter 2019");
       foreach (string s in ArgInfo) Console.WriteLine(s);
     }
+    public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
+    public void OnOpenDChanged(in OpenD data) { }
+    public void OnPanelDChanged(in int[] data) { }
+    public void OnSoundDChanged(in int[] data) { }
+
+    #region IDisposable Support
+    private bool disposedValue = false; // 重複する呼び出しを検出するには
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!disposedValue)
+      {
+        if (disposing)
+        {
+          // TODO: マネージ状態を破棄します (マネージ オブジェクト)。
+        }
+
+        // TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
+        // TODO: 大きなフィールドを null に設定します。
+        udpc?.Dispose();
+        disposedValue = true;
+      }
+    }
+
+    // TODO: 上の Dispose(bool disposing) にアンマネージ リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします。
+    // ~udp()
+    // {
+    //   // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
+    //   Dispose(false);
+    // }
+
+    // このコードは、破棄可能なパターンを正しく実装できるように追加されました。
+    public void Dispose()
+    {
+      // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
+      Dispose(true);
+      // TODO: 上のファイナライザーがオーバーライドされる場合は、次の行のコメントを解除してください。
+      // GC.SuppressFinalize(this);
+    }
+    #endregion
   }
 }
