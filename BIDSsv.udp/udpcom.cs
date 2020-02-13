@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections;
 
 namespace TR.BIDSsv
 {
@@ -33,7 +32,7 @@ namespace TR.BIDSsv
       IPEndPoint ipep = Dst ?? new IPEndPoint(IPAddress.Broadcast, pt);
       UCW.Connect(ipep);
     }
-
+    OldChecker ocr = new OldChecker();
     private void ReceiveCallback(IAsyncResult ar)
     {
       IPEndPoint remIPE = new IPEndPoint(IPAddress.Any, 0);
@@ -45,26 +44,35 @@ namespace TR.BIDSsv
       catch (ObjectDisposedException) { Console.WriteLine("udpcom ::: ReceiveCallback => ObjectDisposed."); return; }
       catch (Exception) { throw; }
 
-      if (!dsb.IsAlready(ba))
+      if (ocr.IsOldData(remIPE.Address, ba))
+      {
+        if (IsDebugging)
+          Console.WriteLine("udpcom class <<<<<<Old Data<<<<<< {0} : {1}", remIPE, ba);
+      }
+      else if (!dsb.IsAlready(ba))
       {
         ba = dsb.RemoveTimeStamp(ba);
 
         if (IsDebugging)
-          Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, ba);
+          Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(ba));
 
         if (ba?.Length > 0)
-          //DataGotEv?.BeginInvoke(remIPE, new UDPGotEvArgs(ba), DataGotEvDoneCallback, DataGotEv);
           DataGotEv?.Invoke(remIPE, new UDPGotEvArgs(ba));
       }
       else if (IsDebugging)
-        Console.WriteLine("udpcom class <<<Already<<< {0} : {1}", remIPE, ba);
-      ((UdpClient)ar.AsyncState)?.BeginReceive(ReceiveCallback, ar.AsyncState);
+        Console.WriteLine("udpcom class <<<<<<Already<<<<<< {0} : {1}", remIPE, ba);
+      if (disposing) return;
+      try
+      {
+        ((UdpClient)ar.AsyncState)?.BeginReceive(ReceiveCallback, ar.AsyncState);
+      }
+      catch (ObjectDisposedException) { return; }
+      catch (Exception) { throw; }
     }
-
-    private void DataGotEvDoneCallback(IAsyncResult ar) => ((EventHandler<UDPGotEvArgs>)ar.AsyncState)?.EndInvoke(ar);
     
     public bool DataSend(in byte[] ba)
     {
+      if (disposing) return false;
       byte[] tsba = dsb.AddTimeStamp(ba);
       dsb.SetData(tsba);
       if (UCW?.Client.Connected == true && tsba?.Length > 0) UCW?.BeginSend(tsba, tsba.Length, SendedCallback, UCW);
@@ -76,19 +84,29 @@ namespace TR.BIDSsv
       }
 
       if (IsDebugging)
-        Console.WriteLine("udpcom class >>> {0} : {1}", UCW.Client.RemoteEndPoint, ba);
+        Console.WriteLine("udpcom class >>> {0} : {1}", UCW.Client.RemoteEndPoint, BitConverter.ToString(ba));
 
       return true;
     }
 
-    private void SendedCallback(IAsyncResult ar) => ((UdpClient)ar.AsyncState).EndSend(ar);
+    private void SendedCallback(IAsyncResult ar)
+    {
+      try
+      {
+        ((UdpClient)ar.AsyncState).EndSend(ar);
+      }
+      catch (ObjectDisposedException) { Console.WriteLine("udpcom sended_callback : objectdisposed exception fired."); }
+      catch (Exception) { throw; }
+    }
     
 
     #region IDisposable Support
     private bool disposedValue = false; // 重複する呼び出しを検出するには
+    private bool disposing = false;
 
     protected virtual void Dispose(bool disposing)
     {
+      disposing = true;
       if (!disposedValue)
       {
         if (disposing)
@@ -172,7 +190,7 @@ namespace TR.BIDSsv
         return sha?.Hash;
       }
     }
-
+    public const int DivNum = 2;
     internal byte[] AddTimeStamp(in byte[] ba)
     {
       if (ba == null || ba.Length <= 0) return null;
@@ -181,7 +199,7 @@ namespace TR.BIDSsv
       Array.Copy(ba, 0, tsba, sizeof(int), ba.Length);
 
       DateTime dt = DateTime.Now;
-      int sms = dt.Second * 1000 + dt.Millisecond;
+      int sms = dt.Second * 1000 + dt.Millisecond; sms /= 2;
       Array.Copy(sms.GetBytes(), 0, tsba, 0, sizeof(int));
 
       return tsba;
@@ -258,9 +276,63 @@ namespace TR.BIDSsv
       Parallel.For(0, RecMax, (i) =>
       {
         if (isSame || Hashes[i] == null) return;
-        if (ba.SequenceEqual(Hashes[i])) isSame = true; ;
+        if (StructuralComparisons.StructuralEqualityComparer.Equals(ba, Hashes[i])) isSame = true;
       });
       return isSame;
+    }
+  }
+
+  internal class OldChecker
+  {
+    private const int TimeThresholdH = 40 * 1000 / DSendBlock.DivNum;
+    private const int TimeThresholdL = 10 / DSendBlock.DivNum;
+    List<RecData> rd = new List<RecData>();
+    internal bool IsOldData(IPAddress ip, in byte[] ba)
+    {
+      if (ba[4] != 't' || ba[5] != 'r') return false;
+
+      int time = ba.GetInt(0);
+      byte[] hd = new byte[4];
+      Array.Copy(ba, 4, hd, 0, 4);
+      if (!(rd?.Count > 0))
+      {
+        if (rd == null) rd = new List<RecData>();
+
+        rd.Add(new RecData(ip, time, hd));
+
+        return false;
+      }
+      for(int i = 0; i < rd.Count; i++)
+      {
+        if (!Equals(rd[i].IP, ip)) continue;
+
+        if (!(rd[i].Header.SequenceEqual(hd))) continue;
+
+        int t = time - rd[i].Time;
+
+        if (t > 0 || t < -TimeThresholdH) rd[i].Time = time;
+
+        return -TimeThresholdH < t && t < -TimeThresholdL;
+
+      }
+
+      rd.Add(new RecData(ip, time, hd));
+
+      return false;
+    }
+
+    internal class RecData
+    {
+      internal RecData(IPAddress ip, int time, byte[] header)
+      {
+        IP = ip;
+        Time = time;
+        Header = header;
+      }
+
+      internal IPAddress IP { get; private set; }
+      internal int Time { get; set; }
+      internal byte[] Header { get; private set; }
     }
   }
 }
