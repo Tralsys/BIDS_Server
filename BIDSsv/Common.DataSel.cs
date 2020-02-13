@@ -539,10 +539,10 @@ namespace TR.BIDSsv
                   OpenD od = OD;
                   Hand h = bsmd.HandleData;
                   int i = 0;
-                  h.P = Convert.ToInt32(ba.Skip(i += 4).Take(4));
-                  h.B = Convert.ToInt32(ba.Skip(i += 4).Take(4));
-                  h.R = Convert.ToInt32(ba.Skip(i += 4).Take(4));
-                  od.SelfBPosition = Convert.ToInt32(ba.Skip(i += 4).Take(4));
+                  h.P = ba.GetInt(i += 4);
+                  h.B = ba.GetInt(i += 4);
+                  h.R = ba.GetInt(i += 4);
+                  od.SelfBPosition = ba.GetInt(i += 4);
                   bsmd.HandleData = h;
                   BSMD = bsmd;
                   OD = od;
@@ -552,7 +552,7 @@ namespace TR.BIDSsv
             }
             break;
           case 0x70://Panel Data
-            if (ba.Length < 129 * 4) return null;
+            if (ba.Length < AutoSendSetting.PanelSize) return null;
             int pai = 0;
             try
             {
@@ -567,6 +567,7 @@ namespace TR.BIDSsv
               Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = ba.GetInt(4 + (4 * i)));
               PD = pd;
             }
+            catch (ObjectDisposedException) { return null; }
             catch (Exception) { throw; }
             break;
           case 0x73://SoundData
@@ -582,9 +583,10 @@ namespace TR.BIDSsv
                 Array.Copy(sd.Sounds, sa, sd.Length);
                 sd.Sounds = sa;
               }
-              //Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = Convert.ToInt32((ba.Skip(4 + (4 * i)).Take(4))?.ToArray() ?? ZeroX4));
+              Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = ba.GetInt(4 + (4 * i)));
               SD = sd;
             }
+            catch (ObjectDisposedException) { return null; }
             catch (Exception) { throw; }
             break;
           default:
