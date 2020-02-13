@@ -226,8 +226,7 @@ namespace BIDS_Server
             {
               try
               {
-                ibsv.Connect(s);
-                Common.Add(ref ibsv);
+                if (ibsv.Connect(s)) Common.Add(ref ibsv);
               }
               catch (Exception e)
               {
