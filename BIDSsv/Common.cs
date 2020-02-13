@@ -551,6 +551,7 @@ namespace TR.BIDSsv
     /// <returns>Converted Array</returns>
     static public byte[] BAtoBIDSBA(in byte[] ba)
     {
+      return ba;
       List<byte> dbl = ba.ToList();
       for(int i = 0; i < ba.Count(); i++)
       {
@@ -576,6 +577,7 @@ namespace TR.BIDSsv
     /// <returns>Converted Array</returns>
     static public byte[] BIDSBAtoBA(in byte[] ba)
     {
+      return ba;
       if (ba.Length > 1)
       {
         List<byte> dbl = ba.ToList();
