@@ -35,17 +35,17 @@ namespace TR.BIDSsv
 
     public class AutoSendSetting
     {
-      public const uint HeaderBasicConst = 0x54526201;
+      public const uint HeaderBasicConst = 0x74726201;
       public const uint BasicConstSize = 20;
-      public const uint HeaderBasicCommon = 0x54526202;
+      public const uint HeaderBasicCommon = 0x74726202;
       public const uint BasicCommonSize = 53;
-      public const uint HeaderBasicBVE5 = 0x54526203;
-      public const uint HeaderBasicOBVE = 0x54526204;
-      public const uint HeaderBasicHandle = 0x54526205;
+      public const uint HeaderBasicBVE5 = 0x74726203;
+      public const uint HeaderBasicOBVE = 0x74726204;
+      public const uint HeaderBasicHandle = 0x74726205;
       public const uint BasicHandleSize = 20;
-      public const uint HeaderPanel = 0x54527000;
+      public const uint HeaderPanel = 0x74727000;
       public const uint PanelSize = 129 * sizeof(int);
-      public const uint HeaderSound = 0x54527300;
+      public const uint HeaderSound = 0x74727300;
       public const uint SoundSize = PanelSize;
 
       public static bool BasicConstAS = false;
@@ -117,30 +117,34 @@ namespace TR.BIDSsv
       /// 
       /// </summary>
       /// <param name="a">Source Array</param>
-      /// <param name="num">Start Index</param>
+      /// <param name="SttInd">Start Index</param>
       /// <returns>Result Array</returns>
-      static internal byte[] BasicPanel(int[] a, int num)
+      static internal byte[] BasicPanel(int[] a, int SttInd)
       {
-        IntPtr ip = Marshal.AllocHGlobal(a.Length * sizeof(int));//Refer : http://schima.hatenablog.com/entry/20090512/1242139542
-        Marshal.Copy(a, num, ip, Math.Min(128, a.Length - num));
-
         byte[] ba = new byte[PanelSize];
-        Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
 
-        Array.Copy(UFunc.GetBytes((int)HeaderPanel), 0, ba, 0, sizeof(int));
-        ba[3] = (byte)num;
+        Parallel.For(0, 128, (i) =>
+          {
+            if (a.Length <= (SttInd * 128) + i) return;
+            Array.Copy(a[i].GetBytes(), 0, ba, (i + 1) * sizeof(int), sizeof(int));
+          });
+
+        Array.Copy(HeaderPanel.GetBytes(), 0, ba, 0, sizeof(uint));
+        ba[3] = (byte)(SttInd / 128);
         return ba;
       }
-      static internal byte[] BasicSound(int[] a, int num)
+      static internal byte[] BasicSound(int[] a, int SttInd)
       {
-        IntPtr ip = Marshal.AllocHGlobal(a.Length * sizeof(int));//Refer : http://schima.hatenablog.com/entry/20090512/1242139542
-        Marshal.Copy(a, num, ip, Math.Min(128, a.Length - num));
-
         byte[] ba = new byte[SoundSize];
-        Marshal.Copy(ip, ba, 4, 128 * sizeof(int));
 
-        Array.Copy(UFunc.GetBytes((int)HeaderSound), 0, ba, 0, sizeof(int));
-        ba[3] = (byte)num;
+        Parallel.For(0, 128, (i) =>
+        {
+          if (a.Length <= (SttInd * 128) + i) return;
+          Array.Copy(a[i].GetBytes(), 0, ba, (i + 1) * sizeof(int), sizeof(int));
+        });
+
+        Array.Copy(HeaderSound.GetBytes(), 0, ba, 0, sizeof(uint));
+        ba[3] = (byte)(SttInd / 128);
         return ba;
       }
     }
