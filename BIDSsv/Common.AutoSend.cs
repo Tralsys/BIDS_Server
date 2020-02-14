@@ -156,7 +156,7 @@ namespace TR.BIDSsv
 
     static private void ASPtr(byte[] ba)
     {
-      if (ba != null && ba.Length > 0)
+      if (ba != null && ba.Length > 0 && svlist?.Count > 0)
         Parallel.For(0, svlist.Count, (i) => svlist[i]?.Print(ba));
     }
 
@@ -181,14 +181,8 @@ namespace TR.BIDSsv
         Array.Copy(e.NewArray, na, e.NewArray.Length);
 
         for (int i = 0; i < al; i += 128)
-        {
-          bool IsNEqual = false;
-          Parallel.For(0, 128, (j) =>
-          {
-            if (!IsNEqual) IsNEqual = oa[i + j] == na[i + j];
-          });
-          if (IsNEqual) ASPtr(AutoSendSetting.BasicSound(na, i));
-        }
+          if (!(oa, na).ArrayEqual(i, i, 128)) ASPtr(AutoSendSetting.BasicSound(na, i));
+        
         #endregion
 
         if (SDAutoList?.Count > 0)
@@ -227,17 +221,9 @@ namespace TR.BIDSsv
         int[] na = new int[al];
         Array.Copy(e.OldArray, oa, e.OldArray.Length);
         Array.Copy(e.NewArray, na, e.NewArray.Length);
-
+        Console.WriteLine("PDCng:\toa[39]:{0}\tna[39]:{1}\t==?:{2}\tEquals:{3}", oa[39], na[39], oa[39] == na[39], Equals(oa[39], na[39]));
         for (int i = 0; i < al; i += 128)
-        {
-          bool IsNEqual = false;
-          /*Parallel.For(0, 128, (j) =>
-          {
-            if (!IsNEqual) IsNEqual = oa[i + j] == na[i + j];
-          });
-          if (IsNEqual) ASPtr(AutoSendSetting.BasicPanel(na, i));*/
-          if (na.Skip(i).Take(128).SequenceEqual(oa.Skip(i).Take(128))) ASPtr(AutoSendSetting.BasicPanel(na, i));
-        }
+          if (!(oa, na).ArrayEqual(i, i, 128)) ASPtr(AutoSendSetting.BasicPanel(na, i));
         #endregion
 
 
