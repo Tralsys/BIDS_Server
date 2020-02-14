@@ -546,13 +546,13 @@ namespace TR.BIDSsv
       }
     }
 
-    /// <summary>Convert from Native Byte Array to BIDS Communication Byte Array Format</summary>
+    /// <summary>(disabled)Convert from Native Byte Array to BIDS Communication Byte Array Format</summary>
     /// <param name="ba">Array to Converted</param>
     /// <returns>Converted Array</returns>
     static public byte[] BAtoBIDSBA(in byte[] ba)
     {
       return ba;
-      List<byte> dbl = ba.ToList();
+      /*List<byte> dbl = ba.ToList();
       for(int i = 0; i < ba.Count(); i++)
       {
         switch (dbl[i])
@@ -570,15 +570,15 @@ namespace TR.BIDSsv
         }
       }
       dbl.Add((byte)'\n');
-      return dbl.ToArray();
+      return dbl.ToArray();*/
     }
-    /// <summary>Convert from BIDS Communication Byte Array Format to Native Byte Array</summary>
+    /// <summary>(disabled)Convert from BIDS Communication Byte Array Format to Native Byte Array</summary>
     /// <param name="ba">Array to Converted</param>
     /// <returns>Converted Array</returns>
     static public byte[] BIDSBAtoBA(in byte[] ba)
     {
       return ba;
-      if (ba.Length > 1)
+      /*if (ba.Length > 1)
       {
         List<byte> dbl = ba.ToList();
         //dbl.RemoveAt(dbl.Count - 1);
@@ -600,7 +600,7 @@ namespace TR.BIDSsv
         }
         return dbl.ToArray();
       }
-      else return ba;
+      else return ba;*/
     }
   }
 }
