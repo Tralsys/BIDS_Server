@@ -489,7 +489,7 @@ namespace TR.BIDSsv
             switch (ba[3])
             {
               case 0x01://Spec
-                if (ba.GetShort(4) >= Version) return null;
+                if (ba.GetShort(4) < Version) return null;
                 else if (ba.Length >= AutoSendSetting.BasicConstSize)
                 {
                   BIDSSharedMemoryData bsmd = BSMD;
@@ -524,6 +524,7 @@ namespace TR.BIDSsv
                   s.BP = ba.GetFloat(i += 4);
                   s.SAP = ba.GetFloat(i += 4);
                   bsmd.IsDoorClosed = (ba[13 * 4] & 0b10000000) > 0;
+                  bsmd.StateData = s;
                   BSMD = bsmd;
                 }
                 else return ba;
