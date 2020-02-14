@@ -78,7 +78,7 @@ namespace TR.BIDSsv
         Array.Copy(UFunc.GetBytes((double)s.Z), 0, ba, i, sizeof(double)); i += sizeof(double);
         Array.Copy(UFunc.GetBytes((float)s.V), 0, ba, i, sizeof(float)); i += sizeof(float);
         Array.Copy(UFunc.GetBytes((float)s.I), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)0), 0, ba, i, sizeof(float)); i += sizeof(float);
+        Array.Copy(UFunc.GetBytes((float)0.0), 0, ba, i, sizeof(float)); i += sizeof(float);
         Array.Copy(UFunc.GetBytes((int)s.T), 0, ba, i, sizeof(int)); i += sizeof(int);
         Array.Copy(UFunc.GetBytes((float)s.BC), 0, ba, i, sizeof(float)); i += sizeof(float);
         Array.Copy(UFunc.GetBytes((float)s.MR), 0, ba, i, sizeof(float)); i += sizeof(float);
@@ -221,7 +221,6 @@ namespace TR.BIDSsv
         int[] na = new int[al];
         Array.Copy(e.OldArray, oa, e.OldArray.Length);
         Array.Copy(e.NewArray, na, e.NewArray.Length);
-        Console.WriteLine("PDCng:\toa[39]:{0}\tna[39]:{1}\t==?:{2}\tEquals:{3}", oa[39], na[39], oa[39] == na[39], Equals(oa[39], na[39]));
         for (int i = 0; i < al; i += 128)
           if (!(oa, na).ArrayEqual(i, i, 128)) ASPtr(AutoSendSetting.BasicPanel(na, i));
         #endregion
