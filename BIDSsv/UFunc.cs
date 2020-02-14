@@ -215,5 +215,19 @@ namespace TR.BIDSsv
     public static ulong ToUInt64(IEnumerable<byte> ab, int ind = 0) => GetULong(ab.ToArray(), ind);
     public static char ToChar(IEnumerable<byte> ab, int ind = 0) => GetChar(ab.ToArray(), ind);
 
+    public static bool ArrayEqual<T>(T[] ar1, int ar1ind, T[] ar2, int ar2ind, int len = -1)
+    {
+      int l = len;
+      if (l <= 0) l = Math.Min((ar1?.Length ?? 0) - ar1ind, (ar2?.Length ?? 0) - ar2ind);
+      if (!(ar1?.Length >= ar1ind + l && ar2?.Length >= ar2ind + l) || l <= 0) return false;
+      byte IsNEqual = 0;
+      System.Threading.Tasks.Parallel.For(0, l, (i) =>
+      {
+        IsNEqual |= (byte)(Equals(ar1[ar1ind + i], ar2[ar2ind + i]) ? 0 : 1);
+      });
+      return IsNEqual == 1;
+    }
+    public static bool ArrayEqual<T>(T[] ar1, T[] ar2, int len = -1) => ArrayEqual<T>(ar1, 0, ar2, 0, len);
+    public static bool ArrayEqual<T>(this (T[], T[]) ar, int len = -1) => ArrayEqual<T>(ar.Item1, ar.Item2, len);
   }
 }
