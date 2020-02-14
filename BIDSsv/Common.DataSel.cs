@@ -517,8 +517,9 @@ namespace TR.BIDSsv
                   s.Z = ba.GetDouble(i += 4);
                   s.V = ba.GetFloat(i += 8);
                   s.I = ba.GetFloat(i += 4);
-                  //s. = ba.GetFloat(i += 4).Take(4).ToArray());WireVoltage
-                  s.BC = ba.GetFloat(i += 8);
+                  _ = ba.GetFloat(i += 4);//WireVoltage
+                  s.T = ba.GetInt(i += 4);
+                  s.BC = ba.GetFloat(i += 4);
                   s.MR = ba.GetFloat(i += 4);
                   s.ER = ba.GetFloat(i += 4);
                   s.BP = ba.GetFloat(i += 4);
