@@ -506,7 +506,7 @@ namespace TR.BIDSsv
                   BSMD = bsmd;
                   OD = od;
                 }
-                else return ba;
+                //else return ba;
                 break;
               case 0x02://State
                 if (ba.Length >= AutoSendSetting.BasicCommonSize)
@@ -527,7 +527,7 @@ namespace TR.BIDSsv
                   bsmd.StateData = s;
                   BSMD = bsmd;
                 }
-                else return ba;
+                //else return ba;
                 break;
               case 0x03://BVE5D
                 break;
@@ -549,7 +549,6 @@ namespace TR.BIDSsv
                   OD = od;
                 }
                 break;
-
             }
             break;
           case 0x70://Panel Data
@@ -591,7 +590,7 @@ namespace TR.BIDSsv
             catch (Exception) { throw; }
             break;
           default:
-            return data;
+            break;
         }
       }
       return null;
