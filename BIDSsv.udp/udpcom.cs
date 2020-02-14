@@ -109,6 +109,8 @@ namespace TR.BIDSsv
       disposing = true;
       if (!disposedValue)
       {
+        UCW?.Close();
+        UCR?.Close();
         if (disposing)
         {
           // TODO: マネージ状態を破棄します (マネージ オブジェクト)。
@@ -162,7 +164,6 @@ namespace TR.BIDSsv
 
   internal class DSendBlock : IDisposable
   {
-    const int RecMax = 100;
     FixedSizeList fsl;
 
     internal DSendBlock()
