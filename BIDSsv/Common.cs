@@ -69,12 +69,12 @@ namespace TR.BIDSsv
 
     static string stateAllStr = "{0}";
 
-    static public void Start(int Interval = 10)
+    static public void Start(int Interval = 10, bool NO_SMEM_MODE = false)
     {
       if (!IsStarted)
       {
         for (int i = 1; i <= 9; i++) stateAllStr += ("X{" + i.ToString() + "}");
-        SML = new SMemLib(true, 0);
+        SML = new SMemLib(true, 0, NO_SMEM_MODE);
         CI = new CtrlInput();
         SML?.ReadStart(0, Interval);
 
