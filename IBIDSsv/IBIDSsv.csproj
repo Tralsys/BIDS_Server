@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\source\repos\IAtsPI\IAtsPI.csproj" />
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
   </ItemGroup>
 

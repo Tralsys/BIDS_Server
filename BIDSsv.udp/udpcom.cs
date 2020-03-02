@@ -51,7 +51,7 @@ namespace TR.BIDSsv
       }
       else if (!dsb.IsAlready(ba))
       {
-        ba = dsb.RemoveTimeStamp(ba);
+        ba = ocr.RemoveTimeStamp(ba);
 
         if (IsDebugging)
           Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(ba));
@@ -73,7 +73,7 @@ namespace TR.BIDSsv
     public bool DataSend(in byte[] ba)
     {
       if (disposing) return false;
-      byte[] tsba = dsb.AddTimeStamp(ba);
+      byte[] tsba = ocr.AddTimeStamp(ba);
       dsb.SetData(tsba);
       if (UCW?.Client.Connected == true && tsba?.Length > 0) UCW?.BeginSend(tsba, tsba.Length, SendedCallback, UCW);
       else
@@ -165,7 +165,6 @@ namespace TR.BIDSsv
   internal class DSendBlock : IDisposable
   {
     FixedSizeList fsl;
-
     internal DSendBlock()
     {
       fsl = new FixedSizeList();
@@ -190,30 +189,6 @@ namespace TR.BIDSsv
         sha?.TransformFinalBlock(ba, 0, Math.Min(ba.Length, 512));
         return sha?.Hash;
       }
-    }
-    public const int DivNum = 2;
-    internal byte[] AddTimeStamp(in byte[] ba)
-    {
-      if (ba == null || ba.Length <= 0) return null;
-      byte[] tsba = new byte[ba.Length + sizeof(int)];
-
-      Array.Copy(ba, 0, tsba, sizeof(int), ba.Length);
-
-      DateTime dt = DateTime.Now;
-      int sms = dt.Second * 1000 + dt.Millisecond; sms /= 2;
-      Array.Copy(sms.GetBytes(), 0, tsba, 0, sizeof(int));
-
-      return tsba;
-    }
-
-    internal byte[] RemoveTimeStamp(in byte[] tsba)
-    {
-      if (tsba == null || tsba.Length <= sizeof(int)) return null;
-      byte[] ba = new byte[tsba.Length - sizeof(int)];
-
-      Array.Copy(tsba, sizeof(int), ba, 0, ba.Length);
-
-      return ba;
     }
     #region IDisposable Support
     private bool disposedValue = false; // 重複する呼び出しを検出するには
@@ -285,14 +260,18 @@ namespace TR.BIDSsv
 
   internal class OldChecker
   {
-    private const int TimeThresholdH = 40 * 1000 / DSendBlock.DivNum;
-    private const int TimeThresholdL = 10 / DSendBlock.DivNum;
+    const int TimeThresholdH = int.MaxValue;//40 * 1000 / DSendBlock.DivNum;
+    const int TimeThresholdL = 3;//10 / DSendBlock.DivNum;
+    //const int DivNum = 2;
+
+    uint Counter = 0;
     List<RecData> rd = new List<RecData>();
+    
     internal bool IsOldData(IPAddress ip, in byte[] ba)
     {
       if (ba[4] != 't' || ba[5] != 'r') return false;
 
-      int time = ba.GetInt(0);
+      uint time = ba.GetUInt(0);
       byte[] hd = new byte[4];
       Array.Copy(ba, 4, hd, 0, 4);
       if (!(rd?.Count > 0))
@@ -309,7 +288,7 @@ namespace TR.BIDSsv
 
         if (!(rd[i].Header.SequenceEqual(hd))) continue;
 
-        int t = time - rd[i].Time;
+        long t = time - rd[i].Time;
 
         if (t > 0 || t < -TimeThresholdH) rd[i].Time = time;
 
@@ -321,10 +300,38 @@ namespace TR.BIDSsv
 
       return false;
     }
+    
+    internal byte[] AddTimeStamp(in byte[] ba)
+    {
+      if (ba == null || ba.Length <= 0) return null;
+      byte[] tsba = new byte[ba.Length + sizeof(uint)];
+
+      Array.Copy(ba, 0, tsba, sizeof(uint), ba.Length);
+
+      //DateTime dt = DateTime.Now;
+      //int sms = dt.Second * 1000 + dt.Millisecond; sms /= 2;
+      uint sms = 0;
+      if (Counter > uint.MaxValue - 10000)
+        sms = Counter = 0;
+      else sms = ++Counter;
+      Array.Copy(sms.GetBytes(), 0, tsba, 0, sizeof(uint));
+
+      return tsba;
+    }
+
+    internal byte[] RemoveTimeStamp(in byte[] tsba)
+    {
+      if (tsba == null || tsba.Length <= sizeof(uint)) return null;
+      byte[] ba = new byte[tsba.Length - sizeof(uint)];
+
+      Array.Copy(tsba, sizeof(uint), ba, 0, ba.Length);
+
+      return ba;
+    }
 
     internal class RecData
     {
-      internal RecData(IPAddress ip, int time, byte[] header)
+      internal RecData(IPAddress ip, uint time, byte[] header)
       {
         IP = ip;
         Time = time;
@@ -332,7 +339,7 @@ namespace TR.BIDSsv
       }
 
       internal IPAddress IP { get; private set; }
-      internal int Time { get; set; }
+      internal uint Time { get; set; }
       internal byte[] Header { get; private set; }
     }
   }
