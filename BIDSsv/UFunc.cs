@@ -214,7 +214,7 @@ namespace TR.BIDSsv
     public static long ToInt64(IEnumerable<byte> ab, int ind = 0) => GetLong(ab.ToArray(), ind);
     public static ulong ToUInt64(IEnumerable<byte> ab, int ind = 0) => GetULong(ab.ToArray(), ind);
     public static char ToChar(IEnumerable<byte> ab, int ind = 0) => GetChar(ab.ToArray(), ind);
-
+#if !ID_SERCON
     public static bool ArrayEqual<T>(T[] ar1, int ar1ind, T[] ar2, int ar2ind, in int len = -1)
     {
       int l = len;
@@ -229,6 +229,6 @@ namespace TR.BIDSsv
     }
     public static bool ArrayEqual<T>(in T[] ar1, in T[] ar2, in int len = -1) => ArrayEqual<T>(ar1, 0, ar2, 0, len);
     public static bool ArrayEqual<T>(in this (T[], T[]) ar, in int item1ind = 0, in int item2ind = 0, in int len = -1) => ArrayEqual<T>(ar.Item1, item1ind, ar.Item2, item2ind, len);
-
+#endif
   }
 }
