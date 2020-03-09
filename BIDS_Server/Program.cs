@@ -265,10 +265,13 @@ namespace BIDS_Server
     static string FindMod(string keyword)
     {
       string[] ml = LSMod();
-      for (int i = 0; i < ml.Length; i++)
+      if (ml?.Length > 0)
       {
-        string[] sa = ml[i].Split('.');
-        if (sa.Length >= 2 && sa[sa.Length - 2] == keyword) return ml[i];
+        for (int i = 0; i < ml.Length; i++)
+        {
+          string[] sa = ml[i].Split('.');
+          if (sa.Length >= 2 && sa[sa.Length - 2] == keyword) return ml[i];
+        }
       }
       return string.Empty;
     }
