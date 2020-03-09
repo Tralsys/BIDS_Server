@@ -285,7 +285,7 @@ namespace TR.BIDSsv
           TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
           TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
           ICollection<int> IC = AutoNumL.Values;
-          ICollection<int> ICR = default;
+          ICollection<int> ICR = new List<int>();
 
           Parallel.For(0, IC.Count, (ind) =>
           {
