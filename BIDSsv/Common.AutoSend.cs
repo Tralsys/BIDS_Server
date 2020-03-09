@@ -357,7 +357,7 @@ namespace TR.BIDSsv
                 Parallel.For(0, svlist.Count, (s) =>
                 {
                   if (AutoNumL.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                    svlist[s].Print("TRIS" + num.ToString() + "X" + WriteStr);
+                    svlist[s].Print("TRI" + chr + num.ToString() + "X" + WriteStr);
                 });
               }
             }
