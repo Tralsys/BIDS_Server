@@ -356,7 +356,7 @@ namespace TR.BIDSsv
               {
                 Parallel.For(0, svlist.Count, (s) =>
                 {
-                  if (SDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
+                  if (AutoNumL.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
                     svlist[s].Print("TRIS" + num.ToString() + "X" + WriteStr);
                 });
               }
