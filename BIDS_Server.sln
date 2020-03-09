@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BIDSsv.communication", "BID
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BIDSsv.swif", "BIDSsv.swif\BIDSsv.swif.csproj", "{C0D45BD1-9A88-401B-8EFF-7BFF06932D2F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IAtsPI", "..\..\..\source\repos\IAtsPI\IAtsPI.csproj", "{6E2BBD03-9543-416D-B369-22374A1F0DC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IAtsPI", "..\IAtsPI\IAtsPI.csproj", "{6E2BBD03-9543-416D-B369-22374A1F0DC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
