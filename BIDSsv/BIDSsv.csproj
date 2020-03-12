@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.CtrlIOcs\BIDSSMemLib.CtrlIOcs.csproj" />
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.rw\BIDSSMemLib.rw.csproj" />
+    <ProjectReference Include="..\..\IAtsPI\IAtsPI.csproj" />
     <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
   </ItemGroup>
 
