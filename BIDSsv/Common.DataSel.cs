@@ -282,15 +282,15 @@ namespace TR.BIDSsv
                 case -1://All
                   State st1 = BSMD.StateData;
                   return ReturnString + string.Format(stateAllStr, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
-                case 0: return ReturnString + BSMD.StateData.Z;
-                case 1: return ReturnString + BSMD.StateData.V;
-                case 2: return ReturnString + BSMD.StateData.T;
-                case 3: return ReturnString + BSMD.StateData.BC;
-                case 4: return ReturnString + BSMD.StateData.MR;
-                case 5: return ReturnString + BSMD.StateData.ER;
-                case 6: return ReturnString + BSMD.StateData.BP;
-                case 7: return ReturnString + BSMD.StateData.SAP;
-                case 8: return ReturnString + BSMD.StateData.I;
+                case 0: return ReturnString + BSMD.StateData.Z.ToString();
+                case 1: return ReturnString + BSMD.StateData.V.ToString();
+                case 2: return ReturnString + BSMD.StateData.T.ToString();
+                case 3: return ReturnString + BSMD.StateData.BC.ToString();
+                case 4: return ReturnString + BSMD.StateData.MR.ToString();
+                case 5: return ReturnString + BSMD.StateData.ER.ToString();
+                case 6: return ReturnString + BSMD.StateData.BP.ToString();
+                case 7: return ReturnString + BSMD.StateData.SAP.ToString();
+                case 8: return ReturnString + BSMD.StateData.I.ToString();
                 //case 9: return ReturnString + BSMD.StateData.Volt;//予約 電圧
                 case 10: return ReturnString + TimeSpan.FromMilliseconds(BSMD.StateData.T).Hours.ToString();
                 case 11: return ReturnString + TimeSpan.FromMilliseconds(BSMD.StateData.T).Minutes.ToString();
@@ -304,10 +304,10 @@ namespace TR.BIDSsv
                 case -1:
                   Hand hd1 = BSMD.HandleData;
                   return ReturnString + string.Format("{0}X{1}X{2}X{3}", hd1.B, hd1.P, hd1.R, hd1.C);
-                case 0: return ReturnString + BSMD.HandleData.B;
-                case 1: return ReturnString + BSMD.HandleData.P;
-                case 2: return ReturnString + BSMD.HandleData.R;
-                case 3: return ReturnString + BSMD.HandleData.C;//定速状態は予約
+                case 0: return ReturnString + BSMD.HandleData.B.ToString();
+                case 1: return ReturnString + BSMD.HandleData.P.ToString();
+                case 2: return ReturnString + BSMD.HandleData.R.ToString();
+                case 3: return ReturnString + BSMD.HandleData.C.ToString();//定速状態は予約
                 case 4:
                   OpenD od = new OpenD();
                   SML?.Read(out od);
@@ -339,7 +339,7 @@ namespace TR.BIDSsv
 
               ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
               for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
-                ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]);
+                ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]).ToString();
 
               return ReturnString;
             case "s":
@@ -347,7 +347,7 @@ namespace TR.BIDSsv
               SML?.Read(out sda);
               ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
               for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
-                ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]);
+                ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]).ToString();
 
               return ReturnString;
             default: return "TRE3";//記号部不正
