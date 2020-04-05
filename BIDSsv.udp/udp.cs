@@ -9,6 +9,7 @@ namespace TR.BIDSsv
 {
   public class udp : IBIDSsv
   {
+    public bool IsDisposed { get => disposedValue; }
     public int Version { get; private set; } = 202;
     public string Name { get; private set; } = "udp";
     public bool IsDebug {

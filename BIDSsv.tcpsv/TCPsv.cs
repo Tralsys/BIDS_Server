@@ -12,6 +12,7 @@ namespace TR.BIDSsv
   {
     //Wait Port : 14147
     int PortNum = Common.DefPNum;
+    public bool IsDisposed { get; private set; } = false;
     public int Version { get; private set; } = 202;
 
     public string Name { get; private set; } = "tcpsv";
@@ -147,6 +148,7 @@ namespace TR.BIDSsv
       NS?.Dispose();
       TC?.Dispose();
       TL?.Stop();
+      IsDisposed = true;
     }
 
     void ConnectDoing()
