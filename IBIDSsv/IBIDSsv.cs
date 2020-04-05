@@ -14,6 +14,7 @@ namespace TR
   }
   public interface IBIDSsv : IDisposable
   {
+    bool IsDisposed { get; }
     int Version { get; }
     string Name { get; }
     bool IsDebug { get; set; }
