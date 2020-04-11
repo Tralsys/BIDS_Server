@@ -12,6 +12,7 @@ namespace BIDSsv.tcpcl
 {
   class TCPcl : IBIDSsv
   {
+    public bool IsDisposed { get; private set; } = false;
     public int Version { get; private set; } = 202;
     public string Name { get; private set; } = "tcpcl";
     public bool IsDebug { get; set; } = false;
@@ -229,6 +230,7 @@ namespace BIDSsv.tcpcl
       if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
       NS?.Dispose();
       TC?.Dispose();
+      IsDisposed = true;
     }
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }

@@ -100,9 +100,9 @@ namespace TR.BIDSsv
       return GotString;
     }
 
-    static private string DataSelTR(in string CName, in string GotString)
+    static private string DataSelTR(this IBIDSsv SVc, in string GotString)
     {
-      if (IsDebug) Console.Write("{0} << {1}", CName, GotString);
+      if (IsDebug) Console.Write("{0} << {1}", SVc?.Name, GotString);
       string ReturnString = GotString.Replace("\n", string.Empty) + "X";
 
       //0 1 2 3
@@ -367,38 +367,28 @@ namespace TR.BIDSsv
             return "TRE5";//要求情報コード 変換オーバーフロー
           }
 
-          int Bias = -1;
-          switch (GotString.Substring(3, 1))
+          char dtypc_a = GotString.Substring(3, 1).ToCharArray()[0];
+          ASList asl = null;
+          switch (dtypc_a)
           {
-            case "C":
-              Bias = 0;
+            case ConstVals.DTYPE_PANEL:
+              if (PDAutoList == null) PDAutoList = new ASList(false);
+              asl = PDAutoList;
               break;
-            case "H":
-              Bias = HandDBias;
+            case ConstVals.DTYPE_SOUND:
+              if (SDAutoList == null) SDAutoList = new ASList(false);
+              asl = SDAutoList;
               break;
-            case "D":
-              Bias = DoorDBias;
+            default:
+              if (AutoNumL == null) AutoNumL = new ASList();
+              asl = AutoNumL;
               break;
-            case "E":
-              Bias = ElapDBias;
-              break;
-            case "P":
-              if (PDAutoList?.Contains(new KeyValuePair<string, int>(CName, sera)) != true) PDAutoList.Add(CName, sera);
-              return ReturnString + (SML.Panels.Length > sera ? SML.Panels.Panels[sera] : 0).ToString();
-            case "S":
-              if (SDAutoList?.Contains(new KeyValuePair<string, int>(CName, sera)) != true) SDAutoList.Add(CName, sera);
-              return ReturnString + (SML.Sounds.Length > sera ? SML.Sounds.Sounds[sera] : 0).ToString();
           }
 
-
-          if (Bias >= 0)
-          {
-            if (AutoNumL?.Contains(new KeyValuePair<string, int>(CName, Bias + sera)) != true) AutoNumL.Add(CName, Bias + sera);
-            return ReturnString + "0";
-          }
-          else return "TRE3";
+          if (!asl.Contains(SVc, sera, dtypc_a)) asl.Add(SVc, sera, dtypc_a);
+          return ReturnString + DataPicker(dtypc_a, sera);
+          
         case "D"://Auto Send Delete
-          int Biasd = -1;
           int serd;
           try
           {
@@ -413,35 +403,27 @@ namespace TR.BIDSsv
             return "TRE5";//要求情報コード 変換オーバーフロー
           }
 
-          switch (GotString.Substring(3, 1))
+          char dtypc_d = GotString.Substring(3, 1).ToCharArray()[0];
+          ASList asld = null;
+          switch (dtypc_d)
           {
-            case "C":
-              Biasd = 0;
+            case ConstVals.DTYPE_PANEL:
+              if (PDAutoList == null) PDAutoList = new ASList(false);
+              asld = PDAutoList;
               break;
-            case "H":
-              Biasd = HandDBias;
+            case ConstVals.DTYPE_SOUND:
+              if (SDAutoList == null) SDAutoList = new ASList(false);
+              asld = SDAutoList;
               break;
-            case "D":
-              Biasd = DoorDBias;
+            default:
+              if (AutoNumL == null) AutoNumL = new ASList();
+              asld = AutoNumL;
               break;
-            case "E":
-              Biasd = ElapDBias;
-              break;
-            case "P":
-              if (PDAutoList.Contains(new KeyValuePair<string, int>(CName, serd))) PDAutoList.Remove(new KeyValuePair<string, int>(CName, serd));
-              return ReturnString + "0";
-            case "S":
-              if (!SDAutoList.Contains(new KeyValuePair<string, int>(CName, serd))) SDAutoList.Remove(new KeyValuePair<string, int>(CName, serd));
-              return ReturnString + "0";
           }
 
-          if (Biasd > 0)
-          {
-            if (AutoNumL.Contains(new KeyValuePair<string, int>(CName, Biasd + serd))) AutoNumL.Remove(new KeyValuePair<string, int>(CName, Biasd + serd));
-
-            return ReturnString + "0";
-          }
-          else return "TRE3";
+          if (!asld.Contains(SVc, serd, dtypc_d)) asld.Remove(SVc, serd, dtypc_d);
+          return ReturnString + "0";
+          
         case "E":
         //throw new Exception(GotString);
         default:
@@ -454,7 +436,7 @@ namespace TR.BIDSsv
     /// <param name="data">Got Data</param>
     /// <param name="enc">Encording</param>
     /// <returns>byte array to return, or array that calling program is needed to do something</returns>
-    static public byte[] DataSelect(in string CName, in byte[] data, in Encoding enc)
+    static public byte[] DataSelect(IBIDSsv CName, in byte[] data, in Encoding enc)
     {
       if (data == null || data.Length < 4) return null;
       byte[] ba = BIDSBAtoBA(data);
@@ -599,7 +581,7 @@ namespace TR.BIDSsv
 
 
     [Obsolete("Please use the \"DataSelect\" Method.")]
-    static public string DataSelectTR(in string CN, in string GotStr) => DataSelTR(CN, GotStr);
+    static public string DataSelectTR(IBIDSsv CN, in string GotStr) => DataSelTR(CN, GotStr);
 
     [Obsolete("Please use the \"DataSelect\" Method.")]
     static public string DataSelectTO(in string GotString) => DataSelTO(GotString);

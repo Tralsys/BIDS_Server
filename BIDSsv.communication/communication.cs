@@ -9,6 +9,7 @@ namespace TR.BIDSsv
   public class communication : IBIDSsv
   {
     const int DefPNum = 9032;
+    public bool IsDisposed { get; private set; } = false;
     private int PortNum = DefPNum;
     private int RemotePNum = DefPNum;
     IPAddress Addr = IPAddress.Any;
@@ -116,6 +117,7 @@ namespace TR.BIDSsv
     {
       if (!tf) UC?.Close();
       UC?.Dispose();
+      IsDisposed = true;
     }
     public void Dispose()
     {

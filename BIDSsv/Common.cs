@@ -87,46 +87,36 @@ namespace TR.BIDSsv
     }
     
     static public void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
-    static public void Remove() => Remove(string.Empty);
-    static public void Remove(in string Name)
+    static public void Remove() => Remove(null);
+    static public void Remove(IBIDSsv Name)
     {
       if (!(svlist?.Count > 0)) return;
-      if (Name != string.Empty)
+      ASRemove(Name);
+      for(int i = svlist.Count - 1; i >= 0; i--)
       {
-        ASRemove(Name);
-        for (int i = svlist.Count - 1; i >= 0; i--)
-          if (Name == svlist[i].Name)
-          {
-            try
-            {
-              svlist[i].Dispose();
-              svlist.RemoveAt(i);
-            }
-            catch (Exception e)
-            {
-              Console.WriteLine(e);
-            }
-          }
-      }
-      else
-      {
-        for (int i = svlist.Count - 1; i >= 0; i--)
+        if (Name == null || svlist[i] == Name)
         {
-          svlist[i]?.Dispose();
-          svlist?.RemoveAt(i);
+          try
+          {
+            svlist[i]?.Dispose();
+            svlist.RemoveAt(i);
+          }catch(Exception e)
+          {
+            Console.WriteLine(e);
+          }
         }
       }
     }
     static public void Remove(in IBIDSsv sv)
     {
       if (sv == null || !(svlist?.Count > 0)) return;
-      string Name = sv.Name;
-      ASRemove(Name);
 
-      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", Name, svlist.Remove(sv) ? "done." : "failed (not found?)");
+      ASRemove(sv);
+
+      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, svlist.Remove(sv) ? "done." : "failed (not found?)");
     }
 
-    static private void ASRemove(in string Name)
+    static private void ASRemove(IBIDSsv Name)
     {
       try
       {

@@ -188,7 +188,7 @@ namespace TR.BIDSsv
         if (SDAutoList?.Count > 0)
           Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
           {
-            if (SDAutoList.Values.Contains(i))
+            if (SDAutoList.DNums.Contains(i))
             {
               int? Num = null;
               if (e.OldArray.Length <= i) Num = e.NewArray[i];
@@ -196,10 +196,10 @@ namespace TR.BIDSsv
 
               if (Num != null)
               {
-                Parallel.For(0, svlist.Count, (s) =>
+                Parallel.For(0, SDAutoList.Count, (s) =>
                 {
-                  if (SDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                    svlist[s].Print("TRIS" + i.ToString() + "X" + Num.ToString());
+                  if (SDAutoList.DNums[s] == i)
+                    SDAutoList.SvList[s].Print("TRIS" + i.ToString() + "X" + Num.ToString());
                 });
               }
             }
@@ -229,7 +229,7 @@ namespace TR.BIDSsv
         if (PDAutoList?.Count > 0)
           Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
           {
-            if (PDAutoList.Values.Contains(i))
+            if (PDAutoList.DNums.Contains(i))
             {
               int? Num = null;
               if (e.OldArray.Length <= i) Num = e.NewArray[i];
@@ -237,10 +237,10 @@ namespace TR.BIDSsv
 
               if (Num != null)
               {
-                Parallel.For(0, svlist.Count, (s) =>
+                Parallel.For(0, PDAutoList.Count, (s) =>
                 {
-                  if (PDAutoList.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                    svlist[s].Print("TRIP" + i.ToString() + "X" + Num.ToString());
+                  if (PDAutoList.DNums[s] == i)
+                    PDAutoList.SvList[s].Print("TRIP" + i.ToString() + "X" + Num.ToString());
                 });
               }
             }
@@ -284,82 +284,19 @@ namespace TR.BIDSsv
           Hand nh = e.NewData.HandleData;
           TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
           TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
-          ICollection<int> IC = AutoNumL.Values;
-          ICollection<int> ICR = new List<int>();
 
-          Parallel.For(0, IC.Count, (ind) =>
+          Parallel.For(0, AutoNumL.Count, (ind) =>//書き直す/////////////////////////////////////////////////////////////////////////////////////
           {
-            int i = IC.ElementAt(ind);
-            if (!ICR.Contains(i))
+            char dtyp = AutoNumL.DTypes[ind];
+            int dnum = AutoNumL.DNums[ind];
+            bool isfv = false;
+            switch (AutoNumL.DTypes[ind])
             {
-              ICR.Add(i);
-
-              string WriteStr = string.Empty;
-              string chr = string.Empty;
-              int num = 0;
-
-              if (OpenDBias > i && i >= ElapDBias)
-              {
-                switch (i - ElapDBias)
-                {
-                  case 0: WriteStr = UFunc.Comp(ost.Z, nst.Z); break;
-                  case 1: WriteStr = UFunc.Comp(ost.V, nst.V); break;
-                  case 2: WriteStr = UFunc.Comp(ost.T, nst.T); break;
-                  case 3: WriteStr = UFunc.Comp(ost.BC, nst.BC); break;
-                  case 4: WriteStr = UFunc.Comp(ost.MR, nst.MR); break;
-                  case 5: WriteStr = UFunc.Comp(ost.ER, nst.ER); break;
-                  case 6: WriteStr = UFunc.Comp(ost.BP, nst.BP); break;
-                  case 7: WriteStr = UFunc.Comp(ost.SAP, nst.SAP); break;
-                  case 8: WriteStr = UFunc.Comp(ost.I, nst.I); break;
-                  //case 9: WriteStr = UFunc.Comp(ost.Z, nst.Z); break;
-                  case 10: WriteStr = UFunc.Comp(ots.Hours, nts.Hours); break;
-                  case 11: WriteStr = UFunc.Comp(ots.Minutes, nts.Minutes); break;
-                  case 12: WriteStr = UFunc.Comp(ots.Seconds, nts.Seconds); break;
-                  case 13: WriteStr = UFunc.Comp(ots.Milliseconds, nts.Milliseconds); break;
-                }
-                (chr, num) = ("E", i - ElapDBias);
-              }
-              else if (i >= DoorDBias)
-              {
-                switch (i - DoorDBias)
-                {
-                  case 0: WriteStr = UFunc.Comp(IsDClsdo ? 1 : 0, IsDClsd ? 1 : 0); break;
-                }
-                (chr, num) = ("D", i - DoorDBias);
-              }
-              else if (i >= HandDBias)
-              {
-                switch (i - HandDBias)
-                {
-                  case 0: WriteStr = UFunc.Comp(oh.B, nh.B); break;
-                  case 1: WriteStr = UFunc.Comp(oh.P, nh.P); break;
-                  case 2: WriteStr = UFunc.Comp(oh.R, nh.R); break;
-                  case 3: WriteStr = UFunc.Comp(oh.C, nh.C); break;
-                }
-                (chr, num) = ("H", i - HandDBias);
-              }
-              else if (OpenDBias > i)
-              {
-                switch (i)
-                {
-                  case 0: WriteStr = UFunc.Comp(osp.B, nsp.B); break;
-                  case 1: WriteStr = UFunc.Comp(osp.P, nsp.P); break;
-                  case 2: WriteStr = UFunc.Comp(osp.A, nsp.A); break;
-                  case 3: WriteStr = UFunc.Comp(osp.J, nsp.J); break;
-                  case 4: WriteStr = UFunc.Comp(osp.C, nsp.C); break;
-                }
-                (chr, num) = ("C", i % HandDBias);
-              }
-
-
-              if (WriteStr != string.Empty)
-              {
-                Parallel.For(0, svlist.Count, (s) =>
-                {
-                  if (AutoNumL.Contains(new KeyValuePair<string, int>(svlist[s].Name, i)))
-                    svlist[s].Print("TRI" + chr + num.ToString() + "X" + WriteStr);
-                });
-              }
+              case ConstVals.DTYPE_CONSTD:
+                object oconstd = e.NewData.SpecData.PickData(dtyp, dnum, out isfv);
+                if (Equals(e.OldData.SpecData.PickData(dtyp, dnum, out isfv), oconstd)) return;
+                AutoNumL.SvList[ind].Print(ConstVals.CMD_HEADER + ConstVals.CMD_INFOREQ.ToString() + dtyp.ToString() + dnum.ToString() + ConstVals.CMD_SEPARATOR.ToString() + oconstd.ToString());
+                return;
             }
           });
         }
@@ -368,48 +305,4 @@ namespace TR.BIDSsv
 
   }
 
-  internal class ASList
-  {
-    private List<string> SL;
-    private List<int> IL;
-    public int Count { get => SL.Count; }
-    public List<string> Keys { get => SL; }
-    public List<int> Values { get => IL; }
-    public ASList()
-    {
-      SL = new List<string>();
-      IL = new List<int>();
-    }
-
-    public bool Contains(KeyValuePair<string, int> k) => Contains(k.Key, k.Value);
-    public bool Contains(string key, int value)
-    {
-      bool result = false;
-      Parallel.For(0, SL.Count, (i) =>
-      {
-        if (SL[i] == key && IL[i] == value) result = true;
-      });
-      return result;
-    }
-
-    public void Remove(KeyValuePair<string, int> k) => Remove(k.Key, k.Value);
-    public void Remove(string key, int? value = null)
-    {
-      if (SL == null || SL.Count <= 0) return;
-      for (int i = SL.Count - 1; i >= 0; i--)
-      {
-        if (SL[i] == key && (value == null || IL[i] == value))
-        {
-          SL.RemoveAt(i);
-          IL.RemoveAt(i);
-        }
-      }
-    }
-
-    public void Add(string key, int value)
-    {
-      SL.Add(key);
-      IL.Add(value);
-    }
-  }
 }

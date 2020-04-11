@@ -11,6 +11,7 @@ namespace TR.BIDSsv
 {
   public class Serial : TR.IBIDSsv
   {
+    public bool IsDisposed { get; private set; } = false;
     public int Version => 202;
     public bool IsDebug { get; set; } = false;
     public string Name { get; private set; } = "serial";
@@ -204,6 +205,7 @@ namespace TR.BIDSsv
       if (ReadThread?.Join(5000) == false) Console.WriteLine(Name + " : ReadThread Closing Failed.");
       SP?.Dispose();
       Console.WriteLine(Name + " : " + SP?.IsOpen.ToString());
+      IsDisposed = true;
     }
 
     private void ReadDoing()
