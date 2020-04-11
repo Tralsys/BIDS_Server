@@ -13,11 +13,22 @@ namespace TR.BIDSsv
   {
     public event EventHandler<UDPGotEvArgs> DataGotEv;
     public bool IsDebugging { get; set; } = false;
+    public uint MyID { get; } = 0;
     UdpClient UCW = null;
     UdpClient UCR = null;
     DSendBlock dsb;
     public udpcom(IPEndPoint Src = null, IPEndPoint Dst = null)
     {
+      #region GetMyIP
+      IPAddress[] myip = Dns.GetHostAddresses(Dns.GetHostName());
+      if (myip?.Length > 0)
+      {
+        byte[] adrs = myip[0].GetAddressBytes();
+        for (int i = 0; i <adrs.Length; i++)
+          MyID ^= (MyID << 8) + adrs[i];
+      }
+      #endregion
+
       int pt = Src?.Port ?? Common.DefPNum;
 
       UCR = new UdpClient(Src ?? new IPEndPoint(IPAddress.Any, pt));
@@ -31,6 +42,12 @@ namespace TR.BIDSsv
 
       IPEndPoint ipep = Dst ?? new IPEndPoint(IPAddress.Broadcast, pt);
       UCW.Connect(ipep);
+
+      if (MyID == 0)
+      {
+        byte[] ucwlep = ((IPEndPoint)UCW.Client.LocalEndPoint).Address.GetAddressBytes();
+        MyID = ucwlep[ucwlep.Length - 1];
+      }
     }
     OldChecker ocr = new OldChecker();
     private void ReceiveCallback(IAsyncResult ar)
@@ -40,34 +57,34 @@ namespace TR.BIDSsv
       try
       {
         ba = ((UdpClient)ar.AsyncState)?.EndReceive(ar, ref remIPE);
+        if (disposing) return;
+        ((UdpClient)ar.AsyncState)?.BeginReceive(ReceiveCallback, ar.AsyncState);
       }
       catch (ObjectDisposedException) { Console.WriteLine("udpcom ::: ReceiveCallback => ObjectDisposed."); return; }
       catch (Exception) { throw; }
-
-      if (ocr.IsOldData(remIPE.Address, ba))
+      byte[] rba = new byte[0];
+      if (IsMyDataCheck(ba, out rba))// || Equals(remIPE.Address, ((IPEndPoint)UCW.Client.LocalEndPoint).Address))
       {
         if (IsDebugging)
-          Console.WriteLine("udpcom class <<<<<<Old Data<<<<<< {0} : {1}", remIPE, ba);
+          Console.WriteLine("udpcom class <<<<<<My Data<<<<<< {0} (from {2}) : {1}", remIPE, BitConverter.ToString(ba), ((IPEndPoint)UCW.Client.LocalEndPoint));
       }
-      else if (!dsb.IsAlready(ba))
+      else if (ocr.IsOldData(remIPE.Address, rba))
       {
-        ba = ocr.RemoveTimeStamp(ba);
+        if (IsDebugging)
+          Console.WriteLine("udpcom class <<<<<<Old Data<<<<<< {0} : {1}", remIPE, BitConverter.ToString(rba));
+      }
+      else if (!dsb.IsAlready(rba))
+      {
+        rba = ocr.RemoveTimeStamp(rba);
 
         if (IsDebugging)
-          Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(ba));
+          Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(rba));
 
-        if (ba?.Length > 0)
-          DataGotEv?.Invoke(remIPE, new UDPGotEvArgs(ba));
+        if (rba?.Length > 0)
+          DataGotEv?.Invoke(remIPE, new UDPGotEvArgs(rba));
       }
       else if (IsDebugging)
-        Console.WriteLine("udpcom class <<<<<<Already<<<<<< {0} : {1}", remIPE, ba);
-      if (disposing) return;
-      try
-      {
-        ((UdpClient)ar.AsyncState)?.BeginReceive(ReceiveCallback, ar.AsyncState);
-      }
-      catch (ObjectDisposedException) { return; }
-      catch (Exception) { throw; }
+        Console.WriteLine("udpcom class <<<<<<Already<<<<<< {0} : {1}", remIPE, BitConverter.ToString(rba));
     }
     
     public bool DataSend(in byte[] ba)
@@ -75,6 +92,7 @@ namespace TR.BIDSsv
       if (disposing) return false;
       byte[] tsba = ocr.AddTimeStamp(ba);
       dsb.SetData(tsba);
+      tsba = SetMyID(tsba);
       if (UCW?.Client.Connected == true && tsba?.Length > 0) UCW?.BeginSend(tsba, tsba.Length, SendedCallback, UCW);
       else
       {
@@ -99,6 +117,28 @@ namespace TR.BIDSsv
       catch (Exception) { throw; }
     }
     
+
+    bool IsMyDataCheck(byte[] ba,out byte[] rba)
+    {
+      rba = new byte[(ba?.Length ?? sizeof(uint)) - sizeof(uint)];
+      if (!(ba?.Length > sizeof(uint))) return true;
+
+      if (MyID == UFunc.GetUInt(ba, 0)) return true;
+
+      Array.Copy(ba, sizeof(uint), rba, 0, rba.Length);
+      return false;
+    }
+
+    byte[] SetMyID(byte[] ba)
+    {
+      if (!(ba?.Length > 0)) return null;
+      byte[] rba = new byte[ba.Length + sizeof(uint)];
+
+      Array.Copy(MyID.GetBytes(), 0, rba, 0, sizeof(uint));
+      Array.Copy(ba, 0, rba, sizeof(uint), ba.Length);
+
+      return rba;
+    }
 
     #region IDisposable Support
     private bool disposedValue = false; // 重複する呼び出しを検出するには
@@ -172,6 +212,7 @@ namespace TR.BIDSsv
 
     internal bool IsAlready(in byte[] ba)
     {
+      //return false;//一時的に無効化
       byte[] hash = GetHash(ba);
 
       if (!(hash?.Length > 0)) return false;
@@ -269,6 +310,7 @@ namespace TR.BIDSsv
     
     internal bool IsOldData(IPAddress ip, in byte[] ba)
     {
+      return false;//
       if (ba[4] != 't' || ba[5] != 'r') return false;
 
       uint time = ba.GetUInt(0);
@@ -303,6 +345,7 @@ namespace TR.BIDSsv
     
     internal byte[] AddTimeStamp(in byte[] ba)
     {
+      return ba;
       if (ba == null || ba.Length <= 0) return null;
       byte[] tsba = new byte[ba.Length + sizeof(uint)];
 
@@ -321,6 +364,7 @@ namespace TR.BIDSsv
 
     internal byte[] RemoveTimeStamp(in byte[] tsba)
     {
+      return tsba;
       if (tsba == null || tsba.Length <= sizeof(uint)) return null;
       byte[] ba = new byte[tsba.Length - sizeof(uint)];
 
@@ -343,4 +387,5 @@ namespace TR.BIDSsv
       internal byte[] Header { get; private set; }
     }
   }
+
 }

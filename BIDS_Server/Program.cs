@@ -18,7 +18,7 @@ namespace BIDS_Server
       Console.WriteLine("BIDS Server Application");
       Console.WriteLine("ver : " + VerNumStr);
 
-      Common.Start(5);
+      Common.Start(1);
 
       for (int i = 0; i < args.Length; i++) Console.WriteLine("{0}[{1}] :: {2}", "args", i, args[i]);
       if (args?.Length > 0)
