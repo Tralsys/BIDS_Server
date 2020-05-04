@@ -19,13 +19,18 @@ namespace TR.BIDSsv
     }
 
     //public bool Contains(KeyValuePair<IBIDSsv, int> k) => Contains(k.Key, k.Value);
-    public bool Contains(IBIDSsv key, int dnum, char dtyp = '\0')
+    /// <summary>Listに指定の要素が含まれているかを確認します.</summary>
+    /// <param name="sv">登録された通信クラスインスタンス</param>
+    /// <param name="dnum">データ番号</param>
+    /// <param name="dtyp">データタイプ記号</param>
+    /// <returns>CountNum以上の</returns>
+    public bool Contains(IBIDSsv sv, int dnum, char dtyp = '\0')
     {
-      if (key == null || !((SvList?.Count ?? 0) > 0)) return false;
+      if (sv == null || !((SvList?.Count ?? 0) > 0)) return false;
       bool result = false;
       Parallel.For(0, SvList.Count, (i) =>
       {
-        if (SvList[i] == key && (DTypes == null ? true : DTypes[i] == dtyp) && DNums[i] == dnum) result = true;
+        if (SvList[i] == sv && (DTypes == null ? true : DTypes[i] == dtyp) && DNums[i] == dnum) result = true;
       });
       return result;
     }

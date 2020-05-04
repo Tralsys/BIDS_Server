@@ -92,7 +92,7 @@ namespace TR.BIDSsv
       catch (ObjectDisposedException)
       {
         Console.WriteLine("{0} (ReceivedDoing) : This connection is already closed.", Name);
-        Common.Remove(Name);
+        Common.Remove(this);
         return;
       }
 
@@ -107,7 +107,7 @@ namespace TR.BIDSsv
       }
       else
       {
-        Common.DataSelect(Name, rba, Encoding.Default);
+        Common.DataSelect(this, rba, Encoding.Default);
       }
 
       uc?.BeginReceive(ReceivedDoing, uc);

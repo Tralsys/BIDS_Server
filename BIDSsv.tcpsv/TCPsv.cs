@@ -225,7 +225,7 @@ namespace TR.BIDSsv
         if (ReadData.Contains("X")) Common.DataGot(ReadData);
         else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
         else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));*/
-        byte[] ba = Common.DataSelect(Name, ReadByte(), Enc);
+        byte[] ba = Common.DataSelect(this, ReadByte(), Enc);
       }
       NS?.Close();
       TC?.Close();

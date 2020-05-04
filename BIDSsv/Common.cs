@@ -88,18 +88,17 @@ namespace TR.BIDSsv
     
     static public void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
     static public void Remove() => Remove(null);
-    static public void Remove(IBIDSsv Name)
+    static public void Remove(string Name)
     {
-      if (!(svlist?.Count > 0)) return;
-      ASRemove(Name);
-      for(int i = svlist.Count - 1; i >= 0; i--)
+      if (!(svlist?.Count > 0)) return;//null or 要素なしは実行しない
+      
+      for(int i = svlist.Count - 1; i >= 0; i--)//尻尾から順に
       {
-        if (Name == null || svlist[i] == Name)
+        if (Name == null || svlist[i].Name == Name)
         {
           try
           {
-            svlist[i]?.Dispose();
-            svlist.RemoveAt(i);
+            Remove(svlist[i]);
           }catch(Exception e)
           {
             Console.WriteLine(e);
@@ -110,17 +109,26 @@ namespace TR.BIDSsv
     static public void Remove(in IBIDSsv sv)
     {
       if (sv == null || !(svlist?.Count > 0)) return;
-
-      ASRemove(sv);
-
-      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, svlist.Remove(sv) ? "done." : "failed (not found?)");
+      string name = sv.Name;
+      bool successd = false;
+      try
+      {
+        ASRemove(sv);
+        sv.Dispose();
+        successd = svlist.Remove(sv);
+      }catch(Exception e)
+      {
+        Console.WriteLine("BIDSsv.Common Remove() Name:{0}\tan exception has occured.\n{1}", name, e);
+      }
+      
+      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, successd ? "done." : "failed (not found?)");
     }
 
-    static private void ASRemove(IBIDSsv Name)
+    static private void ASRemove(IBIDSsv sv)
     {
       try
       {
-        if (PDAutoList?.Count > 0) PDAutoList.Remove(Name);
+        if (PDAutoList?.Count > 0) PDAutoList.Remove(sv);
       }
       catch (Exception e)
       {
@@ -128,7 +136,7 @@ namespace TR.BIDSsv
       }
       try
       {
-        if (SDAutoList?.Count > 0) SDAutoList.Remove(Name);
+        if (SDAutoList?.Count > 0) SDAutoList.Remove(sv);
       }
       catch (Exception e)
       {
@@ -136,7 +144,7 @@ namespace TR.BIDSsv
       }
       try
       {
-        if (AutoNumL?.Count > 0) AutoNumL.Remove(Name);
+        if (AutoNumL?.Count > 0) AutoNumL.Remove(sv);
       }
       catch (Exception e)
       {

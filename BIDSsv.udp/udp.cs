@@ -126,7 +126,7 @@ namespace TR.BIDSsv
       if (e.DataLen <= 0) return;
 
       byte[] ba = Common.BIDSBAtoBA(e.Data);
-      ba = Common.DataSelect(Name, ba, Enc);
+      ba = Common.DataSelect(this, ba, Enc);
       if (ba?.Length > 0) Print(ba);
     }
 
