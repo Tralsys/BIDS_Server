@@ -53,16 +53,24 @@ namespace BIDS_Server
       if (s.EndsWith(".bsvcmd"))
       {
         Console.WriteLine("{0} => BIDS_Server Command preset file", s);
-        using (StreamReader sr = new StreamReader(s))
+        try
         {
-          string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-          if (sa?.Length > 0)
-            for (int pi = 0; pi < sa.Length; pi++)
-            {
-              Console.WriteLine("do {0}[{1}] : {2}", s, pi, sa[pi]);
-              ReadLineDO(sa[pi]);
-            }
-          else Console.WriteLine("{0} : There is no command in the file.", s);
+          using (StreamReader sr = new StreamReader(s))
+          {
+            string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            if (sa?.Length > 0)
+              for (int pi = 0; pi < sa.Length; pi++)
+              {
+                Console.WriteLine("do {0}[{1}] : {2}", s, pi, sa[pi]);
+                ReadLineDO(sa[pi]);
+              }
+            else Console.WriteLine("{0} : There is no command in the file.", s);
+          }
+        } catch (FileNotFoundException){ Console.WriteLine("Program.ReadLineDO : the file \"{0}\" is not found.", s); }
+        catch(DirectoryNotFoundException) { Console.WriteLine("Program.ReadLineDO : the directory is not found. (file path:\"{0}\")", s); }
+        catch(Exception e)
+        {
+          Console.WriteLine("Program.ReadLineDO : an exception has occured (file path:\"{0}\")\n{1}", s, e);
         }
 
         return;
