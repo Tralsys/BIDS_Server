@@ -16,7 +16,8 @@ namespace TR.BIDSsv
       Parsing_overflow,
       Char_in_DNum,
       ERROR_in_DType_or_DNum,
-      Cannot_get_BVE_WindowHandle
+      Cannot_get_BVE_WindowHandle,
+      AS_AddErr
     }
 
     public static string GetCMD(this ErrorNums ErrNum) => ConstVals.CMD_HEADER + ConstVals.CMD_ERROR + ((int)ErrNum).ToString();

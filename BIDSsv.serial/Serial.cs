@@ -223,7 +223,7 @@ namespace TR.BIDSsv
           }
           byte[] ba = new byte[btr];
           SP.Read(ba, 0, ba.Length);
-          Print(Common.DataSelect(Name, ba, SP.Encoding));
+          Print(Common.DataSelect(this, ba, SP.Encoding));
           continue;
         }
         try
@@ -249,17 +249,23 @@ namespace TR.BIDSsv
           {
             if (inputStr.StartsWith("TRV"))
             {
-              if (int.Parse(inputStr.Substring(3, 3)) >= 202)
+              try
               {
-                if (inputStr.Contains("BR"))
+                if (int.Parse(inputStr.Substring(3, 3)) >= 202)
                 {
-                  int BaR = int.Parse(inputStr.Split(new string[] { "BR" }, StringSplitOptions.RemoveEmptyEntries)[1]);
-                  SPWriteLine(inputStr + "X202" + BaR.ToString());
-                  SP.BaudRate = BaR;
+                  if (inputStr.Contains("BR"))
+                  {
+                    int BaR = int.Parse(inputStr.Split(new string[] { "BR" }, StringSplitOptions.RemoveEmptyEntries)[1]);
+                    SPWriteLine(inputStr + "X202br" + BaR.ToString());//TRV202BR115200X202br115200
+                    SP.BaudRate = BaR;
+                  }
+                  else SPWriteLine(inputStr + "X202");
                 }
-                else SPWriteLine(inputStr + "X202");
+                else SPWriteLine(inputStr + "X" + inputStr.Substring(3));
+              }catch(Exception e)
+              {
+                Console.WriteLine("Serial({0}) ReadDoing() : VersionCheck Error\n{1}", Name, e);
               }
-              else SPWriteLine(inputStr + "X" + inputStr.Substring(3));
             }
             else SPWriteLine(DataSelectTR(in inputStr));
           }
@@ -318,7 +324,7 @@ namespace TR.BIDSsv
     }
 
 
-    private string DataSelectTR(in string GetString) => Common.DataSelectTR(Name, in GetString);
+    private string DataSelectTR(in string GetString) => Common.DataSelectTR(this, in GetString);
     private string DataSelectTO(in string GetString) => Common.DataSelectTO(in GetString);
 
     public void Print(in string data) => SPWriteLine(data);

@@ -15,7 +15,7 @@ namespace TR.BIDSsv
 
       bool IsFloatVal = false;
       object o = DataPicker(DType, DNum, out IsFloatVal);
-      
+      if (o == null) return null;
       if (IsFloatVal)
       {
         Type otyp = o.GetType();

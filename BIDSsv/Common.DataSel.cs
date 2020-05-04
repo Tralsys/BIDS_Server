@@ -213,7 +213,7 @@ namespace TR.BIDSsv
               //else return "TRE8";
               return "TRE3";
             case "P":
-              if (serk < 128)
+              if (0 <= serk && serk < 128) 
               {
                 CI?.SetIsKeyPushed(serk, true);
                 return ReturnString + "0";
@@ -223,7 +223,7 @@ namespace TR.BIDSsv
                 return "TRE2";
               }
             case "R":
-              if (serk < 128)
+              if (0 <= serk && serk < 128) 
               {
                 CI?.SetIsKeyPushed(serk, false);
                 return ReturnString + "0";
@@ -334,17 +334,20 @@ namespace TR.BIDSsv
                 default: return "TRE2";
               }
             case "p":
-              PanelD pda = new PanelD();
+              if (seri < 0) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);//負の数は使用できません.
+                PanelD pda = new PanelD();
               SML?.Read(out pda);
-
+              
               ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
               for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
                 ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]).ToString();
 
               return ReturnString;
             case "s":
+              if (seri < 0) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);//負の数は使用できません.
               SoundD sda = new SoundD();
               SML?.Read(out sda);
+
               ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
               for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
                 ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]).ToString();
@@ -384,9 +387,11 @@ namespace TR.BIDSsv
               asl = AutoNumL;
               break;
           }
-
+          string asres = DataPicker(dtypc_a, sera);
+          if (string.IsNullOrWhiteSpace(asres)) return Errors.GetCMD(Errors.ErrorNums.AS_AddErr);
           if (!asl.Contains(SVc, sera, dtypc_a)) asl.Add(SVc, sera, dtypc_a);
-          return ReturnString + DataPicker(dtypc_a, sera);
+
+          return ReturnString + asres;
           
         case "D"://Auto Send Delete
           int serd;
@@ -405,24 +410,25 @@ namespace TR.BIDSsv
 
           char dtypc_d = GotString.Substring(3, 1).ToCharArray()[0];
           ASList asld = null;
-          switch (dtypc_d)
+          ReturnString += "0";//値を入れて返すことはないから, 先に0を付けとく.
+          switch (dtypc_d)//nullなら削除する要素は存在しない.
           {
             case ConstVals.DTYPE_PANEL:
-              if (PDAutoList == null) PDAutoList = new ASList(false);
-              asld = PDAutoList;
+              if (PDAutoList == null) return ReturnString;
+              else asld = PDAutoList;
               break;
             case ConstVals.DTYPE_SOUND:
-              if (SDAutoList == null) SDAutoList = new ASList(false);
-              asld = SDAutoList;
+              if (SDAutoList == null) return ReturnString;
+              else asld = SDAutoList;
               break;
             default:
-              if (AutoNumL == null) AutoNumL = new ASList();
-              asld = AutoNumL;
+              if (AutoNumL == null) return ReturnString;
+              else asld = AutoNumL;
               break;
           }
 
-          if (!asld.Contains(SVc, serd, dtypc_d)) asld.Remove(SVc, serd, dtypc_d);
-          return ReturnString + "0";
+          asld.Remove(SVc, serd, dtypc_d);
+          return ReturnString;
           
         case "E":
         //throw new Exception(GotString);
