@@ -209,9 +209,9 @@ namespace TR.BIDSsv
 
     static private void DataGot(in string GotStr)
     {
-      if (GotStr == null || GotStr == string.Empty) return;
+      if (string.IsNullOrWhiteSpace(GotStr)) return;
       if (!GotStr.StartsWith("TR")) return;
-      string[] GSA = GotStr.Replace("\n", string.Empty).Split('X');
+      string[] GSA = GotStr.Split('X');//接尾辞は除かれたものが使用されていることを期待する.
       if (GSA[0].StartsWith("TRI"))
       {
         int seri = 0;
@@ -544,6 +544,9 @@ namespace TR.BIDSsv
       }
     }
 
+
+		#region Obsolete Method
+		[Obsolete("BIDSとして接尾辞等への配慮は行いません.  下位レイヤで独自に処理を行ってください.")]
     /// <summary>(disabled)Convert from Native Byte Array to BIDS Communication Byte Array Format</summary>
     /// <param name="ba">Array to Converted</param>
     /// <returns>Converted Array</returns>
@@ -570,6 +573,8 @@ namespace TR.BIDSsv
       dbl.Add((byte)'\n');
       return dbl.ToArray();*/
     }
+
+    [Obsolete("BIDSとして接尾辞等への配慮は行いません.  下位レイヤで独自に処理を行ってください.")]
     /// <summary>(disabled)Convert from BIDS Communication Byte Array Format to Native Byte Array</summary>
     /// <param name="ba">Array to Converted</param>
     /// <returns>Converted Array</returns>
@@ -600,5 +605,6 @@ namespace TR.BIDSsv
       }
       else return ba;*/
     }
-  }
+		#endregion
+	}
 }
