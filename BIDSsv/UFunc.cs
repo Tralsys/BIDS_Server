@@ -214,6 +214,53 @@ namespace TR.BIDSsv
     public static long ToInt64(IEnumerable<byte> ab, int ind = 0) => GetLong(ab.ToArray(), ind);
     public static ulong ToUInt64(IEnumerable<byte> ab, int ind = 0) => GetULong(ab.ToArray(), ind);
     public static char ToChar(IEnumerable<byte> ab, int ind = 0) => GetChar(ab.ToArray(), ind);
+
+    /// <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
+    /// <param name="str">入力文字列</param>
+    /// <param name="ind">変換開始位置</param>
+    /// <param name="len">変換を行う最大長</param>
+    /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+    public static int? String2INT(string str)
+    {
+      if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException();
+
+      return (int?)String2Double(str);
+    }
+
+    static private readonly char[] NumAndSign = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '.' };
+
+    /// <summary>stringから小数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
+    /// <param name="str">入力文字列</param>
+    /// <param name="ind">変換開始位置</param>
+    /// <param name="len">変換を行う最大長</param>
+    /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+    public static double? String2Double(string str)
+    {
+      if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException();
+      double v;
+      //ref : https://stackoverflow.com/questions/2253653/where-can-i-find-a-net-implementation-of-atof
+      int sInd = str.IndexOfAny(NumAndSign);
+      if (sInd < 0) return null;
+      return double.TryParse(
+        new string(
+          str.Substring(sInd).Trim()
+          .TakeWhile((c) => (char.IsDigit(c) || c == '+' || c == '-' || c == '.'))
+          .ToArray()), out v) ? (double?)v : null;
+    }
+
+
+    public static string BIDSCMDMaker(char CMDType, char DType, int DNum, string data = null, char separator = ConstVals.CMD_SEPARATOR)
+      => string.Format("{0}{1}{2}{3}{4}{5}", ConstVals.CMD_HEADER, CMDType, DType, DNum, data == null ? string.Empty : separator.ToString(), data ?? string.Empty);
+    public static string BIDSCMDMaker(char CMDType, int DNum, string data = null, char separator = ConstVals.CMD_SEPARATOR)
+      => string.Format("{0}{1}{2}{3}{4}", ConstVals.CMD_HEADER, CMDType, DNum, data == null ? string.Empty : separator.ToString(), data ?? string.Empty);
+
+    public static bool State_Pressure_IsSame(in State oldS, in State newS)
+      => oldS.BC == newS.BC
+      && oldS.BP == newS.BP
+      && oldS.ER == newS.ER
+      && oldS.MR == newS.MR
+      && oldS.SAP == newS.SAP;
+
 #if !ID_SERCON
     public static bool ArrayEqual<T>(T[] ar1, int ar1ind, T[] ar2, int ar2ind, in int len = -1)
     {
