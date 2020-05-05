@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
@@ -100,16 +101,15 @@ namespace TR.BIDSsv
       return GotString;
     }
 
-    static private string DataSelTR(this IBIDSsv SVc, in string GotString)
+    static private string DataSelTR(IBIDSsv SVc, in string GotString)
     {
-      if (IsDebug) Console.Write("{0} << {1}", SVc?.Name, GotString);
       string ReturnString = GotString.Replace("\n", string.Empty) + "X";
 
       //0 1 2 3
       //T R X X
-      switch (GotString.Substring(2, 1))
+      switch (GotString.ToCharArray()[2])
       {
-        case "R"://レバーサー
+        case ConstVals.CMD_REVERSER://レバーサー
           switch (GotString.Substring(3))
           {
             case "R":
@@ -134,7 +134,7 @@ namespace TR.BIDSsv
               return "TRE7";//要求情報コードが不正
           }
           return ReturnString + "0";
-        case "S"://ワンハンドル
+        case ConstVals.CMD_SPoleMC://ワンハンドル
           int sers = 0;
           try
           {
@@ -155,7 +155,7 @@ namespace TR.BIDSsv
           PowerNotchNum = pnn;
           BrakeNotchNum = bnn;
           return ReturnString + "0";
-        case "P"://Pノッチ操作
+        case ConstVals.CMD_POWER://Pノッチ操作
           int serp = 0;
           try
           {
@@ -171,7 +171,7 @@ namespace TR.BIDSsv
           }
           PowerNotchNum = serp;
           return ReturnString + "0";
-        case "B"://Bノッチ操作
+        case ConstVals.CMD_BREAK://Bノッチ操作
           int serb = 0;
           try
           {
@@ -187,7 +187,7 @@ namespace TR.BIDSsv
           }
           BrakeNotchNum = serb;
           return ReturnString + "0";
-        case "K"://キー操作
+        case ConstVals.CMD_KeyCtrl://キー操作
           int serk = 0;
           try
           {
@@ -235,127 +235,19 @@ namespace TR.BIDSsv
             default:
               return "TRE3";//記号部不正
           }
-        case "I"://情報取得
-          if (!BSMD.IsEnabled) return "TRE1";
-          int seri = 0;
+        case ConstVals.CMD_INFOREQ://情報取得
           try
           {
-            seri = Convert.ToInt32(GotString.Substring(4));
-          }
-          catch (FormatException)
+            char dtyp = GotString.ToCharArray()[ConstVals.DTYPE_CHAR_POS];
+            int? dnum = UFunc.String2INT(GotString.Substring(ConstVals.DNUM_POS));
+            if (dnum == null) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);
+            else return ReturnString + Get_TRI_Data(dtyp, dnum ?? 0);
+          }catch(BIDSErrException bee)
           {
-            return "TRE6";//要求情報コード 文字混入
+            return bee.ErrCMD;
           }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
-          switch (GotString.Substring(3, 1))
-          {
-            case "C":
-              switch (seri)
-              {
-                case -1:
-                  Spec spec = BSMD.SpecData;
-                  return ReturnString + string.Format("{0}X{1}X{2}X{3}X{4}", spec.B, spec.P, spec.A, spec.J, spec.C);
-                case 0:
-                  return ReturnString + BSMD.SpecData.B.ToString();
-                case 1:
-                  return ReturnString + BSMD.SpecData.P.ToString();
-                case 2:
-                  return ReturnString + BSMD.SpecData.A.ToString();
-                case 3:
-                  return ReturnString + BSMD.SpecData.J.ToString();
-                case 4:
-                  return ReturnString + BSMD.SpecData.C.ToString();
-                default: return "TRE2";
-              }
-            case "E":
-              switch (seri)
-              {
-                case -3://Time
-                  TimeSpan ts3 = TimeSpan.FromMilliseconds(BSMD.StateData.T);
-                  return ReturnString + string.Format("{0}:{1}:{2}.{3}", ts3.Hours, ts3.Minutes, ts3.Seconds, ts3.Milliseconds);
-                case -2://Pressure
-                  State st2 = BSMD.StateData;
-                  return ReturnString + string.Format("{0}X{1}X{2}X{3}X{4}", st2.BC, st2.MR, st2.ER, st2.BP, st2.SAP);
-                case -1://All
-                  State st1 = BSMD.StateData;
-                  return ReturnString + string.Format(stateAllStr, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
-                case 0: return ReturnString + BSMD.StateData.Z.ToString();
-                case 1: return ReturnString + BSMD.StateData.V.ToString();
-                case 2: return ReturnString + BSMD.StateData.T.ToString();
-                case 3: return ReturnString + BSMD.StateData.BC.ToString();
-                case 4: return ReturnString + BSMD.StateData.MR.ToString();
-                case 5: return ReturnString + BSMD.StateData.ER.ToString();
-                case 6: return ReturnString + BSMD.StateData.BP.ToString();
-                case 7: return ReturnString + BSMD.StateData.SAP.ToString();
-                case 8: return ReturnString + BSMD.StateData.I.ToString();
-                //case 9: return ReturnString + BSMD.StateData.Volt;//予約 電圧
-                case 10: return ReturnString + TimeSpan.FromMilliseconds(BSMD.StateData.T).Hours.ToString();
-                case 11: return ReturnString + TimeSpan.FromMilliseconds(BSMD.StateData.T).Minutes.ToString();
-                case 12: return ReturnString + TimeSpan.FromMilliseconds(BSMD.StateData.T).Seconds.ToString();
-                case 13: return ReturnString + TimeSpan.FromMilliseconds(BSMD.StateData.T).Milliseconds.ToString();
-                default: return "TRE2";
-              }
-            case "H":
-              switch (seri)
-              {
-                case -1:
-                  Hand hd1 = BSMD.HandleData;
-                  return ReturnString + string.Format("{0}X{1}X{2}X{3}", hd1.B, hd1.P, hd1.R, hd1.C);
-                case 0: return ReturnString + BSMD.HandleData.B.ToString();
-                case 1: return ReturnString + BSMD.HandleData.P.ToString();
-                case 2: return ReturnString + BSMD.HandleData.R.ToString();
-                case 3: return ReturnString + BSMD.HandleData.C.ToString();//定速状態は予約
-                case 4:
-                  OpenD od = new OpenD();
-                  SML?.Read(out od);
-                  if (od.IsEnabled) return ReturnString + od.SelfBPosition.ToString();
-                  else return "TRE1";//SMem is not connected.
-                default: return "TRE2";
-              }
-            case "P":
-              PanelD pd = new PanelD();
-              SML?.Read(out pd);
-              if (seri < 0) return ReturnString + pd.Length.ToString();
-              else return ReturnString + (seri < pd.Length ? pd.Panels[seri] : 0).ToString();
-            case "S":
-              SoundD sd = new SoundD();
-              SML?.Read(out sd);
-              if (seri < 0) return ReturnString + sd.Length.ToString();
-              else return ReturnString + (seri < sd.Length ? sd.Sounds[seri] : 0).ToString();
-            case "D":
-              switch (seri)
-              {
-                case 0: return ReturnString + (BSMD.IsDoorClosed ? "1" : "0");
-                case 1: return ReturnString + "0";
-                case 2: return ReturnString + "0";
-                default: return "TRE2";
-              }
-            case "p":
-              if (seri < 0) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);//負の数は使用できません.
-                PanelD pda = new PanelD();
-              SML?.Read(out pda);
-              
-              ReturnString += ((seri * 32) >= pda.Length) ? 0 : pda.Panels[seri * 32];
-              for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
-                ReturnString += "X" + ((i >= pda.Length) ? 0 : pda.Panels[i]).ToString();
-
-              return ReturnString;
-            case "s":
-              if (seri < 0) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);//負の数は使用できません.
-              SoundD sda = new SoundD();
-              SML?.Read(out sda);
-
-              ReturnString += ((seri * 32) >= sda.Length) ? 0 : sda.Sounds[seri * 32];
-              for (int i = (seri * 32) + 1; i < (seri + 1) * 32; i++)
-                ReturnString += "X" + ((i >= sda.Length) ? 0 : sda.Sounds[i]).ToString();
-
-              return ReturnString;
-            default: return "TRE3";//記号部不正
-          }
-        case "A"://Auto Send Add
+          catch (Exception) { throw; }
+        case ConstVals.CMD_AUTOSEND_ADD://Auto Send Add
           int sera = 0;
           try
           {
@@ -387,13 +279,13 @@ namespace TR.BIDSsv
               asl = AutoNumL;
               break;
           }
-          string asres = DataPicker(dtypc_a, sera);
+          string asres = Get_TRI_Data(dtypc_a, sera);
           if (string.IsNullOrWhiteSpace(asres)) return Errors.GetCMD(Errors.ErrorNums.AS_AddErr);
           if (!asl.Contains(SVc, sera, dtypc_a)) asl.Add(SVc, sera, dtypc_a);
 
           return ReturnString + asres;
           
-        case "D"://Auto Send Delete
+        case ConstVals.CMD_AUTOSEND_DEL://Auto Send Delete
           int serd;
           try
           {
@@ -430,168 +322,328 @@ namespace TR.BIDSsv
           asld.Remove(SVc, serd, dtypc_d);
           return ReturnString;
           
-        case "E":
-        //throw new Exception(GotString);
+        case ConstVals.CMD_ERROR:
+          //throw new Exception(GotString);
+          return null;
+
+        case ConstVals.CMD_VERSION:
+          int serv = UFunc.String2INT(GotString.Substring(3)) ?? -1;
+          if (serv < 0) Errors.GetCMD(Errors.ErrorNums.CMD_ERROR);
+          SVc.Version = Math.Min(serv, Version);//デバイスのバージョンとBIDSsvのバージョンを比較し, より小さい値をその通信インスタンスでの採用バージョンとする.
+          return ReturnString + SVc.Version.ToString();
+
         default:
           return "TRE4";//識別子不正
       }
     }
 
-    /// <summary>Classify the data</summary>
-    /// <param name="CName">Connection Name</param>
-    /// <param name="data">Got Data</param>
-    /// <param name="enc">Encording</param>
-    /// <returns>byte array to return, or array that calling program is needed to do something</returns>
-    static public byte[] DataSelect(IBIDSsv CName, in byte[] data, in Encoding enc)
+    /// <summary>TRIで始まるコマンドに対応するデータを返す</summary>
+    /// <param name="DType">要求されたデータのタイプ</param>
+    /// <param name="DNum">要求されたデータの番号</param>
+    /// <param name="separator">使用するセパレータ文字</param>
+    /// <returns>要求されたデータ文字列(先頭のセパレータは含まれません.)</returns>
+    static public string Get_TRI_Data(char DType, int DNum, char separator = ConstVals.CMD_SEPARATOR)
     {
-      if (data == null || data.Length < 4) return null;
-      byte[] ba = BIDSBAtoBA(data);
-      if (ba[0] == (byte)'T')
+      if (!BSMD.IsEnabled) throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);
+
+      string s = "{1}";//連続出力用フォーマット指定文字列
+      switch (DType)
       {
-        switch ((char)ba[1])
-        {
-          case 'R':
-            string gs = enc.GetString(ba);
-            if (gs != null && gs != string.Empty)
-            {
-              if (gs.Contains("X")) DataGot(gs);
-              else
-              {
-                string sr = DataSelTR(CName, gs);
-                if (sr != null && sr != string.Empty) return enc.GetBytes(sr);
-              }
-            }
-            break;
-          case 'O':
-            string so = DataSelTO(enc.GetString(ba));
-            if (so != null && so != string.Empty) return enc.GetBytes(so);
-            break;
-        }
+        case ConstVals.DTYPE_CONSTD:
+          switch ((ConstVals.DNums.ConstD)DNum)
+          {
+            case ConstVals.DNums.ConstD.AllData:
+              Spec spec = BSMD.SpecData;
+              for (int i = 1; i < 5; i++)
+                s += string.Format("{0}{{{0}}}", i + 1);
+              
+              return string.Format(s, separator, spec.B, spec.P, spec.A, spec.J, spec.C);
+            case ConstVals.DNums.ConstD.Brake_Count:
+              return BSMD.SpecData.B.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ConstD.Power_Count:
+              return BSMD.SpecData.P.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ConstD.ATSCheckPos:
+              return BSMD.SpecData.A.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ConstD.B67_Pos:
+              return BSMD.SpecData.J.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ConstD.Car_Count:
+              return BSMD.SpecData.C.ToString(ConstVals.ToStrFormatInt);
+            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
+          }
+        case ConstVals.DTYPE_ELAPD:
+          switch ((ConstVals.DNums.ElapD)DNum)
+          {
+            case ConstVals.DNums.ElapD.Time_HMSms://Time
+              TimeSpan ts3 = TimeSpan.FromMilliseconds(BSMD.StateData.T);
+              return string.Format("{0}:{1}:{2}.{3}", ts3.Hours, ts3.Minutes, ts3.Seconds, ts3.Milliseconds);
+            case ConstVals.DNums.ElapD.Pressures://Pressure
+              State st2 = BSMD.StateData;
+              for (int i = 1; i < 5; i++)
+                s += string.Format("{0}{{{0}}}", i + 1);
+              return string.Format(s, separator, st2.BC, st2.MR, st2.ER, st2.BP, st2.SAP);
+            case ConstVals.DNums.ElapD.AllData://All
+              State st1 = BSMD.StateData;
+              for (int i = 1; i < 10; i++)
+                s += string.Format("{0}{{{0}}}", i + 1);
+              return string.Format(s, separator, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
+            case ConstVals.DNums.ElapD.Distance: return BSMD.StateData.Z.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.Speed: return BSMD.StateData.V.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.Time: return BSMD.StateData.T.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ElapD.BC_Pres: return BSMD.StateData.BC.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.MR_Pres: return BSMD.StateData.MR.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.ER_Pres: return BSMD.StateData.ER.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.BP_Pres: return BSMD.StateData.BP.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.SAP_Pres: return BSMD.StateData.SAP.ToString(ConstVals.ToStrFormatFloat);
+            case ConstVals.DNums.ElapD.Current: return BSMD.StateData.I.ToString(ConstVals.ToStrFormatFloat);
+            //case 9: return BSMD.StateData.Volt;//予約 電圧
+            case ConstVals.DNums.ElapD.TIME_Hour: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Hours.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ElapD.TIME_Min: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Minutes.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ElapD.TIME_Sec: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Seconds.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.ElapD.TIME_MSec: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Milliseconds.ToString(ConstVals.ToStrFormatInt);
+            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
+          }
+        case ConstVals.DTYPE_HANDPOS:
+          switch ((ConstVals.DNums.HandPos)DNum)
+          {
+            case ConstVals.DNums.HandPos.AllData:
+              Hand hd1 = BSMD.HandleData;
+              for (int i = 1; i < 4; i++)
+                s += string.Format("{0}{{{0}}}", i + 1);
+              return string.Format(s, separator, hd1.B, hd1.P, hd1.R, hd1.C);
+            case ConstVals.DNums.HandPos.Brake: return BSMD.HandleData.B.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.HandPos.Power: return BSMD.HandleData.P.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.HandPos.Reverser: return BSMD.HandleData.R.ToString(ConstVals.ToStrFormatInt);
+            case ConstVals.DNums.HandPos.ConstSpd: return BSMD.HandleData.C.ToString(ConstVals.ToStrFormatInt);//定速状態は予約
+            case ConstVals.DNums.HandPos.SelfB:
+              OpenD od = new OpenD();
+              SML?.Read(out od);
+              if (od.IsEnabled) return od.SelfBPosition.ToString(ConstVals.ToStrFormatInt);
+              else throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);//SMem is not connected.
+            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
+          }
+        case ConstVals.DTYPE_PANEL:
+          PanelD pd = new PanelD();
+          SML?.Read(out pd);
+          if (DNum < 0) return pd.Length.ToString(ConstVals.ToStrFormatInt);
+          else return (DNum < pd.Length ? pd.Panels[DNum] : 0).ToString(ConstVals.ToStrFormatInt);
+        case ConstVals.DTYPE_SOUND:
+          SoundD sd = new SoundD();
+          SML?.Read(out sd);
+          if (DNum < 0) return sd.Length.ToString(ConstVals.ToStrFormatInt);
+          else return (DNum < sd.Length ? sd.Sounds[DNum] : 0).ToString(ConstVals.ToStrFormatInt);
+        case ConstVals.DTYPE_DOOR:
+          switch (DNum)
+          {
+            case 0: return BSMD.IsDoorClosed ? "1" : "0";
+            case 1: return "0";
+            case 2: return "0";
+            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
+          }
+        case ConstVals.DTYPE_PANEL_ARR:
+          if (DNum < 0) return ConstVals.PANEL_ARR_PRINT_COUNT.ToString(ConstVals.ToStrFormatInt);//負の数は一度に出力する数の指定
+          PanelD pda = new PanelD();
+          SML?.Read(out pda);
+          string pReturnStr = string.Empty;
+          pReturnStr += ((DNum * ConstVals.PANEL_ARR_PRINT_COUNT) >= pda.Length) ? 0 : pda.Panels[DNum * ConstVals.PANEL_ARR_PRINT_COUNT];
+          for (int i = (DNum * ConstVals.PANEL_ARR_PRINT_COUNT) + 1;
+            i < (DNum + 1) * ConstVals.PANEL_ARR_PRINT_COUNT; i++)
+            pReturnStr += string.Format("{0}{1}",separator, (i >= pda.Length) ? 0 : pda.Panels[i]);
+
+          return pReturnStr;
+        case ConstVals.DTYPE_SOUND_ARR:
+          if (DNum < 0) return ConstVals.SOUND_ARR_PRINT_COUNT.ToString(ConstVals.ToStrFormatInt);//負の数は一度に出力する数の指定
+          SoundD sda = new SoundD();
+          SML?.Read(out sda);
+          string sReturnStr = string.Empty;
+          sReturnStr += ((DNum * ConstVals.SOUND_ARR_PRINT_COUNT) >= sda.Length) ? 0 : sda.Sounds[DNum * ConstVals.SOUND_ARR_PRINT_COUNT];
+          for (int i = (DNum * ConstVals.SOUND_ARR_PRINT_COUNT) + 1;
+            i < (DNum + 1) * ConstVals.SOUND_ARR_PRINT_COUNT; i++)
+            sReturnStr += string.Format("{0}{1}", separator, (i >= sda.Length) ? 0 : sda.Sounds[i]);
+
+          return sReturnStr;
+        default: throw new BIDSErrException(Errors.ErrorNums.DTYPE_ERROR);//記号部不正
       }
-      else if (ba[0] == 't' && ba[1] == 'r')//t:0x74, r:0x72
+
+      throw new BIDSErrException(Errors.ErrorNums.ERROR_in_DType_or_DNum);
+    }
+
+    static private byte[] DataSelBin(byte[] ba)
+    {
+      if (!(ba?.Length >= 6)) return null;//データ長6未満 or nullは対象外(念のためチェック)
+
+      //Header Check
+      if (ba[0] != ConstVals.BIN_CMD_HEADER_0 || ba[1] != ConstVals.BIN_CMD_HEADER_1) return null;//t:0x74, r:0x72
+
+      switch (ba[2])
       {
-        if (ba.Length < 6) return null;
-        switch (ba[2])
-        {
-          case 0x62://Info Data
-            switch (ba[3])
-            {
-              case 0x01://Spec
-                if (ba.GetShort(4) < Version) return null;
-                else if (ba.Length >= AutoSendSetting.BasicConstSize)
-                {
-                  BIDSSharedMemoryData bsmd = BSMD;
-                  OpenD od = OD;
-                  Spec s = bsmd.SpecData;
-                  int i = 0;
-                  s.B = ba.GetShort(i += 8);
-                  s.P = ba.GetShort(i += 2);
-                  s.A = ba.GetShort(i += 2);
-                  s.J = ba.GetShort(i += 2);
-                  s.C = ba.GetShort(i += 2);
-                  od.SelfBCount = ba.GetShort(i++);
-                  bsmd.SpecData = s;
-                  BSMD = bsmd;
-                  OD = od;
-                }
-                //else return ba;
-                break;
-              case 0x02://State
-                if (ba.Length >= AutoSendSetting.BasicCommonSize)
-                {
-                  BIDSSharedMemoryData bsmd = BSMD;
-                  State s = bsmd.StateData;
-                  int i = 0;
-                  s.Z = ba.GetDouble(i += 4);
-                  s.V = ba.GetFloat(i += 8);
-                  s.I = ba.GetFloat(i += 4);
-                  _ = ba.GetFloat(i += 4);//WireVoltage
-                  s.T = ba.GetInt(i += 4);
-                  s.BC = ba.GetFloat(i += 4);
-                  s.MR = ba.GetFloat(i += 4);
-                  s.ER = ba.GetFloat(i += 4);
-                  s.BP = ba.GetFloat(i += 4);
-                  s.SAP = ba.GetFloat(i += 4);
-                  bsmd.IsDoorClosed = (ba[13 * 4] & 0b10000000) > 0;
-                  bsmd.StateData = s;
-                  BSMD = bsmd;
-                }
-                //else return ba;
-                break;
-              case 0x03://BVE5D
-                break;
-              case 0x04://OpenD
-                break;
-              case 0x05://Handle
-                if (ba.Length >= AutoSendSetting.BasicHandleSize)
-                {
-                  BIDSSharedMemoryData bsmd = BSMD;
-                  OpenD od = OD;
-                  Hand h = bsmd.HandleData;
-                  int i = 0;
-                  h.P = ba.GetInt(i += 4);
-                  h.B = ba.GetInt(i += 4);
-                  h.R = ba.GetInt(i += 4);
-                  od.SelfBPosition = ba.GetInt(i += 4);
-                  bsmd.HandleData = h;
-                  BSMD = bsmd;
-                  OD = od;
-                }
-                break;
-            }
-            break;
-          case 0x70://Panel Data
-            if (ba.Length < AutoSendSetting.PanelSize) return null;
-            int pai = 0;
-            try
-            {
-              PanelD pd = PD;
-              pai = Convert.ToInt32(ba[3]);
-              if ((pai + 1) * 128 >= pd.Length)
+        case ConstVals.BIN_CMD_INFO_DATA://Info Data
+          switch ((ConstVals.BIN_CMD_INFOD_TYPES)ba[3])
+          {
+            case ConstVals.BIN_CMD_INFOD_TYPES.SPEC://Spec
+              if (ba.GetShort(4) < Version) return null;
+              else if (ba.Length >= AutoSendSetting.BasicConstSize)
               {
-                int[] pa = new int[(pai + 1) * 128];
-                Array.Copy(pd.Panels, pa, pd.Length);
-                pd.Panels = pa;
+                BIDSSharedMemoryData bsmd = BSMD;
+                OpenD od = OD;
+                Spec s = bsmd.SpecData;
+                int i = 0;
+                s.B = ba.GetShort(i += 8);
+                s.P = ba.GetShort(i += 2);
+                s.A = ba.GetShort(i += 2);
+                s.J = ba.GetShort(i += 2);
+                s.C = ba.GetShort(i += 2);
+                od.SelfBCount = ba.GetShort(i++);
+                bsmd.SpecData = s;
+                BSMD = bsmd;
+                OD = od;
               }
-              Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = ba.GetInt(4 + (4 * i)));
-              PD = pd;
-            }
-            catch (ObjectDisposedException) { return null; }
-            catch (Exception) { throw; }
-            break;
-          case 0x73://SoundData
-            if (ba.Length < 129 * 4) return null;
-            int sai = 0;
-            try
-            {
-              SoundD sd = SD;
-              sai = Convert.ToInt32(ba[3]);
-              if ((sai + 1) * 128 >= sd.Length)
+              //else return ba;
+              break;
+            case ConstVals.BIN_CMD_INFOD_TYPES.STATE://State
+              if (ba.Length >= AutoSendSetting.BasicCommonSize)
               {
-                int[] sa = new int[(sai + 1) * 128];
-                Array.Copy(sd.Sounds, sa, sd.Length);
-                sd.Sounds = sa;
+                BIDSSharedMemoryData bsmd = BSMD;
+                State s = bsmd.StateData;
+                int i = 0;
+                s.Z = ba.GetDouble(i += 4);
+                s.V = ba.GetFloat(i += 8);
+                s.I = ba.GetFloat(i += 4);
+                _ = ba.GetFloat(i += 4);//WireVoltage
+                s.T = ba.GetInt(i += 4);
+                s.BC = ba.GetFloat(i += 4);
+                s.MR = ba.GetFloat(i += 4);
+                s.ER = ba.GetFloat(i += 4);
+                s.BP = ba.GetFloat(i += 4);
+                s.SAP = ba.GetFloat(i += 4);
+                bsmd.IsDoorClosed = (ba[13 * 4] & 0b10000000) > 0;
+                bsmd.StateData = s;
+                BSMD = bsmd;
               }
-              Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = ba.GetInt(4 + (4 * i)));
-              SD = sd;
+              //else return ba;
+              break;
+            case ConstVals.BIN_CMD_INFOD_TYPES.BVE5D://BVE5D
+              break;
+            case ConstVals.BIN_CMD_INFOD_TYPES.OPEND://OpenD
+              break;
+            case ConstVals.BIN_CMD_INFOD_TYPES.HANDLE://Handle
+              if (ba.Length >= AutoSendSetting.BasicHandleSize)
+              {
+                BIDSSharedMemoryData bsmd = BSMD;
+                OpenD od = OD;
+                Hand h = bsmd.HandleData;
+                int i = 0;
+                h.P = ba.GetInt(i += 4);
+                h.B = ba.GetInt(i += 4);
+                h.R = ba.GetInt(i += 4);
+                od.SelfBPosition = ba.GetInt(i += 4);
+                bsmd.HandleData = h;
+                BSMD = bsmd;
+                OD = od;
+              }
+              break;
+          }
+          break;
+        case ConstVals.BIN_CMD_PANEL_DATA://Panel Data
+          if (ba.Length < AutoSendSetting.PanelSize) return null;
+          int pai = 0;
+          try
+          {
+            PanelD pd = PD;
+            pai = Convert.ToInt32(ba[3]);
+            if ((pai + 1) * 128 >= pd.Length)
+            {
+              int[] pa = new int[(pai + 1) * 128];
+              Array.Copy(pd.Panels, pa, pd.Length);
+              pd.Panels = pa;
             }
-            catch (ObjectDisposedException) { return null; }
-            catch (Exception) { throw; }
-            break;
-          default:
-            break;
-        }
+            Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = ba.GetInt(4 + (4 * i)));
+            PD = pd;
+          }
+          catch (ObjectDisposedException) { return null; }
+          catch (Exception) { throw; }
+          break;
+        case ConstVals.BIN_CMD_SOUND_DATA://SoundData
+          if (ba.Length < 129 * 4) return null;
+          int sai = 0;
+          try
+          {
+            SoundD sd = SD;
+            sai = Convert.ToInt32(ba[3]);
+            if ((sai + 1) * 128 >= sd.Length)
+            {
+              int[] sa = new int[(sai + 1) * 128];
+              Array.Copy(sd.Sounds, sa, sd.Length);
+              sd.Sounds = sa;
+            }
+            Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = ba.GetInt(4 + (4 * i)));
+            SD = sd;
+          }
+          catch (ObjectDisposedException) { return null; }
+          catch (Exception) { throw; }
+          break;
+        default:
+          break;
       }
+
       return null;
     }
 
+    /// <summary>Classify the data</summary>
+    /// <param name="CName">Connection Instance</param>
+    /// <param name="ba">Got Data</param>
+    /// <param name="enc">Encording</param>
+    /// <returns>byte array to return, or array that calling program is needed to do something</returns>
+    static public byte[] DataSelect(IBIDSsv CName, in byte[] ba, in Encoding enc)
+    {
+      if (!(ba?.Length >= 4)) return null;//データ長4未満 or nullは対象外
 
-    [Obsolete("Please use the \"DataSelect\" Method.")]
+      //StringデータかBinaryデータかを識別し, 適切なメソッドに処理を渡す
+
+      if (ba[0] == (byte)'T') return enc.GetBytes(DataSelect(CName, enc.GetString(ba)) ?? string.Empty);
+      else return DataSelBin(ba);
+    }
+
+    /// <summary>要求された情報を取得する</summary>
+    /// <param name="sv">IBIDSsvインスタンス</param>
+    /// <param name="str">入力されたコマンド文字列</param>
+    /// <returns>返信すべき文字列</returns>
+    static public string DataSelect(IBIDSsv sv, in string str)
+    {
+      if (sv == null) throw new ArgumentNullException();
+      if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException();
+
+      if (str.StartsWith(ConstVals.CMD_HEADER))
+        if (str.Contains(ConstVals.CMD_SEPARATOR))//データ付き
+        {
+          DataGot(str);
+          return null;
+        }
+        else return DataSelTR(sv, str);//データ要求
+      
+      else if (str.StartsWith(ConstVals.GIPI_HEADER)) return DataSelTO(str);
+
+      return null;//対応しないコマンド
+    }
+
+    /// <summary>必要なデータを取得すると同時に, 送信まで行う.</summary>
+    /// <param name="sv">通信インスタンス</param>
+    /// <param name="data">入力データ</param>
+    /// <param name="enc">使用するエンコーディング</param>
+    static public void DataSelSend(IBIDSsv sv, in byte[] data, in Encoding enc) => sv?.Print(DataSelect(sv, data, enc));
+
+    /// <summary>必要なデータを選択すると同時に, 送信まで行う.</summary>
+    /// <param name="sv">IBIDSsvインスタンス</param>
+    /// <param name="str">入力されたコマンド文字列</param>
+    static public void DataSelSend(IBIDSsv sv, in string str) => sv?.Print(DataSelect(sv, str));
+    
+
+
+		#region Obsolete Method
+		[Obsolete("Please use the \"DataSelect\" Method.")]
     static public string DataSelectTR(IBIDSsv CN, in string GotStr) => DataSelTR(CN, GotStr);
 
     [Obsolete("Please use the \"DataSelect\" Method.")]
     static public string DataSelectTO(in string GotString) => DataSelTO(GotString);
-
-
-  }
+		#endregion
+	}
 }
