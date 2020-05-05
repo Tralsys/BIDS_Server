@@ -6,12 +6,10 @@ namespace TR.BIDSsv
 {
   static public partial class Common
   {
-    public const string ToStrFormatInt = "D";
-    public const string ToStrFormatFloat = ".0#####";
-    static public string DataPicker(char DType, int DNum, string ToStringFormatInt = ToStrFormatInt, string ToStringFormatFloat = ToStrFormatFloat)
+    static public string DataPicker(char DType, int DNum, string ToStringFormatInt = ConstVals.ToStrFormatInt, string ToStringFormatFloat = ConstVals.ToStrFormatFloat)
     {
-      if (string.IsNullOrWhiteSpace(ToStringFormatInt)) ToStringFormatInt = ToStrFormatInt;
-      if (string.IsNullOrWhiteSpace(ToStringFormatFloat)) ToStringFormatFloat = ToStrFormatFloat;
+      if (string.IsNullOrWhiteSpace(ToStringFormatInt)) ToStringFormatInt = ConstVals.ToStrFormatInt;
+      if (string.IsNullOrWhiteSpace(ToStringFormatFloat)) ToStringFormatFloat = ConstVals.ToStrFormatFloat;
 
       bool IsFloatVal = false;
       object o = DataPicker(DType, DNum, out IsFloatVal);
