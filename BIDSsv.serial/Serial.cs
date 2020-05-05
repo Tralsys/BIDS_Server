@@ -1,30 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Ports;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using TR.BIDSSMemLib;
-using TR.BIDSsv;
 
 namespace TR.BIDSsv
 {
-  public class Serial : TR.IBIDSsv
+  public class Serial : IBIDSsv
   {
     public bool IsDisposed { get; private set; } = false;
-    public int Version => 202;
-    public bool IsDebug { get; set; } = false;
+    public int Version { get; set; } = 202;
+    public bool IsDebug { get => sdc.IsDebugging; set => sdc.IsDebugging = value; }
     public string Name { get; private set; } = "serial";
 
-    SerialPort SP = null;
-    bool IsLooping = true;
-    bool IsBinaryAllowed = false;
-
-    Thread ReadThread = null;
+    Serial_DeviceCom sdc = null;
+    private bool IsBinaryAllowed = false;
 
     public bool Connect(in string args)
     {
-      SP = new SerialPort();
+      SerialPort SP = new SerialPort();
 
       SP.ReadBufferSize = 64;
       SP.WriteBufferSize = 64;
@@ -189,106 +181,27 @@ namespace TR.BIDSsv
           }
         }
       }
-      SP?.Open();
-      if (SP?.IsOpen == true)
+      try
       {
-        ReadThread = new Thread(ReadDoing);
-        ReadThread.Start();
+        sdc = new Serial_DeviceCom(SP);
+
+        Console.WriteLine(Name + " : " + sdc.IsOpen);
+
+        sdc.StringDataReceived += Sdc_StringDataReceived;
+        sdc.BinaryDataReceived += Sdc_BinaryDataReceived;
       }
-      Console.WriteLine(Name + " : " + SP?.IsOpen.ToString());
-      return SP?.IsOpen == true;
+      catch(Exception e)
+      {
+        Console.WriteLine("{0} : an exception has occured in the init section.\n{1}", Name, e);
+        return false;
+      }
+
+      return sdc.IsOpen;
     }
 
-    public void Dispose()
-    {
-      IsLooping = false;
-      if (ReadThread?.Join(5000) == false) Console.WriteLine(Name + " : ReadThread Closing Failed.");
-      SP?.Dispose();
-      Console.WriteLine(Name + " : " + SP?.IsOpen.ToString());
-      IsDisposed = true;
-    }
+    private void Sdc_BinaryDataReceived(object sender, byte[] e) => Common.DataSelSend(this, e, sdc.Enc);
 
-    private void ReadDoing()
-    {
-      while (SP?.IsOpen == true && IsLooping)
-      {
-        string inputStr = null;
-        if (IsBinaryAllowed)
-        {
-          int btr = SP.BytesToRead;
-          if (btr <= 0)
-          {
-            Thread.Sleep(1);
-            continue;
-          }
-          byte[] ba = new byte[btr];
-          SP.Read(ba, 0, ba.Length);
-          Print(Common.DataSelect(this, ba, SP.Encoding));
-          continue;
-        }
-        try
-        {
-          inputStr = SP?.ReadLine();
-        }
-        catch (TimeoutException)
-        {
-          continue;
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine("Error has occured at ReadDoing on" + Name);
-          Console.WriteLine(e);
-          continue;
-        }
-        if (inputStr != null && inputStr.Length > 3)
-        {
-          if (IsDebug) Console.WriteLine(Name + " : Get > " + inputStr + "\n");
-          //byte[] debugBA = SP.Encoding.GetBytes(inputStr);
-          if (inputStr.StartsWith("TO")) SPWriteLine(DataSelectTO(in inputStr));
-          if (inputStr.StartsWith("TR"))
-          {
-            if (inputStr.StartsWith("TRV"))
-            {
-              try
-              {
-                if (int.Parse(inputStr.Substring(3, 3)) >= 202)
-                {
-                  if (inputStr.Contains("BR"))
-                  {
-                    int BaR = int.Parse(inputStr.Split(new string[] { "BR" }, StringSplitOptions.RemoveEmptyEntries)[1]);
-                    SPWriteLine(inputStr + "X202br" + BaR.ToString());//TRV202BR115200X202br115200
-                    SP.BaudRate = BaR;
-                  }
-                  else SPWriteLine(inputStr + "X202");
-                }
-                else SPWriteLine(inputStr + "X" + inputStr.Substring(3));
-              }catch(Exception e)
-              {
-                Console.WriteLine("Serial({0}) ReadDoing() : VersionCheck Error\n{1}", Name, e);
-              }
-            }
-            else SPWriteLine(DataSelectTR(in inputStr));
-          }
-        }
-      }
-    }
-
-    void SPWriteLine(string s)
-    {
-      if (string.IsNullOrWhiteSpace(s)) return;
-      if (SP != null)
-      {
-        if (IsDebug) Console.WriteLine(Name + " : Set > " + s);
-        try
-        {
-          SP.WriteLine(s);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine(e);
-        }
-      }
-    }
+    private void Sdc_StringDataReceived(object sender, string e) => Common.DataSelSend(this, e);
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
     public void OnOpenDChanged(in OpenD data) { }
@@ -324,16 +237,52 @@ namespace TR.BIDSsv
     }
 
 
-    private string DataSelectTR(in string GetString) => Common.DataSelectTR(this, in GetString);
-    private string DataSelectTO(in string GetString) => Common.DataSelectTO(in GetString);
+    public void Print(in string data) => sdc?.PrintString(data);
 
-    public void Print(in string data) => SPWriteLine(data);
+    /// <summary>(IsBinaryAllowedがtrueの場合のみ)Binaryデータを送信します.</summary>
+    /// <param name="data">送信するデータ</param>
     public void Print(in byte[] data)
     {
-      if (!IsBinaryAllowed) return;
-      if (data == null || data.Length <= 0) return;
-      byte[] wa = Common.BAtoBIDSBA(data);
-      SP?.Write(wa, 0, wa.Length);
+      if (IsBinaryAllowed) sdc?.PrintBinary(data);
     }
+
+
+    #region IDisposable Support
+    private bool disposedValue = false; // 重複する呼び出しを検出するには
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!disposedValue)
+      {
+        if (disposing)
+        {
+          // TODO: マネージ状態を破棄します (マネージ オブジェクト)。
+        }
+
+        // TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
+        // TODO: 大きなフィールドを null に設定します。
+
+        sdc.Dispose();
+
+        disposedValue = true;
+      }
+    }
+
+    // TODO: 上の Dispose(bool disposing) にアンマネージ リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします。
+    // ~Serial()
+    // {
+    //   // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
+    //   Dispose(false);
+    // }
+
+    // このコードは、破棄可能なパターンを正しく実装できるように追加されました。
+    public void Dispose()
+    {
+      // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
+      Dispose(true);
+      // TODO: 上のファイナライザーがオーバーライドされる場合は、次の行のコメントを解除してください。
+      // GC.SuppressFinalize(this);
+    }
+    #endregion
   }
 }

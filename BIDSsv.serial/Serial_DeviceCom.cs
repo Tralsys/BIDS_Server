@@ -21,6 +21,8 @@ namespace TR.BIDSsv
 		public event EventHandler<string> StringDataReceived;
 		public event EventHandler<byte[]> BinaryDataReceived;
 
+		public Encoding Enc { get => serial?.Encoding ?? Encoding.UTF8; }
+
 		private const string BINARY_DATA_HEADER = "B64E";
 		private const string SERIAL_SETTING_HEADER = "S";
 		
@@ -57,7 +59,7 @@ namespace TR.BIDSsv
 			gotData = sp.ReadExisting();
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
 
-			if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{1}", gotData);
+			if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
 
 			string[] sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
