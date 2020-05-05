@@ -10,7 +10,7 @@ namespace TR.BIDSsv
   public class udp : IBIDSsv
   {
     public bool IsDisposed { get => disposedValue; }
-    public int Version { get; private set; } = 202;
+    public int Version { get; set; } = 202;
     public string Name { get; private set; } = "udp";
     public bool IsDebug {
       get => isDbg;
@@ -123,16 +123,16 @@ namespace TR.BIDSsv
 
     private void Udpc_DataGotEv(object sender, UDPGotEvArgs e)
     {
-      if (e.DataLen <= 0) return;
+      if (!(e?.DataLen > 0)) return;
 
-      byte[] ba = Common.BIDSBAtoBA(e.Data);
-      ba = Common.DataSelect(this, ba, Enc);
-      if (ba?.Length > 0) Print(ba);
+      Common.DataSelSend(this, e.Data, Enc);
     }
 
     public void Print(in string data)
     {
       if (IsDebug) Console.WriteLine("{0} >> {1}", Name, data);
+      if (string.IsNullOrWhiteSpace(data)) return;
+
       try
       {
         Print(Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n")));

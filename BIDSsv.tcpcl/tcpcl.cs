@@ -13,7 +13,7 @@ namespace BIDSsv.tcpcl
   class TCPcl : IBIDSsv
   {
     public bool IsDisposed { get; private set; } = false;
-    public int Version { get; private set; } = 202;
+    public int Version { get; set; } = 202;
     public string Name { get; private set; } = "tcpcl";
     public bool IsDebug { get; set; } = false;
 
@@ -257,8 +257,8 @@ namespace BIDSsv.tcpcl
     public void Print(in byte[] data)
     {
       if (TC?.Connected != true || NS?.CanWrite != true) return;
-      byte[] ba = Common.BAtoBIDSBA(data);
-      if (ba != null && ba.Length > 0) NS?.Write(ba, 0, ba.Length);
+
+      if (data?.Length > 0) NS?.Write(data, 0, data.Length);
     }
 
     List<byte> RBytesLRec = new List<byte>();

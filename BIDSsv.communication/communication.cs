@@ -13,7 +13,7 @@ namespace TR.BIDSsv
     private int PortNum = DefPNum;
     private int RemotePNum = DefPNum;
     IPAddress Addr = IPAddress.Any;
-    public int Version { get; private set; } = 100;
+    public int Version { get; set; } = 100;
     public string Name { get; private set; } = "communication";
     public bool IsDebug { get; set; } = false;
     bool IsWriteable = false;
@@ -157,13 +157,8 @@ namespace TR.BIDSsv
 
     public void Print(in byte[] data)
     {
-      if (!IsWriteable) return;
-      
-      if (UC != null && data?.Length > 0)
-      {
-        byte[] wa = Common.BAtoBIDSBA(data);
-        UC.Send(wa, wa.Length);
-      }
+      if (IsWriteable && UC != null && data?.Length > 0)
+        UC.Send(data, data.Length); 
     }
 
     readonly string[] ArgInfo = new string[]
