@@ -149,11 +149,6 @@ namespace TR.BIDSsv
       }
     }
 
-    const int OpenDBias = 1000000;
-    const int ElapDBias = 100000;
-    const int DoorDBias = 10000;
-    const int HandDBias = 1000;
-
     static private void ASPtr(byte[] ba)
     {
       if (ba != null && ba.Length > 0 && svlist?.Count > 0)
@@ -274,30 +269,75 @@ namespace TR.BIDSsv
 
         if (AutoNumL?.Count > 0)
         {
-          bool IsDClsdo = e.OldData.IsDoorClosed;
-          bool IsDClsd = e.NewData.IsDoorClosed;
-          Spec osp = e.OldData.SpecData;
-          Spec nsp = e.NewData.SpecData;
-          State ost = e.OldData.StateData;
-          State nst = e.NewData.StateData;
-          Hand oh = e.OldData.HandleData;
-          Hand nh = e.NewData.HandleData;
-          TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
-          TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
-
-          Parallel.For(0, AutoNumL.Count, (ind) =>//書き直す/////////////////////////////////////////////////////////////////////////////////////
+          Parallel.For(0, AutoNumL.Count, (ind) =>
           {
             char dtyp = AutoNumL.DTypes[ind];
             int dnum = AutoNumL.DNums[ind];
-            bool isfv = false;
-            switch (AutoNumL.DTypes[ind])
+            IBIDSsv sv = AutoNumL.SvList[ind];
+
+            if (sv?.IsDisposed != false) return;//null=>return, Disposed=T:return, Disposed=F:next
+            string data = null;
+            try
             {
-              case ConstVals.DTYPE_CONSTD:
-                object oconstd = e.NewData.SpecData.PickData(dtyp, dnum, out isfv);
-                if (Equals(e.OldData.SpecData.PickData(dtyp, dnum, out isfv), oconstd)) return;
-                AutoNumL.SvList[ind].Print(ConstVals.CMD_HEADER + ConstVals.CMD_INFOREQ.ToString() + dtyp.ToString() + dnum.ToString() + ConstVals.CMD_SEPARATOR.ToString() + oconstd.ToString());
-                return;
+              data = Get_TRI_Data(dtyp, dnum);
             }
+            catch (BIDSErrException) { return; }
+            catch (Exception) { throw; }
+
+            TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
+            TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
+
+            if (dtyp switch
+            {
+              ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)dnum switch
+              {
+                ConstVals.DNums.ConstD.AllData => Equals(e.OldData.SpecData, e.NewData.SpecData),
+                ConstVals.DNums.ConstD.ATSCheckPos => e.OldData.SpecData.A == e.NewData.SpecData.A,
+                ConstVals.DNums.ConstD.B67_Pos => e.OldData.SpecData.J == e.NewData.SpecData.J,
+                ConstVals.DNums.ConstD.Brake_Count => e.OldData.SpecData.B == e.NewData.SpecData.B,
+                ConstVals.DNums.ConstD.Car_Count => e.OldData.SpecData.C == e.NewData.SpecData.C,
+                ConstVals.DNums.ConstD.Power_Count => e.OldData.SpecData.P == e.NewData.SpecData.P,
+                _ => null
+              },
+
+              ConstVals.DTYPE_DOOR => e.OldData.IsDoorClosed == e.NewData.IsDoorClosed,
+
+              ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)dnum switch
+              {
+                ConstVals.DNums.ElapD.AllData => Equals(e.OldData.StateData, e.NewData.StateData),
+                ConstVals.DNums.ElapD.BC_Pres => e.OldData.StateData.BC == e.NewData.StateData.BC,
+                ConstVals.DNums.ElapD.BP_Pres => e.OldData.StateData.BP == e.NewData.StateData.BP,
+                ConstVals.DNums.ElapD.Current => e.OldData.StateData.I == e.NewData.StateData.I,
+                ConstVals.DNums.ElapD.Distance => e.OldData.StateData.Z == e.NewData.StateData.Z,
+                ConstVals.DNums.ElapD.ER_Pres => e.OldData.StateData.ER == e.NewData.StateData.ER,
+                ConstVals.DNums.ElapD.MR_Pres => e.OldData.StateData.MR == e.NewData.StateData.MR,
+                ConstVals.DNums.ElapD.Pressures => UFunc.State_Pressure_IsSame(e.OldData.StateData, e.NewData.StateData),
+                ConstVals.DNums.ElapD.SAP_Pres => e.OldData.StateData.SAP == e.NewData.StateData.SAP,
+                ConstVals.DNums.ElapD.Speed => e.OldData.StateData.V == e.NewData.StateData.V,
+                ConstVals.DNums.ElapD.Time => e.OldData.StateData.T == e.NewData.StateData.T,
+                ConstVals.DNums.ElapD.Time_HMSms => e.OldData.StateData.T == e.NewData.StateData.T,
+                ConstVals.DNums.ElapD.TIME_Hour => ots.Hours == nts.Hours,
+                ConstVals.DNums.ElapD.TIME_Min => ots.Minutes == nts.Minutes,
+                ConstVals.DNums.ElapD.TIME_MSec => ots.Milliseconds == nts.Milliseconds,
+                ConstVals.DNums.ElapD.TIME_Sec => ots.Seconds == nts.Seconds,
+                ConstVals.DNums.ElapD.Voltage => null,
+                _ => null
+              },
+
+              ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)dnum switch
+              {
+                ConstVals.DNums.HandPos.AllData => Equals(e.OldData.HandleData, e.NewData.HandleData),
+                ConstVals.DNums.HandPos.Brake => e.OldData.HandleData.B == e.NewData.HandleData.B,
+                ConstVals.DNums.HandPos.ConstSpd => e.OldData.HandleData.C == e.NewData.HandleData.C,
+                ConstVals.DNums.HandPos.Power => e.OldData.HandleData.P == e.NewData.HandleData.P,
+                ConstVals.DNums.HandPos.Reverser => e.OldData.HandleData.R == e.NewData.HandleData.R,
+                ConstVals.DNums.HandPos.SelfB => null,
+                _ => null
+              },
+
+              _ => null
+            }
+            == false) sv?.Print(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, dtyp, dnum, data));
           });
         }
       }
