@@ -89,7 +89,7 @@ namespace TR.BIDSsv
     
     public bool DataSend(in byte[] ba)
     {
-      if (disposing) return false;
+      if (disposing || !(ba?.Length > 0)) return false;
       byte[] tsba = ocr.AddTimeStamp(ba);
       dsb.SetData(tsba);
       tsba = SetMyID(tsba);
