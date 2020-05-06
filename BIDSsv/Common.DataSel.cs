@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 
@@ -236,13 +237,36 @@ namespace TR.BIDSsv
               return "TRE3";//記号部不正
           }
         case ConstVals.CMD_INFOREQ://情報取得
+          char dtyp = '\0';
+          int? dnum = null;
+
+          //dtyp convert
           try
           {
-            char dtyp = GotString.ToCharArray()[ConstVals.DTYPE_CHAR_POS];
-            int? dnum = UFunc.String2INT(GotString.Substring(ConstVals.DNUM_POS));
-            if (dnum == null) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);
-            else return ReturnString + Get_TRI_Data(dtyp, dnum ?? 0);
-          }catch(BIDSErrException bee)
+            dtyp = GotString.ToCharArray()[ConstVals.DTYPE_CHAR_POS];
+          }
+          catch (Exception)
+          {
+            return Errors.GetCMD(Errors.ErrorNums.DTYPE_ERROR);
+          }
+
+          //dnum conv
+          try
+          {
+            dnum = UFunc.String2INT(GotString.Substring(ConstVals.DNUM_POS));
+          }
+          catch (Exception)
+          {
+            return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);
+          }
+
+          if (dnum == null) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);
+
+          try
+          {
+            return ReturnString + Get_TRI_Data(dtyp, dnum ?? 0);
+          }
+          catch(BIDSErrException bee)
           {
             return bee.ErrCMD;
           }
@@ -279,8 +303,22 @@ namespace TR.BIDSsv
               asl = AutoNumL;
               break;
           }
-          string asres = Get_TRI_Data(dtypc_a, sera);
+          string asres = string.Empty;
+          try
+          {
+            asres = Get_TRI_Data(dtypc_a, sera, true);//BIDS SMem疎通状況によらず初期値を取得する.
+          }
+          catch (BIDSErrException)
+          {
+            asres = "0";
+          }//無視(使用できないデータでも一応受け付けておく.)
+          catch (Exception)
+          {
+            return Errors.GetCMD(Errors.ErrorNums.UnknownError);
+          }
+
           if (string.IsNullOrWhiteSpace(asres)) return Errors.GetCMD(Errors.ErrorNums.AS_AddErr);
+
           if (!asl.Contains(SVc, sera, dtypc_a)) asl.Add(SVc, sera, dtypc_a);
 
           return ReturnString + asres;
@@ -340,13 +378,17 @@ namespace TR.BIDSsv
     /// <summary>TRIで始まるコマンドに対応するデータを返す</summary>
     /// <param name="DType">要求されたデータのタイプ</param>
     /// <param name="DNum">要求されたデータの番号</param>
+    /// <param name="GetDataAnyway">BIDS SMemの疎通状況に依らずにデータを取得するか否か</param>
     /// <param name="separator">使用するセパレータ文字</param>
     /// <returns>要求されたデータ文字列(先頭のセパレータは含まれません.)</returns>
-    static public string Get_TRI_Data(char DType, int DNum, char separator = ConstVals.CMD_SEPARATOR)
+    static public string Get_TRI_Data(char DType, int DNum, bool GetDataAnyway = false, char separator = ConstVals.CMD_SEPARATOR)
     {
-      if (!BSMD.IsEnabled) throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);
+      //データ強制取得F && SMem未疎通 => NotConnected
+      //データ強制取得F && SMem疎通済 => 値を返す
+      //データ強制取得T && (疎通不依存) => 値を返す
+      if (!GetDataAnyway && !BSMD.IsEnabled) throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);
 
-      string s = "{1}";//連続出力用フォーマット指定文字列
+      string s = "{0}";//連続出力用フォーマット指定文字列
       switch (DType)
       {
         case ConstVals.DTYPE_CONSTD:
@@ -355,9 +397,9 @@ namespace TR.BIDSsv
             case ConstVals.DNums.ConstD.AllData:
               Spec spec = BSMD.SpecData;
               for (int i = 1; i < 5; i++)
-                s += string.Format("{0}{{{0}}}", i + 1);
+                s += string.Format("{0}{{1}}", separator, i);
               
-              return string.Format(s, separator, spec.B, spec.P, spec.A, spec.J, spec.C);
+              return string.Format(s, spec.B, spec.P, spec.A, spec.J, spec.C);
             case ConstVals.DNums.ConstD.Brake_Count:
               return BSMD.SpecData.B.ToString(ConstVals.ToStrFormatInt);
             case ConstVals.DNums.ConstD.Power_Count:
@@ -379,13 +421,13 @@ namespace TR.BIDSsv
             case ConstVals.DNums.ElapD.Pressures://Pressure
               State st2 = BSMD.StateData;
               for (int i = 1; i < 5; i++)
-                s += string.Format("{0}{{{0}}}", i + 1);
-              return string.Format(s, separator, st2.BC, st2.MR, st2.ER, st2.BP, st2.SAP);
+                s += string.Format("{0}{{1}}", separator, i);
+              return string.Format(s, st2.BC, st2.MR, st2.ER, st2.BP, st2.SAP);
             case ConstVals.DNums.ElapD.AllData://All
               State st1 = BSMD.StateData;
               for (int i = 1; i < 10; i++)
-                s += string.Format("{0}{{{0}}}", i + 1);
-              return string.Format(s, separator, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
+                s += string.Format("{0}{{1}}", separator, i);
+              return string.Format(s, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
             case ConstVals.DNums.ElapD.Distance: return BSMD.StateData.Z.ToString(ConstVals.ToStrFormatFloat);
             case ConstVals.DNums.ElapD.Speed: return BSMD.StateData.V.ToString(ConstVals.ToStrFormatFloat);
             case ConstVals.DNums.ElapD.Time: return BSMD.StateData.T.ToString(ConstVals.ToStrFormatInt);
@@ -408,8 +450,8 @@ namespace TR.BIDSsv
             case ConstVals.DNums.HandPos.AllData:
               Hand hd1 = BSMD.HandleData;
               for (int i = 1; i < 4; i++)
-                s += string.Format("{0}{{{0}}}", i + 1);
-              return string.Format(s, separator, hd1.B, hd1.P, hd1.R, hd1.C);
+                s += string.Format("{0}{{1}}", separator, i);
+              return string.Format(s, hd1.B, hd1.P, hd1.R, hd1.C);
             case ConstVals.DNums.HandPos.Brake: return BSMD.HandleData.B.ToString(ConstVals.ToStrFormatInt);
             case ConstVals.DNums.HandPos.Power: return BSMD.HandleData.P.ToString(ConstVals.ToStrFormatInt);
             case ConstVals.DNums.HandPos.Reverser: return BSMD.HandleData.R.ToString(ConstVals.ToStrFormatInt);
@@ -417,7 +459,7 @@ namespace TR.BIDSsv
             case ConstVals.DNums.HandPos.SelfB:
               OpenD od = new OpenD();
               SML?.Read(out od);
-              if (od.IsEnabled) return od.SelfBPosition.ToString(ConstVals.ToStrFormatInt);
+              if (GetDataAnyway || od.IsEnabled) return od.SelfBPosition.ToString(ConstVals.ToStrFormatInt);
               else throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);//SMem is not connected.
             default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
           }
