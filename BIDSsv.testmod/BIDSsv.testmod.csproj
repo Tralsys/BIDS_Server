@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>TR.BIDSsv</RootNamespace>
+		<AssemblyName>TR.BIDSsv.testmod</AssemblyName>
+		<Authors>Tetsu Otter</Authors>
+		<Company>Tech Otter</Company>
+		<Product>BIDS Project</Product>
+		<Copyright>Copyright 2020 Tetsu Otter</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
+		<ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
+		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="xcopy /I/Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)BIDS_Server\bin\$(ConfigurationName)\mods\&quot;" />
+	</Target>
+
+</Project>
