@@ -23,6 +23,8 @@ namespace TR.BIDSsv
 
 		public Encoding Enc { get => serial?.Encoding ?? Encoding.UTF8; }
 
+		public bool ReConnectWhenTimedOut { get; set; } = false;
+
 		private const string BINARY_DATA_HEADER = "B64E";
 		private const string SERIAL_SETTING_HEADER = "S";
 		
@@ -56,7 +58,9 @@ namespace TR.BIDSsv
 		{
 			string gotData = string.Empty;
 			SerialPort sp = (SerialPort)sender;
+			
 			gotData = sp.ReadExisting();
+			
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
 
 			if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
@@ -111,7 +115,38 @@ namespace TR.BIDSsv
 			try
 			{
 				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.PrintString() : DataSend=>{0}", s);
-				serial.WriteLine(s);
+				try
+				{
+					serial.WriteLine(s);
+				}
+				catch (TimeoutException)
+				{
+					Console.WriteLine("\tTimeOut ({0})", s);
+					if (ReConnectWhenTimedOut)
+					{
+						Console.WriteLine("Reconnect doing...");
+						try
+						{
+							serial.Close();
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine("SerialPort Close Failed. : {0}", e);
+							return false;
+						}
+						try
+						{
+							serial.Open();
+						}
+						catch(Exception e)
+						{
+							Console.WriteLine("SerialPort ReOpen Failed. : {0}", e);
+							return false;
+						}
+						return PrintString(s);
+					}
+					return false;
+				}
 				return true;
 			}catch(Exception e)
 			{

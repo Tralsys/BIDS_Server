@@ -11,6 +11,8 @@ namespace TR.BIDSsv
     public bool IsDebug { get => sdc.IsDebugging; set => sdc.IsDebugging = value; }
     public string Name { get; private set; } = "serial";
 
+    public bool ReConnectWhenTimedOut { get; private set; } = false;
+
     Serial_DeviceCom sdc = null;
     private bool IsBinaryAllowed = false;
 
@@ -34,150 +36,160 @@ namespace TR.BIDSsv
         string[] saa = sa[i].Split(':');
         if (saa.Length > 0)
         {
-          switch (saa[0])
+          try
           {
-            case "B":
-              SP.BaudRate = int.Parse(saa[1]);
-              break;
-            case "BaudRate":
-              SP.BaudRate = int.Parse(saa[1]);
-              break;
-            case "BS":
-              IsBinaryAllowed = true;
-              break;
-            case "BinarySender":
-              IsBinaryAllowed = true;
-              break;
-            case "DataBits":
-              SP.DataBits = int.Parse(saa[1]);
-              break;
-            case "DTR":
-              SP.DtrEnable = saa[1] == "1";
-              break;
-            case "E":
-              switch (int.Parse(saa[1]))
-              {
-                case 0:
-                  SP.Encoding = Encoding.Default;
-                  break;
-                case 1:
-                  SP.Encoding = Encoding.ASCII;
-                  break;
-                case 2:
-                  SP.Encoding = Encoding.Unicode;
-                  break;
-                case 3:
-                  SP.Encoding = Encoding.UTF8;
-                  break;
-                case 4:
-                  SP.Encoding = Encoding.UTF32;
-                  break;
-                default:
-                  SP.Encoding = Encoding.Default;
-                  break;
-              }
-              break;
-            case "Encoding":
-              switch (int.Parse(saa[1]))
-              {
-                case 0:
-                  SP.Encoding = Encoding.Default;
-                  break;
-                case 1:
-                  SP.Encoding = Encoding.ASCII;
-                  break;
-                case 2:
-                  SP.Encoding = Encoding.Unicode;
-                  break;
-                case 3:
-                  SP.Encoding = Encoding.UTF8;
-                  break;
-                case 4:
-                  SP.Encoding = Encoding.UTF32;
-                  break;
-                default:
-                  SP.Encoding = Encoding.Default;
-                  break;
-              }
-              break;
-            case "HandShake":
-              SP.Handshake = (Handshake)int.Parse(saa[1]);
-              break;
-            case "N":
-              Name = saa[1];
-              break;
-            case "Name":
-              Name = saa[1];
-              break;
-            case "NL":
-              switch (int.Parse(saa[1]))
-              {
-                case 1:
-                  SP.NewLine = "\r";
-                  break;
-                case 2:
-                  SP.NewLine = "\r\n";
-                  break;
-                default:
-                  SP.NewLine = "\n";
-                  break;
-              }
-              break;
-            case "NewLine":
-              switch (int.Parse(saa[1]))
-              {
-                case 1:
-                  SP.NewLine = "\r";
-                  break;
-                case 2:
-                  SP.NewLine = "\r\n";
-                  break;
-                default:
-                  SP.NewLine = "\n";
-                  break;
-              }
-              break;
-            case "P":
-              try
-              {
-                SP.PortName = "COM" + int.Parse(saa[1]);
-              }
-              catch (FormatException)
-              {
-                SP.PortName = saa[1];
-              }
-              break;
-            case "Port":
-              try
-              {
-                SP.PortName = "COM" + int.Parse(saa[1]);
-              }
-              catch (FormatException)
-              {
-                SP.PortName = saa[1];
-              }
-              break;
-            case "Parity":
-              SP.Parity = (Parity)int.Parse(saa[1]);
-              break;
-            case "RTO":
-              SP.ReadTimeout = int.Parse(saa[1]);
-              break;
-            case "ReadTimeout":
-              SP.ReadTimeout = int.Parse(saa[1]);
-              break;
-            case "RTS":
-              SP.RtsEnable = saa[1] == "1";
-              break;
-            case "StopBits":
-              SP.StopBits = (StopBits)int.Parse(saa[1]);
-              break;
-            case "WTO":
-              SP.WriteTimeout = int.Parse(saa[1]);
-              break;
-            case "WriteTimeout":
-              SP.WriteTimeout = int.Parse(saa[1]);
-              break;
+            switch (saa[0])
+            {
+              case "B":
+                SP.BaudRate = int.Parse(saa[1]);
+                break;
+              case "BaudRate":
+                SP.BaudRate = int.Parse(saa[1]);
+                break;
+              case "BS":
+                IsBinaryAllowed = true;
+                break;
+              case "BinarySender":
+                IsBinaryAllowed = true;
+                break;
+              case "DataBits":
+                SP.DataBits = int.Parse(saa[1]);
+                break;
+              case "DTR":
+                SP.DtrEnable = saa[1] == "1";
+                break;
+              case "E":
+                switch (int.Parse(saa[1]))
+                {
+                  case 0:
+                    SP.Encoding = Encoding.Default;
+                    break;
+                  case 1:
+                    SP.Encoding = Encoding.ASCII;
+                    break;
+                  case 2:
+                    SP.Encoding = Encoding.Unicode;
+                    break;
+                  case 3:
+                    SP.Encoding = Encoding.UTF8;
+                    break;
+                  case 4:
+                    SP.Encoding = Encoding.UTF32;
+                    break;
+                  default:
+                    SP.Encoding = Encoding.Default;
+                    break;
+                }
+                break;
+              case "Encoding":
+                switch (int.Parse(saa[1]))
+                {
+                  case 0:
+                    SP.Encoding = Encoding.Default;
+                    break;
+                  case 1:
+                    SP.Encoding = Encoding.ASCII;
+                    break;
+                  case 2:
+                    SP.Encoding = Encoding.Unicode;
+                    break;
+                  case 3:
+                    SP.Encoding = Encoding.UTF8;
+                    break;
+                  case 4:
+                    SP.Encoding = Encoding.UTF32;
+                    break;
+                  default:
+                    SP.Encoding = Encoding.Default;
+                    break;
+                }
+                break;
+              case "HandShake":
+                SP.Handshake = (Handshake)int.Parse(saa[1]);
+                break;
+              case "N":
+                Name = saa[1];
+                break;
+              case "Name":
+                Name = saa[1];
+                break;
+              case "NL":
+                switch (int.Parse(saa[1]))
+                {
+                  case 1:
+                    SP.NewLine = "\r";
+                    break;
+                  case 2:
+                    SP.NewLine = "\r\n";
+                    break;
+                  default:
+                    SP.NewLine = "\n";
+                    break;
+                }
+                break;
+              case "NewLine":
+                switch (int.Parse(saa[1]))
+                {
+                  case 1:
+                    SP.NewLine = "\r";
+                    break;
+                  case 2:
+                    SP.NewLine = "\r\n";
+                    break;
+                  default:
+                    SP.NewLine = "\n";
+                    break;
+                }
+                break;
+              case "P":
+                try
+                {
+                  SP.PortName = "COM" + int.Parse(saa[1]);
+                }
+                catch (FormatException)
+                {
+                  SP.PortName = saa[1];
+                }
+                break;
+              case "Port":
+                try
+                {
+                  SP.PortName = "COM" + int.Parse(saa[1]);
+                }
+                catch (FormatException)
+                {
+                  SP.PortName = saa[1];
+                }
+                break;
+              case "Parity":
+                SP.Parity = (Parity)int.Parse(saa[1]);
+                break;
+              case "RTO":
+                SP.ReadTimeout = int.Parse(saa[1]);
+                break;
+              case "ReadTimeout":
+                SP.ReadTimeout = int.Parse(saa[1]);
+                break;
+              case "RTS":
+                SP.RtsEnable = saa[1] == "1";
+                break;
+              case "RCWTO":
+                ReConnectWhenTimedOut = saa[1] == "1";
+                break;
+              case "StopBits":
+                SP.StopBits = (StopBits)int.Parse(saa[1]);
+                break;
+              case "WTO":
+                SP.WriteTimeout = int.Parse(saa[1]);
+                break;
+              case "WriteTimeout":
+                SP.WriteTimeout = int.Parse(saa[1]);
+                break;
+            }
+          }catch(Exception e)
+          {
+            Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
+            continue;
           }
         }
       }
@@ -189,6 +201,8 @@ namespace TR.BIDSsv
 
         sdc.StringDataReceived += Sdc_StringDataReceived;
         sdc.BinaryDataReceived += Sdc_BinaryDataReceived;
+
+
       }
       catch(Exception e)
       {
@@ -262,7 +276,7 @@ namespace TR.BIDSsv
         // TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
         // TODO: 大きなフィールドを null に設定します。
 
-        sdc.Dispose();
+        sdc?.Dispose();
 
         disposedValue = true;
       }
