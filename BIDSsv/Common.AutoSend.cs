@@ -276,13 +276,14 @@ namespace TR.BIDSsv
             IBIDSsv sv = AutoNumL.SvList[ind];
 
             if (sv?.IsDisposed != false) return;//null=>return, Disposed=T:return, Disposed=F:next
-            string data = null;
+
+            string data = string.Empty;
             try
             {
-              data = Get_TRI_Data(dtyp, dnum);
+              data = Get_TRI_Data(dtyp, dnum) ?? string.Empty;
             }
             catch (BIDSErrException) { return; }
-            catch (Exception) { throw; }
+            catch (Exception e) { Console.WriteLine("Common.AutoSend.Common_BSMDChanged : {0}", e); }
 
             TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
             TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
