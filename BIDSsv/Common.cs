@@ -14,22 +14,22 @@ namespace TR.BIDSsv
 
     static public BIDSSharedMemoryData BSMD
     {
-      get => (BIDSSharedMemoryData)SML?.Read<BIDSSharedMemoryData>();
+      get => SML?.BIDSSMemData ?? default;
       set => SML?.Write(in value);
     }
     static public OpenD OD
     {
-      get => (OpenD)SML?.Read<OpenD>();
+      get => SML?.OpenData ?? default;
       set => SML?.Write(in value);
     }
     static public PanelD PD
     {
-      get => (PanelD)SML?.Read<PanelD>();
+      get => SML?.Panels ?? default;
       set => SML?.Write(in value);
     }
     static public SoundD SD
     {
-      get => (SoundD)SML?.Read<SoundD>();
+      get => SML?.Sounds ?? default;
       set => SML?.Write(in value);
     }
 
