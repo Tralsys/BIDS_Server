@@ -67,14 +67,12 @@ namespace TR.BIDSsv
     static private bool IsStarted = false;
     static private bool IsDebug = false;
 
-    static string stateAllStr = "{0}";
 
     static public void Start(int Interval = 10, bool NO_SMEM_MODE = false)
     {
       if (!IsStarted)
       {
-        for (int i = 1; i <= 9; i++) stateAllStr += ("X{" + i.ToString() + "}");
-        SML = new SMemLib(true, 0, NO_SMEM_MODE);
+        SML = new SMemLib(0, true, NO_SMEM_MODE);
         CI = new CtrlInput();
         SML?.ReadStart(0, Interval);
 
@@ -87,14 +85,14 @@ namespace TR.BIDSsv
     }
     
     static public void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
-    static public void Remove() => Remove(null);
+    static public void Remove() => Remove(string.Empty);
     static public void Remove(string Name)
     {
       if (!(svlist?.Count > 0)) return;//null or 要素なしは実行しない
       
       for(int i = svlist.Count - 1; i >= 0; i--)//尻尾から順に
       {
-        if (Name == null || svlist[i].Name == Name)
+        if (string.IsNullOrWhiteSpace(Name) || svlist[i].Name == Name)
         {
           try
           {

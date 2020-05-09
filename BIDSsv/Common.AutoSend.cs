@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 
@@ -159,87 +157,91 @@ namespace TR.BIDSsv
     static private ASList SDAutoList = new ASList();
     static private ASList AutoNumL = new ASList();
 
+    /// <summary>配列を単位長さあたりで分割し, そこに変化があった場合に関数を実行する.</summary>
+    /// <param name="OldArray"></param>
+    /// <param name="NewArray"></param>
+    /// <param name="OneTimePrintCount"></param>
+    /// <param name="onChanged">単位配列長で分割し変化が検知されたとき, 何番目の配列で変化が検知されたかを示す引数とともに実行される関数</param>
+    static void ArrDChangedCheck(in int[] OldArray, in int[] NewArray, int OneTimePrintCount, Action<int> onChanged, bool IsActionThreadsafe = true)
+    {
+      int al = Math.Max(OldArray.Length, NewArray.Length);
+      if (al % OneTimePrintCount != 0) al = ((int)Math.Floor((double)al / OneTimePrintCount) + 1) * OneTimePrintCount;
+
+      int[] oa = new int[al];
+      int[] na = new int[al];
+      Array.Copy(OldArray, oa, OldArray.Length);
+      Array.Copy(NewArray, na, NewArray.Length);
+      ParallelOptions popts = new ParallelOptions();
+      if (!IsActionThreadsafe) popts.MaxDegreeOfParallelism = 1;
+      Parallel.For(0, al / OneTimePrintCount, (i) =>
+      {
+        int j = i * OneTimePrintCount;
+        if (!(oa, na).ArrayEqual(j, j, OneTimePrintCount)) onChanged.Invoke(i);
+      });
+    }
+
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted) return;
       if (svlist?.Count > 0)
       {
-        Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray));
+        Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)));
 
-        #region Byte Array Auto Sender
-        int al = Math.Max(e.OldArray.Length, e.NewArray.Length);
-        if (al % 128 != 0) al = ((int)Math.Floor((double)al / 128) + 1) * 128;
-
-        int[] oa = new int[al];
-        int[] na = new int[al];
-        Array.Copy(e.OldArray, oa, e.OldArray.Length);
-        Array.Copy(e.NewArray, na, e.NewArray.Length);
-
-        for (int i = 0; i < al; i += 128)
-          if (!(oa, na).ArrayEqual(i, i, 128)) ASPtr(AutoSendSetting.BasicSound(na, i));
-        
-        #endregion
+        //Byte Array Auto Sender
+        Task.Run(() =>
+        {
+          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicSound(e.NewArray, i)));
+        });
 
         if (SDAutoList?.Count > 0)
-          Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
-          {
-            if (SDAutoList.DNums.Contains(i))
+        {
+          Task.Run(() => Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
             {
               int? Num = null;
               if (e.OldArray.Length <= i) Num = e.NewArray[i];
               else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
 
-              if (Num != null)
-              {
-                Parallel.For(0, SDAutoList.Count, (s) =>
-                {
-                  if (SDAutoList.DNums[s] == i)
-                    SDAutoList.SvList[s].Print("TRIS" + i.ToString() + "X" + Num.ToString());
-                });
-              }
-            }
+              if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+            }));
+          Task.Run(() =>
+          {
+            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
+              (i) => SDAutoList.PrintValue(Get_TRI_Data(ConstVals.DTYPE_SOUND_ARR, i, true), i, ConstVals.DTYPE_SOUND_ARR));
           });
+        }
       }
 
     }
+
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted) return;
       if (svlist?.Count > 0)
       {
-        Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray));
+        Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray)));
 
-        #region Byte Array Auto Sender
-        int al = Math.Max(e.OldArray.Length, e.NewArray.Length);
-        if (al % 128 != 0) al = ((int)Math.Floor((double)al / 128) + 1) * 128;
-        int[] oa = new int[al];
-        int[] na = new int[al];
-        Array.Copy(e.OldArray, oa, e.OldArray.Length);
-        Array.Copy(e.NewArray, na, e.NewArray.Length);
-        for (int i = 0; i < al; i += 128)
-          if (!(oa, na).ArrayEqual(i, i, 128)) ASPtr(AutoSendSetting.BasicPanel(na, i));
-        #endregion
-
+        //Byte Array Auto Sender
+        Task.Run(() =>
+        {
+          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicPanel(e.NewArray, i)));
+        });
 
         if (PDAutoList?.Count > 0)
-          Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+        {
+          Task.Run(() => Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
           {
-            if (PDAutoList.DNums.Contains(i))
-            {
-              int? Num = null;
-              if (e.OldArray.Length <= i) Num = e.NewArray[i];
-              else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+            int? Num = null;
+            if (e.OldArray.Length <= i) Num = e.NewArray[i];
+            else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
 
-              if (Num != null)
-              {
-                Parallel.For(0, PDAutoList.Count, (s) =>
-                {
-                  if (PDAutoList.DNums[s] == i)
-                    PDAutoList.SvList[s].Print("TRIP" + i.ToString() + "X" + Num.ToString());
-                });
-              }
-            }
+            if (Num != null) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL, i, Num.ToString()), i, ConstVals.DTYPE_PANEL);
+          }));
+          Task.Run(() =>
+          {
+            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_ARR_PRINT_COUNT,
+              (i) => PDAutoList.PrintValue(Get_TRI_Data(ConstVals.DTYPE_PANEL_ARR, i, true), i, ConstVals.DTYPE_PANEL_ARR));
           });
+        }
       }
     }
     private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e)
@@ -258,39 +260,46 @@ namespace TR.BIDSsv
       if (!IsStarted) return;
       if (svlist?.Count > 0)
       {
-        Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData));
+        Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData)));
 
-        if (!Equals(e.OldData.SpecData, e.NewData.SpecData))
-          ASPtr(AutoSendSetting.BasicConst(e.NewData.SpecData, OD));
-        if (!Equals(e.OldData.StateData, e.NewData.StateData) || e.OldData.IsDoorClosed != e.NewData.IsDoorClosed)
-          ASPtr(AutoSendSetting.BasicCommon(e.NewData.StateData, (byte)(e.NewData.IsDoorClosed ? 1 : 0)));
-        if (!Equals(e.NewData.HandleData, e.OldData.HandleData))
-          ASPtr(AutoSendSetting.BasicHandle(e.NewData.HandleData, OD.SelfBPosition));
+        Parallel.Invoke(
+          () => {
+            if (!Equals(e.OldData.SpecData, e.NewData.SpecData))
+              ASPtr(AutoSendSetting.BasicConst(e.NewData.SpecData, OD));
+          },
+        () => {
+          if (!Equals(e.OldData.StateData, e.NewData.StateData) || e.OldData.IsDoorClosed != e.NewData.IsDoorClosed)
+            ASPtr(AutoSendSetting.BasicCommon(e.NewData.StateData, (byte)(e.NewData.IsDoorClosed ? 1 : 0)));
+        },
+        () => {
+          if (!Equals(e.NewData.HandleData, e.OldData.HandleData))
+            ASPtr(AutoSendSetting.BasicHandle(e.NewData.HandleData, OD.SelfBPosition));
+        });
 
         if (AutoNumL?.Count > 0)
         {
           Parallel.For(0, AutoNumL.Count, (ind) =>
           {
-            char dtyp = AutoNumL.DTypes[ind];
-            int dnum = AutoNumL.DNums[ind];
-            IBIDSsv sv = AutoNumL.SvList[ind];
+            ASList.Elem elem = AutoNumL.ElementAt(ind);
 
-            if (sv?.IsDisposed != false) return;//null=>return, Disposed=T:return, Disposed=F:next
+            if (elem.sv?.IsDisposed != false) return;//null=>return, Disposed=T:return, Disposed=F:next
 
             string data = string.Empty;
             try
             {
-              data = Get_TRI_Data(dtyp, dnum) ?? string.Empty;
+              data = Get_TRI_Data(elem.DType, elem.DNum) ?? string.Empty;
             }
             catch (BIDSErrException) { return; }
             catch (Exception e) { Console.WriteLine("Common.AutoSend.Common_BSMDChanged : {0}", e); }
 
+            if (string.IsNullOrWhiteSpace(data)) return;
+
             TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
             TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
 
-            if (dtyp switch
+            if (elem.DType switch
             {
-              ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)dnum switch
+              ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)elem.DNum switch
               {
                 ConstVals.DNums.ConstD.AllData => Equals(e.OldData.SpecData, e.NewData.SpecData),
                 ConstVals.DNums.ConstD.ATSCheckPos => e.OldData.SpecData.A == e.NewData.SpecData.A,
@@ -303,7 +312,7 @@ namespace TR.BIDSsv
 
               ConstVals.DTYPE_DOOR => e.OldData.IsDoorClosed == e.NewData.IsDoorClosed,
 
-              ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)dnum switch
+              ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)elem.DNum switch
               {
                 ConstVals.DNums.ElapD.AllData => Equals(e.OldData.StateData, e.NewData.StateData),
                 ConstVals.DNums.ElapD.BC_Pres => e.OldData.StateData.BC == e.NewData.StateData.BC,
@@ -325,7 +334,7 @@ namespace TR.BIDSsv
                 _ => null
               },
 
-              ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)dnum switch
+              ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)elem.DNum switch
               {
                 ConstVals.DNums.HandPos.AllData => Equals(e.OldData.HandleData, e.NewData.HandleData),
                 ConstVals.DNums.HandPos.Brake => e.OldData.HandleData.B == e.NewData.HandleData.B,
@@ -338,7 +347,7 @@ namespace TR.BIDSsv
 
               _ => null
             }
-            == false) sv?.Print(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, dtyp, dnum, data));
+            == false) elem.sv.Print(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, elem.DType, elem.DNum, data));
           });
         }
       }

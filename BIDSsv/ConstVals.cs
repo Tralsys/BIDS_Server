@@ -5,6 +5,7 @@
     public const string ToStrFormatInt = "D";
     public const string ToStrFormatFloat = "0.0#####";
 
+    public const char NULL_CHAR = (char)0;
 
     public const char BIN_CMD_HEADER_0 = 't';
     public const char BIN_CMD_HEADER_1 = 'r';
@@ -37,7 +38,8 @@
     /// <summary>Carriage Return (\n)</summary>
     public const char LF_C = '\n';
 
-    public const char CMD_VERSION = 'V';
+		#region CMD Type Chars
+		public const char CMD_VERSION = 'V';
     public const char CMD_INFOREQ = 'I';
     public const char CMD_AUTOSEND_ADD = 'A';
     public const char CMD_AUTOSEND_DEL = 'D';
@@ -47,12 +49,14 @@
     public const char CMD_BREAK = 'B';
     public const char CMD_SPoleMC = 'S';
     public const char CMD_KeyCtrl = 'K';
+		#endregion
+		public const char CMD_SEPARATOR = 'X';
 
-    public const char CMD_SEPARATOR = 'X';
-
-    public const int DTYPE_CHAR_POS = 3;//TRIx
     public const int DNUM_POS = 4;
 
+    #region DTYPE Chars
+    public const int DTYPE_CHAR_POS = 3;//TRIx
+    
     public const char DTYPE_ELAPD = 'E';
     public const char DTYPE_DOOR = 'D';
     public const char DTYPE_HANDPOS = 'H';
@@ -62,11 +66,19 @@
 
     public const char DTYPE_PANEL_ARR = 'p';
     public const char DTYPE_SOUND_ARR = 's';
+		#endregion
 
-    /// <summary>Panel/Soundの連続出力機能で出力する数</summary>
-    public const int PANEL_ARR_PRINT_COUNT = 32;
-    public const int SOUND_ARR_PRINT_COUNT = 32;
+		/// <summary>Panelの連続出力機能で出力する数</summary>
+		public const int PANEL_ARR_PRINT_COUNT = 32;
+    /// <summary>Soundの連続出力機能で出力する数</summary>
+		public const int SOUND_ARR_PRINT_COUNT = PANEL_ARR_PRINT_COUNT;
 
+    /// <summary>Panel状態のBinary出力機能で出力する数</summary>
+    public const int PANEL_BIN_ARR_PRINT_COUNT = 128;
+    /// <summary>Sound状態のBinary出力機能で出力する数</summary>
+    public const int SOUND_BIN_ARR_PRINT_COUNT = PANEL_BIN_ARR_PRINT_COUNT;
+
+    
     public class DNums
     {
       public enum ElapD

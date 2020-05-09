@@ -6,7 +6,7 @@ namespace TR.BIDSsv
 {
   static public class UFunc
   {
-    public static string Comp(object oldobj, object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
+    public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
 
     private static readonly bool isLE = BitConverter.IsLittleEndian;
 
@@ -217,8 +217,6 @@ namespace TR.BIDSsv
 
     /// <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
     /// <param name="str">入力文字列</param>
-    /// <param name="ind">変換開始位置</param>
-    /// <param name="len">変換を行う最大長</param>
     /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
     public static int? String2INT(string str)
     {
@@ -231,8 +229,6 @@ namespace TR.BIDSsv
 
     /// <summary>stringから小数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
     /// <param name="str">入力文字列</param>
-    /// <param name="ind">変換開始位置</param>
-    /// <param name="len">変換を行う最大長</param>
     /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
     public static double? String2Double(string str)
     {
@@ -249,9 +245,9 @@ namespace TR.BIDSsv
     }
 
 
-    public static string BIDSCMDMaker(char CMDType, char DType, int DNum, string data = null, char separator = ConstVals.CMD_SEPARATOR)
+    public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
       => string.Format("{0}{1}{2}{3}{4}{5}", ConstVals.CMD_HEADER, CMDType, DType, DNum, data == null ? string.Empty : separator.ToString(), data ?? string.Empty);
-    public static string BIDSCMDMaker(char CMDType, int DNum, string data = null, char separator = ConstVals.CMD_SEPARATOR)
+    public static string BIDSCMDMaker(in char CMDType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
       => string.Format("{0}{1}{2}{3}{4}", ConstVals.CMD_HEADER, CMDType, DNum, data == null ? string.Empty : separator.ToString(), data ?? string.Empty);
 
     public static bool State_Pressure_IsSame(in State oldS, in State newS)
