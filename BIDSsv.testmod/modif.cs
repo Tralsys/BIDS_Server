@@ -23,6 +23,7 @@ namespace BIDSsv.testmod
 		const int DefaultInterval = 10;
     bool IsBinaryAllowed = false;
 		bool IsLoading = false;
+		bool NoLogMode = false;
 
 		List<CMDSendTimer> CSTL = new List<CMDSendTimer>();
 
@@ -37,6 +38,7 @@ namespace BIDSsv.testmod
 			DateTime dt = DateTime.UtcNow;
 			LogFileName = string.Format("BsvTest.{0}.log", dt.ToString("yyyyMMdd.HHmmss.ffff"));
 			Name += (dt.Minute * 60 * 1000 * dt.Second * 1000 + dt.Millisecond).ToString();
+			Console.WriteLine("Name : {0}", Name);
 			try
 			{
 				swr = new StreamWriter(LogFileName);
@@ -48,7 +50,7 @@ namespace BIDSsv.testmod
 				Console.WriteLine("{0}.Connect : {1}", Name, e);
 				return false;
 			}
-			
+			Console.WriteLine("{0} : StreamWriter Open Done.", Name);
 
       for (int i = 0; i < sa.Length; i++)
       {
@@ -101,6 +103,9 @@ namespace BIDSsv.testmod
 								AppendText(string.Format("sa[{0}]:{1} => BAREC", i, sa[i]));
 								IsBinaryAllowed = true;
 								break;
+							case "NOLOG":
+								NoLogMode = true;
+								break;
 							default:
 								if (saa[0].StartsWith("L"))
 								{
@@ -143,6 +148,7 @@ namespace BIDSsv.testmod
 
 		private async void AppendText(string s)
 		{
+			if (NoLogMode) return;
 			if (string.IsNullOrWhiteSpace(s)) return;
 			try
 			{
@@ -211,7 +217,8 @@ namespace BIDSsv.testmod
 			"-ASALL :\tmod作成時に利用できるAutoSend機能をすべて有効化します(但しPanel/Soundは0~256)  使用例:\"-ASALL\"",
 			"-ONCE :\t起動時に一度のみ送信するコマンドを指定します.  使用例:\"-ONCE:TRAE0\"",
 			"-Lnn :\tnnに指定した長さの間隔をあけて, 指定したコマンドを送信します.  nnには整数を指定し, 単位はミリ秒です.  使用例:\"-L10:TRIE0\"",
-			"-BAREC :\tByte Arrayの受信も記録します.  使用例:\"-BAREC\""
+			"-BAREC :\tByte Arrayの受信も記録します.  使用例:\"-BAREC\"",
+			"-NOLOG :\tログ出力を無効化します.  なお, このオプションを指定するよりも前のログは記録されますので, ご了承ください.  また, ファイルハンドルは終了まで保持されます."
 		};
 		public void WriteHelp(in string args)
 		{
