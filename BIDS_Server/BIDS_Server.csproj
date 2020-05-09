@@ -46,10 +46,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.CtrlIOcs\BIDSSMemLib.CtrlIOcs.csproj">
-      <Project>{cc54107a-9aac-4396-912d-7af81c3571b0}</Project>
-      <Name>BIDSSMemLib.CtrlIOcs</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.rw\BIDSSMemLib.rw.csproj">
       <Project>{AE16CC76-B20E-4425-A0C5-FDC24EBACC73}</Project>
       <Name>BIDSSMemLib.rw</Name>
