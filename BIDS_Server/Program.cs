@@ -6,6 +6,7 @@ using TR;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Linq;
 
 namespace BIDS_Server
 {
@@ -87,7 +88,9 @@ namespace BIDS_Server
         return;
       }
 
-      string[] cmd = s?.ToLower().Split(' ');
+      string[] cmd_orig = s?.Split(' ');
+      string[] cmd = cmd_orig?.Select((str) => str.ToLower()).ToArray();
+      
       switch (cmd[0])
       {
         case "man":
@@ -209,18 +212,17 @@ namespace BIDS_Server
           IsLooping = false;
           break;
         case "close":
-          if (cmd.Length >= 2) Common.Remove(cmd[1]);
+          if (cmd.Length >= 2) Common.Remove(cmd_orig[1]);
           else Common.Remove();
-          Console.WriteLine("Close Complete.");
           break;
         case "debug":
-          if (cmd.Length >= 2) Common.DebugDo(cmd[1]);
+          if (cmd.Length >= 2) Common.DebugDo(cmd_orig[1]);
           else Common.DebugDo();
           break;
         case "print":
           if (cmd.Length >= 3)
             for (int i = 2; i < cmd.Length; i++)
-              if (Common.Print(cmd[1], cmd[i]) != true) break;
+              if (Common.Print(cmd_orig[1], cmd_orig[i]) != true) break;
           break;
         case "delay":
           await Task.Delay(int.Parse(cmd[1]));
@@ -240,7 +242,7 @@ namespace BIDS_Server
               {
                 Console.WriteLine(e);
                 ibsv.Dispose();
-                Common.Remove(ibsv.Name);
+                Common.Remove(ibsv);
               }
             }
             else Console.WriteLine("The specified dll file does not implement the IBIDSsv interface.");
