@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
   static public partial class Common
   {
     static readonly byte[] ZeroX4 = new byte[]{ 0, 0, 0, 0 };
+
+		#region String Format
+		static readonly string StrFormat_BSMD_SpecAll = null;
+    static readonly string StrFormat_BSMD_StateAll = null;
+    static readonly string StrFormat_BSMD_Pressures = null;
+    static readonly string StrFormat_BSMD_Time = null;//"{0}:{1}:{2}.{3}"
+    static readonly string StrFormat_BSMD_HandAll = null;
+    #endregion
 
     static private string DataSelTO(in string GotStr)
     {
@@ -262,15 +266,8 @@ namespace TR.BIDSsv
 
           if (dnum == null) return Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR);
 
-          try
-          {
-            return ReturnString + Get_TRI_Data(dtyp, dnum ?? 0);
-          }
-          catch(BIDSErrException bee)
-          {
-            return bee.ErrCMD;
-          }
-          catch (Exception) { throw; }
+          string s_ir = null;
+          return Get_TRI_Data(out s_ir, dtyp, dnum ?? 0) ? ReturnString + s_ir : s_ir;
         case ConstVals.CMD_AUTOSEND_ADD://Auto Send Add
           int sera = 0;
           try
@@ -291,10 +288,12 @@ namespace TR.BIDSsv
           switch (dtypc_a)
           {
             case ConstVals.DTYPE_PANEL:
+            case ConstVals.DTYPE_PANEL_ARR:
               if (PDAutoList == null) PDAutoList = new ASList(false);
               asl = PDAutoList;
               break;
             case ConstVals.DTYPE_SOUND:
+            case ConstVals.DTYPE_SOUND_ARR:
               if (SDAutoList == null) SDAutoList = new ASList(false);
               asl = SDAutoList;
               break;
@@ -306,12 +305,8 @@ namespace TR.BIDSsv
           string asres = string.Empty;
           try
           {
-            asres = Get_TRI_Data(dtypc_a, sera, true);//BIDS SMem疎通状況によらず初期値を取得する.
+            if (!Get_TRI_Data(out asres, dtypc_a, sera, true)) asres = "0";//BIDS SMem疎通状況によらず初期値を取得する.
           }
-          catch (BIDSErrException)
-          {
-            asres = "0";
-          }//無視(使用できないデータでも一応受け付けておく.)
           catch (Exception)
           {
             return Errors.GetCMD(Errors.ErrorNums.UnknownError);
@@ -344,10 +339,12 @@ namespace TR.BIDSsv
           switch (dtypc_d)//nullなら削除する要素は存在しない.
           {
             case ConstVals.DTYPE_PANEL:
+            case ConstVals.DTYPE_PANEL_ARR:
               if (PDAutoList == null) return ReturnString;
               else asld = PDAutoList;
               break;
             case ConstVals.DTYPE_SOUND:
+            case ConstVals.DTYPE_SOUND_ARR:
               if (SDAutoList == null) return ReturnString;
               else asld = SDAutoList;
               break;
@@ -376,137 +373,95 @@ namespace TR.BIDSsv
     }
 
     /// <summary>TRIで始まるコマンドに対応するデータを返す</summary>
+    /// <param name="ReturnStr">コマンドに対応するデータを格納する場所(先頭のセパレータは含まれません.)</param>
     /// <param name="DType">要求されたデータのタイプ</param>
     /// <param name="DNum">要求されたデータの番号</param>
     /// <param name="GetDataAnyway">BIDS SMemの疎通状況に依らずにデータを取得するか否か</param>
     /// <param name="separator">使用するセパレータ文字</param>
-    /// <returns>要求されたデータ文字列(先頭のセパレータは含まれません.)</returns>
-    static public string Get_TRI_Data(char DType, int DNum, bool GetDataAnyway = false, char separator = ConstVals.CMD_SEPARATOR)
+    /// <returns>エラー番号(なければnull)</returns>
+    static public bool Get_TRI_Data(out string ReturnStr, in char DType, in int DNum, in bool GetDataAnyway = false, in char separator = ConstVals.CMD_SEPARATOR)
     {
+			#region Local Function
+      string ArrDGet(in int[] arr, in int dnum, in int DPerOneSending, in char separ)
+      {
+        if (dnum < 0) return DPerOneSending.ToString(ConstVals.ToStrFormatInt);//一度に送信する要素数
+        string s = (((dnum * DPerOneSending) >= arr.Length) ? 0 : arr[dnum * DPerOneSending]).ToString(ConstVals.ToStrFormatInt);
+        for (int i = (dnum * DPerOneSending) + 1; i < (dnum + 1) * DPerOneSending; i++)
+          s += string.Format("{0}{1}", separ, (i >= arr.Length) ? 0 : arr[i]);
+        return s;
+      }
+      #endregion
+
       //データ強制取得F && SMem未疎通 => NotConnected
       //データ強制取得F && SMem疎通済 => 値を返す
       //データ強制取得T && (疎通不依存) => 値を返す
-      if (!GetDataAnyway && !BSMD.IsEnabled) throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);
-
-      string s = "{0}";//連続出力用フォーマット指定文字列
-      switch (DType)
-      {
-        case ConstVals.DTYPE_CONSTD:
-          switch ((ConstVals.DNums.ConstD)DNum)
-          {
-            case ConstVals.DNums.ConstD.AllData:
-              Spec spec = BSMD.SpecData;
-              for (int i = 1; i < 5; i++)
-                s += string.Format("{0}{{1}}", separator, i);
-              
-              return string.Format(s, spec.B, spec.P, spec.A, spec.J, spec.C);
-            case ConstVals.DNums.ConstD.Brake_Count:
-              return BSMD.SpecData.B.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ConstD.Power_Count:
-              return BSMD.SpecData.P.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ConstD.ATSCheckPos:
-              return BSMD.SpecData.A.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ConstD.B67_Pos:
-              return BSMD.SpecData.J.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ConstD.Car_Count:
-              return BSMD.SpecData.C.ToString(ConstVals.ToStrFormatInt);
-            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
-          }
-        case ConstVals.DTYPE_ELAPD:
-          switch ((ConstVals.DNums.ElapD)DNum)
-          {
-            case ConstVals.DNums.ElapD.Time_HMSms://Time
-              TimeSpan ts3 = TimeSpan.FromMilliseconds(BSMD.StateData.T);
-              return string.Format("{0}:{1}:{2}.{3}", ts3.Hours, ts3.Minutes, ts3.Seconds, ts3.Milliseconds);
-            case ConstVals.DNums.ElapD.Pressures://Pressure
-              State st2 = BSMD.StateData;
-              for (int i = 1; i < 5; i++)
-                s += string.Format("{0}{{1}}", separator, i);
-              return string.Format(s, st2.BC, st2.MR, st2.ER, st2.BP, st2.SAP);
-            case ConstVals.DNums.ElapD.AllData://All
-              State st1 = BSMD.StateData;
-              for (int i = 1; i < 10; i++)
-                s += string.Format("{0}{{1}}", separator, i);
-              return string.Format(s, st1.Z, st1.V, st1.T, st1.BC, st1.MR, st1.ER, st1.BP, st1.SAP, st1.I, 0);
-            case ConstVals.DNums.ElapD.Distance: return BSMD.StateData.Z.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.Speed: return BSMD.StateData.V.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.Time: return BSMD.StateData.T.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ElapD.BC_Pres: return BSMD.StateData.BC.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.MR_Pres: return BSMD.StateData.MR.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.ER_Pres: return BSMD.StateData.ER.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.BP_Pres: return BSMD.StateData.BP.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.SAP_Pres: return BSMD.StateData.SAP.ToString(ConstVals.ToStrFormatFloat);
-            case ConstVals.DNums.ElapD.Current: return BSMD.StateData.I.ToString(ConstVals.ToStrFormatFloat);
-            //case 9: return BSMD.StateData.Volt;//予約 電圧
-            case ConstVals.DNums.ElapD.TIME_Hour: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Hours.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ElapD.TIME_Min: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Minutes.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ElapD.TIME_Sec: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Seconds.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.ElapD.TIME_MSec: return TimeSpan.FromMilliseconds(BSMD.StateData.T).Milliseconds.ToString(ConstVals.ToStrFormatInt);
-            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
-          }
-        case ConstVals.DTYPE_HANDPOS:
-          switch ((ConstVals.DNums.HandPos)DNum)
-          {
-            case ConstVals.DNums.HandPos.AllData:
-              Hand hd1 = BSMD.HandleData;
-              for (int i = 1; i < 4; i++)
-                s += string.Format("{0}{{1}}", separator, i);
-              return string.Format(s, hd1.B, hd1.P, hd1.R, hd1.C);
-            case ConstVals.DNums.HandPos.Brake: return BSMD.HandleData.B.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.HandPos.Power: return BSMD.HandleData.P.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.HandPos.Reverser: return BSMD.HandleData.R.ToString(ConstVals.ToStrFormatInt);
-            case ConstVals.DNums.HandPos.ConstSpd: return BSMD.HandleData.C.ToString(ConstVals.ToStrFormatInt);//定速状態は予約
-            case ConstVals.DNums.HandPos.SelfB:
-              OpenD od = new OpenD();
-              SML?.Read(out od);
-              if (GetDataAnyway || od.IsEnabled) return od.SelfBPosition.ToString(ConstVals.ToStrFormatInt);
-              else throw new BIDSErrException(Errors.ErrorNums.BIDS_Not_Connected);//SMem is not connected.
-            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
-          }
-        case ConstVals.DTYPE_PANEL:
-          PanelD pd = new PanelD();
-          SML?.Read(out pd);
-          if (DNum < 0) return pd.Length.ToString(ConstVals.ToStrFormatInt);
-          else return (DNum < pd.Length ? pd.Panels[DNum] : 0).ToString(ConstVals.ToStrFormatInt);
-        case ConstVals.DTYPE_SOUND:
-          SoundD sd = new SoundD();
-          SML?.Read(out sd);
-          if (DNum < 0) return sd.Length.ToString(ConstVals.ToStrFormatInt);
-          else return (DNum < sd.Length ? sd.Sounds[DNum] : 0).ToString(ConstVals.ToStrFormatInt);
-        case ConstVals.DTYPE_DOOR:
-          switch (DNum)
-          {
-            case 0: return BSMD.IsDoorClosed ? "1" : "0";
-            case 1: return "0";
-            case 2: return "0";
-            default: throw new BIDSErrException(Errors.ErrorNums.DNUM_ERROR);
-          }
-        case ConstVals.DTYPE_PANEL_ARR:
-          if (DNum < 0) return ConstVals.PANEL_ARR_PRINT_COUNT.ToString(ConstVals.ToStrFormatInt);//負の数は一度に出力する数の指定
-          PanelD pda = new PanelD();
-          SML?.Read(out pda);
-          string pReturnStr = string.Empty;
-          pReturnStr += ((DNum * ConstVals.PANEL_ARR_PRINT_COUNT) >= pda.Length) ? 0 : pda.Panels[DNum * ConstVals.PANEL_ARR_PRINT_COUNT];
-          for (int i = (DNum * ConstVals.PANEL_ARR_PRINT_COUNT) + 1;
-            i < (DNum + 1) * ConstVals.PANEL_ARR_PRINT_COUNT; i++)
-            pReturnStr += string.Format("{0}{1}",separator, (i >= pda.Length) ? 0 : pda.Panels[i]);
-
-          return pReturnStr;
-        case ConstVals.DTYPE_SOUND_ARR:
-          if (DNum < 0) return ConstVals.SOUND_ARR_PRINT_COUNT.ToString(ConstVals.ToStrFormatInt);//負の数は一度に出力する数の指定
-          SoundD sda = new SoundD();
-          SML?.Read(out sda);
-          string sReturnStr = string.Empty;
-          sReturnStr += ((DNum * ConstVals.SOUND_ARR_PRINT_COUNT) >= sda.Length) ? 0 : sda.Sounds[DNum * ConstVals.SOUND_ARR_PRINT_COUNT];
-          for (int i = (DNum * ConstVals.SOUND_ARR_PRINT_COUNT) + 1;
-            i < (DNum + 1) * ConstVals.SOUND_ARR_PRINT_COUNT; i++)
-            sReturnStr += string.Format("{0}{1}", separator, (i >= sda.Length) ? 0 : sda.Sounds[i]);
-
-          return sReturnStr;
-        default: throw new BIDSErrException(Errors.ErrorNums.DTYPE_ERROR);//記号部不正
+      if (!GetDataAnyway && !BSMD.IsEnabled) {
+        ReturnStr = Errors.GetCMD(Errors.ErrorNums.BIDS_Not_Connected);
+        return false;
       }
 
-      throw new BIDSErrException(Errors.ErrorNums.ERROR_in_DType_or_DNum);
+      TimeSpan ts = TimeSpan.FromMilliseconds(BSMD.StateData.T);
+
+			#region データ取得部
+			ReturnStr = DType switch
+      {
+        ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)DNum switch
+        {
+          ConstVals.DNums.ConstD.AllData => string.Format(StrFormat_BSMD_SpecAll, BSMD.SpecData.B, BSMD.SpecData.P, BSMD.SpecData.A, BSMD.SpecData.J, BSMD.SpecData.C),
+          ConstVals.DNums.ConstD.Brake_Count => BSMD.SpecData.B.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ConstD.Power_Count => BSMD.SpecData.P.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ConstD.ATSCheckPos => BSMD.SpecData.A.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ConstD.B67_Pos => BSMD.SpecData.J.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ConstD.Car_Count => BSMD.SpecData.C.ToString(ConstVals.ToStrFormatInt),
+          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR)
+        },
+        ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)DNum switch
+        {
+          ConstVals.DNums.ElapD.Time_HMSms => string.Format(StrFormat_BSMD_Time, ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds),
+          ConstVals.DNums.ElapD.Pressures => string.Format(StrFormat_BSMD_Pressures, BSMD.StateData.BC, BSMD.StateData.MR, BSMD.StateData.ER, BSMD.StateData.BP, BSMD.StateData.SAP),
+          ConstVals.DNums.ElapD.AllData => string.Format(StrFormat_BSMD_StateAll, BSMD.StateData.Z, BSMD.StateData.V, BSMD.StateData.T, BSMD.StateData.BC, BSMD.StateData.MR, BSMD.StateData.ER, BSMD.StateData.BP, BSMD.StateData.SAP, BSMD.StateData.I, 0),
+          ConstVals.DNums.ElapD.Distance => BSMD.StateData.Z.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.Speed => BSMD.StateData.V.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.Time => BSMD.StateData.T.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ElapD.BC_Pres => BSMD.StateData.BC.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.MR_Pres => BSMD.StateData.MR.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.ER_Pres => BSMD.StateData.ER.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.BP_Pres => BSMD.StateData.BP.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.SAP_Pres => BSMD.StateData.SAP.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.Current => BSMD.StateData.I.ToString(ConstVals.ToStrFormatFloat),
+          ConstVals.DNums.ElapD.Voltage => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR),
+          ConstVals.DNums.ElapD.TIME_Hour => ts.Hours.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ElapD.TIME_Min => ts.Minutes.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ElapD.TIME_Sec => ts.Seconds.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.ElapD.TIME_MSec => ts.Milliseconds.ToString(ConstVals.ToStrFormatInt),
+          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR),
+        },
+        ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)DNum switch
+        {
+          ConstVals.DNums.HandPos.AllData => string.Format(StrFormat_BSMD_HandAll, BSMD.HandleData.B, BSMD.HandleData.P, BSMD.HandleData.R, BSMD.HandleData.C),
+          ConstVals.DNums.HandPos.Brake => BSMD.HandleData.B.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.HandPos.Power => BSMD.HandleData.P.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.HandPos.Reverser => BSMD.HandleData.R.ToString(ConstVals.ToStrFormatInt),
+          ConstVals.DNums.HandPos.ConstSpd => BSMD.HandleData.C.ToString(ConstVals.ToStrFormatInt),//定速状態は予約
+          ConstVals.DNums.HandPos.SelfB => (GetDataAnyway || OD.IsEnabled) ? OD.SelfBPosition.ToString(ConstVals.ToStrFormatInt) : Errors.GetCMD(Errors.ErrorNums.BIDS_Not_Connected),
+          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR)
+        },
+        ConstVals.DTYPE_PANEL => DNum < 0 ? PD.Length.ToString(ConstVals.ToStrFormatInt) : (DNum < PD.Length ? PD.Panels[DNum] : 0).ToString(ConstVals.ToStrFormatInt),
+        ConstVals.DTYPE_SOUND => DNum < 0 ? SD.Length.ToString(ConstVals.ToStrFormatInt) : (DNum < SD.Length ? SD.Sounds[DNum] : 0).ToString(ConstVals.ToStrFormatInt),
+        ConstVals.DTYPE_DOOR => DNum switch
+        {
+          0 => BSMD.IsDoorClosed ? "1" : "0",
+          1 => "0",
+          2 => "0",
+          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR)
+        },
+        ConstVals.DTYPE_PANEL_ARR => ArrDGet(PD.Panels, DNum, ConstVals.PANEL_ARR_PRINT_COUNT, ConstVals.CMD_SEPARATOR),
+        ConstVals.DTYPE_SOUND_ARR => ArrDGet(SD.Sounds, DNum, ConstVals.SOUND_ARR_PRINT_COUNT, ConstVals.CMD_SEPARATOR),
+        _ => Errors.GetCMD(Errors.ErrorNums.DTYPE_ERROR)
+      };
+			#endregion
+
+			return !ReturnStr.StartsWith(ConstVals.CMD_HEADER + ConstVals.CMD_ERROR);
     }
 
     static private byte[] DataSelBin(byte[] ba)
