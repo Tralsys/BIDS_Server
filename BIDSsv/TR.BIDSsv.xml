@@ -45,6 +45,12 @@
             <param name="deltaT">delta T Data</param>
             <returns>Communication.dll Byte Array</returns>
         </member>
+        <member name="F:TR.BIDSsv.Common.Version">
+            <summary>BIDSsvの対応バージョン</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.DefPNum">
+            <summary>デフォルトのポート番号</summary>
+        </member>
         <member name="M:TR.BIDSsv.Common.PickData(Spec@,System.Char,System.Int32,System.Boolean@)">
             <summary>
             Returns the data that matches the data specification information.
@@ -84,6 +90,17 @@
             <param name="DNum">Data Number</param>
             <param name="IsFloatVal">set value that whether the return value is float</param>
             <returns>result value or null</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelTO(System.String@)">
+            <summary>ヘッダがTOであるコマンドでの要求を処理する.</summary>
+            <param name="GotStr">接尾辞が取り除かれたコマンド文字列</param>
+            <returns>返信すべき文字列(なければnull)</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelTR(TR.IBIDSsv,System.String@)">
+            <summary>ヘッダがTRであるコマンドでの要求を処理する</summary>
+            <param name="SVc">受信したインスタンス</param>
+            <param name="GotString">接尾辞が取り除かれたコマンド文字列</param>
+            <returns>返信すべき文字列(不要時はnull)</returns>
         </member>
         <member name="M:TR.BIDSsv.Common.Get_TRI_Data(System.String@,System.Char@,System.Int32@,System.Boolean@,System.Char@)">
             <summary>TRIで始まるコマンドに対応するデータを返す</summary>
