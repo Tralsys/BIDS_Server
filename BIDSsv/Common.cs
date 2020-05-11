@@ -8,7 +8,9 @@ namespace TR.BIDSsv
 {
   static public partial class Common
   {
+    /// <summary>BIDSsvの対応バージョン</summary>
     static public readonly int Version = 202;
+    /// <summary>デフォルトのポート番号</summary>
     static public readonly int DefPNum = 14147;
 
 
@@ -67,6 +69,14 @@ namespace TR.BIDSsv
     static private bool IsStarted = false;
     static private bool IsDebug = false;
 
+    static Common()
+    {
+      StrFormat_BSMD_SpecAll = UFunc.StringFormatProvider(5, ConstVals.CMD_SEPARATOR);
+      StrFormat_BSMD_StateAll = UFunc.StringFormatProvider(10, ConstVals.CMD_SEPARATOR);
+      StrFormat_BSMD_Pressures = UFunc.StringFormatProvider(5, ConstVals.CMD_SEPARATOR);
+      StrFormat_BSMD_Time = "{0}:{1}:{2}.{3}";
+      StrFormat_BSMD_HandAll = UFunc.StringFormatProvider(4, ConstVals.CMD_SEPARATOR);
+    }
 
     static public void Start(int Interval = 10, bool NO_SMEM_MODE = false)
     {
@@ -92,12 +102,13 @@ namespace TR.BIDSsv
       
       for(int i = svlist.Count - 1; i >= 0; i--)//尻尾から順に
       {
-        if (string.IsNullOrWhiteSpace(Name) || svlist[i].Name == Name)
+        if (string.IsNullOrWhiteSpace(Name) || Equals(svlist[i].Name, Name))
         {
           try
           {
             Remove(svlist[i]);
-          }catch(Exception e)
+          }
+          catch(Exception e)
           {
             Console.WriteLine(e);
           }
@@ -112,14 +123,14 @@ namespace TR.BIDSsv
       try
       {
         ASRemove(sv);
-        sv.Dispose();
+        if (!sv.IsDisposed) sv.Dispose();
         successd = svlist.Remove(sv);
       }catch(Exception e)
       {
         Console.WriteLine("BIDSsv.Common Remove() Name:{0}\tan exception has occured.\n{1}", name, e);
       }
       
-      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, successd ? "done." : "failed (not found?)");
+      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, successd ? "done." : "failed");
     }
 
     static private void ASRemove(IBIDSsv sv)

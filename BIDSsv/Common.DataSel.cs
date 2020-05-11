@@ -17,142 +17,105 @@ namespace TR.BIDSsv
     static readonly string StrFormat_BSMD_HandAll = null;
     #endregion
 
+    /// <summary>ヘッダがTOであるコマンドでの要求を処理する.</summary>
+    /// <param name="GotStr">接尾辞が取り除かれたコマンド文字列</param>
+    /// <returns>返信すべき文字列(なければnull)</returns>
     static private string DataSelTO(in string GotStr)
     {
-      string GotString = GotStr.Replace("\n", string.Empty);
-      string ThirdStr = GotString.Substring(2, 1);
-      if (ThirdStr == "R")
+      if (string.IsNullOrWhiteSpace(GotStr)) return null;
+      char[] GotChars = GotStr.ToCharArray();
+      switch (GotChars[2])
       {
-        switch (GotString.Substring(3, 1))
-        {
-          case "F":
-            ReverserNum = 1;
-            break;
-          case "N":
-            ReverserNum = 0;
-            break;
-          case "R":
-            ReverserNum = -1;
-            break;
-          case "B":
-            ReverserNum = -1;
-            break;
-        }
-      }
-      else if (ThirdStr == "K")
-      {
-        int KNum = 0;
-        int[] ka = null;
-        try
-        {
-          KNum = Convert.ToInt32(GotString.Substring(3).Replace("D", string.Empty).Replace("U", string.Empty));
-          ka = GIPI.GetBtJobNum(KNum);
-          if (!(ka?.Length > 0)) return GotString;
-          KNum = 0;
-        }
-        catch (FormatException)
-        {
-          return "TRE6";//要求情報コード 文字混入
-        }
-        catch (OverflowException)
-        {
-          return "TRE5";//要求情報コード 変換オーバーフロー
-        }
-        if (GotString.EndsWith("D"))
-        {
-          while (ka?.Length > KNum)
+        case 'R':
+          int? revVbuf = GotChars[3] switch
           {
-            CI?.SetIsKeyPushed(ka[KNum], true);
-            KNum++;
-          }
-        }
-        if (GotString.EndsWith("U"))
-        {
-          while (ka?.Length > KNum)
+            'F' => 1,
+            'N' => 0,
+            'R' => -1,
+            'B' => -1,
+            _ => null
+          };
+          if (revVbuf != null) ReverserNum = revVbuf ?? 0;
+          break;
+        case 'K':
+          int? KNum = UFunc.String2INT(GotStr.Substring(3));
+          if (KNum == null) break;//値なし
+          int[] ka = GIPI.GetBtJobNum(KNum ?? 0);
+          if (!(ka?.Length > 0)) break;//機能該当なし
+          int i = 0;
+          switch (GotChars.Last())
           {
-            CI?.SetIsKeyPushed(ka[KNum], false);
-            KNum++;
+            case 'D':
+              while (ka?.Length > i)
+              {
+                CI?.SetIsKeyPushed(ka[i], true);
+                i++;
+              }
+              break;
+            case 'U':
+              while (ka?.Length > i)
+              {
+                CI?.SetIsKeyPushed(ka[i], false);
+                i++;
+              }
+              break;
           }
-        }
+          break;
+        default:
+          int Num = 0;
+          if (!int.TryParse(GotStr.Substring(3), out Num)) break;
+          switch (GotChars[2])
+          {
+            case 'B':
+              BrakeNotchNum = Num;
+              break;
+            case 'P':
+              PowerNotchNum = Num;
+              break;
+            case 'H':
+              PowerNotchNum = -Num;
+              break;
+          }
+          break;
       }
-      else
-      {
-        int Num = 0;
-        try
-        {
-          Num = Convert.ToInt32(GotString.Substring(3));
-        }
-        catch (FormatException)
-        {
-          return "TRE6";//要求情報コード 文字混入
-        }
-        catch (OverflowException)
-        {
-          return "TRE5";//要求情報コード 変換オーバーフロー
-        }
-        switch (ThirdStr)
-        {
-          case "B":
-            BrakeNotchNum = Num;
-            break;
-          case "P":
-            PowerNotchNum = Num;
-            break;
-          case "H":
-            PowerNotchNum = -Num;
-            break;
-        }
-      }
-      return GotString;
+
+      return GotStr;
     }
 
+    /// <summary>ヘッダがTRであるコマンドでの要求を処理する</summary>
+    /// <param name="SVc">受信したインスタンス</param>
+    /// <param name="GotString">接尾辞が取り除かれたコマンド文字列</param>
+    /// <returns>返信すべき文字列(不要時はnull)</returns>
     static private string DataSelTR(IBIDSsv SVc, in string GotString)
     {
-      string ReturnString = GotString.Replace("\n", string.Empty) + "X";
+      if (SVc == null || string.IsNullOrWhiteSpace(GotString)) return Errors.GetCMD(Errors.ErrorNums.CMD_ERROR);
+      string ReturnString = GotString + "X";//接尾辞は入っていないことを期待する.
 
       //0 1 2 3
       //T R X X
       switch (GotString.ToCharArray()[2])
       {
         case ConstVals.CMD_REVERSER://レバーサー
-          switch (GotString.Substring(3))
+          int? revVal = GotString.Substring(3) switch
           {
-            case "R":
-              ReverserNum = -1;
-              break;
-            case "N":
-              ReverserNum = 0;
-              break;
-            case "F":
-              ReverserNum = 1;
-              break;
-            case "-1":
-              ReverserNum = -1;
-              break;
-            case "0":
-              ReverserNum = 0;
-              break;
-            case "1":
-              ReverserNum = 1;
-              break;
-            default:
-              return "TRE7";//要求情報コードが不正
+            "R" => -1,
+            "N" => 0,
+            "F" => 1,
+            "-1" => -1,
+            "0" => 0,
+            "1" => 1,
+            _ => null
+          };
+          if (revVal == null) return Errors.GetCMD(Errors.ErrorNums.ERROR_in_DType_or_DNum);
+          else
+          {
+            ReverserNum = revVal ?? 0;
+            return ReturnString + revVal.ToString();
           }
-          return ReturnString + "0";
         case ConstVals.CMD_SPoleMC://ワンハンドル
           int sers = 0;
-          try
-          {
-            sers = Convert.ToInt32(GotString.Substring(3));
-          }
-          catch (FormatException)
-          {
-            return "TRE6";//要求情報コード 文字混入
-          }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
+          if (!int.TryParse(GotString.Substring(3), out sers)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
+
           int pnn = 0;
           int bnn = 0;
           if (sers > 0) pnn = sers;
@@ -162,50 +125,17 @@ namespace TR.BIDSsv
           return ReturnString + "0";
         case ConstVals.CMD_POWER://Pノッチ操作
           int serp = 0;
-          try
-          {
-            serp = Convert.ToInt32(GotString.Substring(3));
-          }
-          catch (FormatException)
-          {
-            return "TRE6";//要求情報コード 文字混入
-          }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
+          if (!int.TryParse(GotString.Substring(3), out serp)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
           PowerNotchNum = serp;
           return ReturnString + "0";
         case ConstVals.CMD_BREAK://Bノッチ操作
           int serb = 0;
-          try
-          {
-            serb = Convert.ToInt32(GotString.Substring(3));
-          }
-          catch (FormatException)
-          {
-            return "TRE6";//要求情報コード 文字混入
-          }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
+          if (!int.TryParse(GotString.Substring(3), out serb)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
           BrakeNotchNum = serb;
           return ReturnString + "0";
         case ConstVals.CMD_KeyCtrl://キー操作
           int serk = 0;
-          try
-          {
-            serk = Convert.ToInt32(GotString.Substring(4));
-          }
-          catch (FormatException)
-          {
-            return "TRE6";//要求情報コード 文字混入
-          }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
+          if (!int.TryParse(GotString.Substring(4), out serk)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
           switch (GotString.Substring(3, 1))
           {
             //udpr
@@ -270,18 +200,7 @@ namespace TR.BIDSsv
           return Get_TRI_Data(out s_ir, dtyp, dnum ?? 0) ? ReturnString + s_ir : s_ir;
         case ConstVals.CMD_AUTOSEND_ADD://Auto Send Add
           int sera = 0;
-          try
-          {
-            sera = Convert.ToInt32(GotString.Substring(4));
-          }
-          catch (FormatException)
-          {
-            return "TRE6";//要求情報コード 文字混入
-          }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
+          if (!int.TryParse(GotString.Substring(4), out sera)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
 
           char dtypc_a = GotString.Substring(3, 1).ToCharArray()[0];
           ASList asl = null;
@@ -289,12 +208,12 @@ namespace TR.BIDSsv
           {
             case ConstVals.DTYPE_PANEL:
             case ConstVals.DTYPE_PANEL_ARR:
-              if (PDAutoList == null) PDAutoList = new ASList(false);
+              if (PDAutoList == null) PDAutoList = new ASList();
               asl = PDAutoList;
               break;
             case ConstVals.DTYPE_SOUND:
             case ConstVals.DTYPE_SOUND_ARR:
-              if (SDAutoList == null) SDAutoList = new ASList(false);
+              if (SDAutoList == null) SDAutoList = new ASList();
               asl = SDAutoList;
               break;
             default:
@@ -320,18 +239,7 @@ namespace TR.BIDSsv
           
         case ConstVals.CMD_AUTOSEND_DEL://Auto Send Delete
           int serd;
-          try
-          {
-            serd = Convert.ToInt32(GotString.Substring(4));
-          }
-          catch (FormatException)
-          {
-            return "TRE6";//要求情報コード 文字混入
-          }
-          catch (OverflowException)
-          {
-            return "TRE5";//要求情報コード 変換オーバーフロー
-          }
+          if (!int.TryParse(GotString.Substring(4), out serd)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
 
           char dtypc_d = GotString.Substring(3, 1).ToCharArray()[0];
           ASList asld = null;
@@ -358,11 +266,12 @@ namespace TR.BIDSsv
           return ReturnString;
           
         case ConstVals.CMD_ERROR:
-          //throw new Exception(GotString);
+          Console.WriteLine("BIDSsv.Common.DataSelTR : Error ({0}) got from {1}", GotString, SVc.Name);
           return null;
 
         case ConstVals.CMD_VERSION:
-          int serv = UFunc.String2INT(GotString.Substring(3)) ?? -1;
+          int serv;
+          if (!int.TryParse(GotString.Substring(3), out serv)) return Errors.GetCMD(Errors.ErrorNums.Num_Parsing_Failed);
           if (serv < 0) Errors.GetCMD(Errors.ErrorNums.CMD_ERROR);
           SVc.Version = Math.Min(serv, Version);//デバイスのバージョンとBIDSsvのバージョンを比較し, より小さい値をその通信インスタンスでの採用バージョンとする.
           return ReturnString + SVc.Version.ToString();
