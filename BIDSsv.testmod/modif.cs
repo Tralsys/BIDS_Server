@@ -34,23 +34,21 @@ namespace BIDSsv.testmod
 
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
 
-			Console.WriteLine("BIDSsv Test Mod version:{0}", ModVersion);
 			DateTime dt = DateTime.UtcNow;
-			LogFileName = string.Format("BsvTest.{0}.log", dt.ToString("yyyyMMdd.HHmmss.ffff"));
 			Name += (dt.Minute * 60 * 1000 * dt.Second * 1000 + dt.Millisecond).ToString();
-			Console.WriteLine("Name : {0}", Name);
+			LogFileName = string.Format("BsvTest.{0}.log", dt.ToString("yyyyMMdd.HHmmss.ffff"));
+			Console.WriteLine("BIDSsv Test Mod\tVersion : {0}\tName : {1}\tFName : {2}", ModVersion, Name, LogFileName);
 			try
 			{
 				swr = new StreamWriter(LogFileName);
 				swr.AutoFlush = true;
-				AppendText(string.Format("BIDSsv Test Mod version:{0}", ModVersion));
+				AppendText(string.Format("BIDSsv Test Mod version:{0}\tname:{1}", ModVersion, Name));
 			}
 			catch(Exception e)
 			{
 				Console.WriteLine("{0}.Connect : {1}", Name, e);
 				return false;
 			}
-			Console.WriteLine("{0} : StreamWriter Open Done.", Name);
 
       for (int i = 0; i < sa.Length; i++)
       {
@@ -146,7 +144,8 @@ namespace BIDSsv.testmod
 			return true;
     }
 
-		private async void AppendText(string s)
+		private void AppendText(string s)
+			=> Task.Run(async () =>
 		{
 			if (NoLogMode) return;
 			if (string.IsNullOrWhiteSpace(s)) return;
@@ -154,11 +153,11 @@ namespace BIDSsv.testmod
 			{
 				await swr_lock.WaitAsync();
 				if (IsDisposed || disposedValue) return;
-				await swr?.WriteLineAsync(DateTime.UtcNow.ToString("HH:mm:ss.ffff,\t") + s);
+				await swr?.WriteLineAsync(DateTime.UtcNow.ToString("HH:mm:ss.fffff,\t") + s);
 			}
 			catch (ObjectDisposedException)
 			{
-				Console.WriteLine("{0} : StreamWriter Closed ({1})", Name, s);
+				Console.WriteLine("{0} : StreamWriter Already Closed ({1})", Name, s);
 				return;
 			}
 			catch (Exception e)
@@ -173,14 +172,14 @@ namespace BIDSsv.testmod
 			{
 				swr_lock?.Release();
 			}
-		}
+		});
 
 		public bool SendCMD2sv(string cmd)
 		{
 			if (string.IsNullOrWhiteSpace(cmd)) return false;
 			try
 			{
-				AppendText(string.Format("Command Send : {0}", cmd));
+				AppendText(string.Format("Send: {0}", cmd));
 				Common.DataSelSend(this, cmd);
 				return true;
 			}catch(Exception e)
@@ -197,11 +196,11 @@ namespace BIDSsv.testmod
 		public void OnSoundDChanged(in int[] data) { }
 		#endregion
 
-		public void Print(in string data) => AppendText(string.Format("String Data Got : {0}", data));
+		public void Print(in string data) => AppendText(string.Format("Got : {0}", data));
 		public void Print(in byte[] data)
 		{
 			if (!IsBinaryAllowed) return;
-			AppendText(string.Format("Binary Data Got : {0}", BitConverter.ToString(data)));
+			AppendText(string.Format("Got : {0}", BitConverter.ToString(data)));
 		}
 
 		string[] helps = new string[]
@@ -229,16 +228,18 @@ namespace BIDSsv.testmod
 		#region IDisposable Support
 		private bool disposedValue = false;
 
-		protected virtual void Dispose(bool disposing)
+		protected virtual async void Dispose(bool disposing)
 		{
 			IsDisposed = true;
 			if (!disposedValue)
 			{
 				if (disposing)
 				{
+					AppendText("Dispose Start");
 					if (CSTL?.Count > 0)
 						for (int i = 0; i < CSTL.Count; i++)
 							CSTL[i]?.Dispose();
+					await swr?.FlushAsync();
 					swr?.Close();
 					swr?.Dispose();
 				}
@@ -254,18 +255,19 @@ namespace BIDSsv.testmod
 
 	internal class CMDSendTimer : IDisposable
 	{
-		Thread LThread = null;
+		readonly int TimeOutNum = 100;
+		Task LThread = null;
 		internal CMDSendTimer(modif mif, int interval, string cmd)
 		{
 			if (mif == null) throw new ArgumentNullException();
 			if (interval < 0) throw new ArgumentException();
-
-			LThread = new Thread(() =>
+			TimeOutNum += interval;
+			LThread = new Task(async () =>
 				{
 					while (mif?.IsDisposed != true && !disposedValue)
 					{
 						if (mif?.SendCMD2sv(cmd) != true) return;
-						Thread.Sleep(interval);
+						await Task.Delay(interval);
 					}
 				});
 			try
@@ -292,7 +294,7 @@ namespace BIDSsv.testmod
 				disposedValue = true;
 				try
 				{
-					LThread?.Abort();
+					LThread?.Wait(TimeOutNum);
 				}catch(Exception e)
 				{
 					Console.WriteLine("CMDSender.Dispose : {0}", e);
