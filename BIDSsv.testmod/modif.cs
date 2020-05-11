@@ -147,7 +147,7 @@ namespace BIDSsv.testmod
 		private void AppendText(string s)
 			=> Task.Run(async () =>
 		{
-			if (NoLogMode) return;
+			if (NoLogMode || disposing) return;
 			if (string.IsNullOrWhiteSpace(s)) return;
 			try
 			{
@@ -227,10 +227,11 @@ namespace BIDSsv.testmod
 
 		#region IDisposable Support
 		private bool disposedValue = false;
+		private bool disposing = false;
 
 		protected virtual async void Dispose(bool disposing)
 		{
-			IsDisposed = true;
+			disposing = true;
 			if (!disposedValue)
 			{
 				if (disposing)
@@ -246,6 +247,7 @@ namespace BIDSsv.testmod
 				
 				disposedValue = true;
 			}
+			IsDisposed = true;
 		}
 
 		public void Dispose() => Dispose(true);

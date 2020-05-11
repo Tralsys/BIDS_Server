@@ -81,7 +81,7 @@ namespace TR.BIDSsv
           Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(rba));
 
         if (rba?.Length > 0)
-          DataGotEv?.Invoke(remIPE, new UDPGotEvArgs(rba));
+          Task.Run(() => DataGotEv?.Invoke(remIPE, new UDPGotEvArgs(rba)));
       }
       else if (IsDebugging)
         Console.WriteLine("udpcom class <<<<<<Already<<<<<< {0} : {1}", remIPE, BitConverter.ToString(rba));

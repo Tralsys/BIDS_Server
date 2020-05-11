@@ -185,37 +185,64 @@ namespace TR.BIDSsv
       if (!IsStarted) return;
       if (svlist?.Count > 0)
       {
-        Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)));
-
-        //Byte Array Auto Sender
-        Task.Run(() =>
-        {
-          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicSound(e.NewArray, i)));
-        });
-
-        if (SDAutoList?.Count > 0)
-        {
-          Task.Run(() => Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+        Parallel.Invoke(
+          () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
+          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicSound(e.NewArray, i))),
+          () => {
+            if (!(SDAutoList?.Count > 0)) return;
+            Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
             {
               int? Num = null;
               if (e.OldArray.Length <= i) Num = e.NewArray[i];
               else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
 
               if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
-            }));
-          Task.Run(() =>
-          {
+            });
+          },
+          () => {
+            if (!(SDAutoList?.Count > 0)) return;
             ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
-              (i) => SDAutoList.PrintValue(Get_TRI_Data(ConstVals.DTYPE_SOUND_ARR, i, true), i, ConstVals.DTYPE_SOUND_ARR));
-          });
-        }
+              (i) =>
+              {
+                string s = null;
+                if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
+              });
+          }
+          );
       }
-
     }
+
 
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted) return;
+      if (svlist?.Count > 0)
+      {
+        Parallel.Invoke(
+          () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
+          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicSound(e.NewArray, i))),
+          () => {
+            if (!(SDAutoList?.Count > 0)) return;
+            Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+            {
+              int? Num = null;
+              if (e.OldArray.Length <= i) Num = e.NewArray[i];
+              else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+
+              if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+            });
+          },
+          () => {
+            if (!(SDAutoList?.Count > 0)) return;
+            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
+              (i) =>
+              {
+                string s = null;
+                if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
+              });
+          }
+          );
+      }
       if (svlist?.Count > 0)
       {
         Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray)));
@@ -239,7 +266,10 @@ namespace TR.BIDSsv
           Task.Run(() =>
           {
             ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_ARR_PRINT_COUNT,
-              (i) => PDAutoList.PrintValue(Get_TRI_Data(ConstVals.DTYPE_PANEL_ARR, i, true), i, ConstVals.DTYPE_PANEL_ARR));
+              (i) => {
+                string s = null;
+                if (Get_TRI_Data(out s, ConstVals.DTYPE_PANEL_ARR, i, true)) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL_ARR, i, s), i, ConstVals.DTYPE_PANEL_ARR);
+                });
           });
         }
       }
@@ -287,9 +317,8 @@ namespace TR.BIDSsv
             string data = string.Empty;
             try
             {
-              data = Get_TRI_Data(elem.DType, elem.DNum) ?? string.Empty;
+              if (!Get_TRI_Data(out data, elem.DType, elem.DNum)) return;
             }
-            catch (BIDSErrException) { return; }
             catch (Exception e) { Console.WriteLine("Common.AutoSend.Common_BSMDChanged : {0}", e); }
 
             if (string.IsNullOrWhiteSpace(data)) return;

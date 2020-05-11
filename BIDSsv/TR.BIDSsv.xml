@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TR.BIDSsv</name>
+    </assembly>
+    <members>
+        <member name="F:TR.BIDSsv.ASList.LLock">
+            <summary>リストの操作権を管理します.</summary>
+        </member>
+        <member name="M:TR.BIDSsv.ASList.Contains(TR.IBIDSsv,System.Int32,System.Char)">
+            <summary>Listに指定の要素が含まれているかを確認します.</summary>
+            <param name="sv">登録された通信クラスインスタンス</param>
+            <param name="dnum">データ番号</param>
+            <param name="dtyp">データタイプ記号</param>
+            <returns>CountNum以上の</returns>
+        </member>
+        <member name="M:TR.BIDSsv.ASList.PrintValue(System.String,System.Int32,System.Char)">
+            <summary>条件に合致したsvにPrint命令を送出します.</summary>
+            <param name="printStr">出力する文字列</param>
+            <param name="dnum">条件とするデータ番号</param>
+            <param name="dtyp">条件とするタイプ文字</param>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicPanel(System.Int32[],System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="a">Source Array</param>
+            <param name="SttInd">Start Index</param>
+            <returns>Result Array</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.ArrDChangedCheck(System.Int32[]@,System.Int32[]@,System.Int32,System.Action{System.Int32},System.Boolean)">
+            <summary>配列を単位長さあたりで分割し, そこに変化があった場合に関数を実行する.</summary>
+            <param name="OldArray"></param>
+            <param name="NewArray"></param>
+            <param name="OneTimePrintCount"></param>
+            <param name="onChanged">単位配列長で分割し変化が検知されたとき, 何番目の配列で変化が検知されたかを示す引数とともに実行される関数</param>
+        </member>
+        <member name="M:TR.BIDSsv.Common.CommunicationBAGet(TR.BIDSsv.CommunicationStruct,System.Int32[],System.Int32[])">
+            <summary>
+            BIDS Data to Communication.dll data
+            </summary>
+            <param name="BSMD">BIDS SharedMemory Data</param>
+            <param name="PD">Panel Data</param>
+            <param name="SD">Sound Data</param>
+            <param name="deltaT">delta T Data</param>
+            <returns>Communication.dll Byte Array</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.PickData(Spec@,System.Char,System.Int32,System.Boolean@)">
+            <summary>
+            Returns the data that matches the data specification information.
+            </summary>
+            <param name="inData">Data Source</param>
+            <param name="DType">Data Type specification char</param>
+            <param name="DNum">Data Number</param>
+            <param name="IsFloatVal">set value that whether the return value is float</param>
+            <returns>result value or null</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.PickData(State@,System.Char,System.Int32,System.Boolean@)">
+            <summary>
+            Returns the data that matches the data specification information.
+            </summary>
+            <param name="inData">Data Source</param>
+            <param name="DType">Data Type specification char</param>
+            <param name="DNum">Data Number</param>
+            <param name="IsFloatVal">set value that whether the return value is float</param>
+            <returns>result value or null</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.PickData(OpenD@,System.Char,System.Int32,System.Boolean@)">
+            <summary>
+            Returns the data that matches the data specification information.
+            </summary>
+            <param name="inData">Data Source</param>
+            <param name="DType">Data Type specification char</param>
+            <param name="DNum">Data Number</param>
+            <param name="IsFloatVal">set value that whether the return value is float</param>
+            <returns>result value or null</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.PickData(Hand@,System.Char,System.Int32,System.Boolean@)">
+            <summary>
+            Returns the data that matches the data specification information.
+            </summary>
+            <param name="inData">Data Source</param>
+            <param name="DType">Data Type specification char</param>
+            <param name="DNum">Data Number</param>
+            <param name="IsFloatVal">set value that whether the return value is float</param>
+            <returns>result value or null</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.Get_TRI_Data(System.String@,System.Char@,System.Int32@,System.Boolean@,System.Char@)">
+            <summary>TRIで始まるコマンドに対応するデータを返す</summary>
+            <param name="ReturnStr">コマンドに対応するデータを格納する場所(先頭のセパレータは含まれません.)</param>
+            <param name="DType">要求されたデータのタイプ</param>
+            <param name="DNum">要求されたデータの番号</param>
+            <param name="GetDataAnyway">BIDS SMemの疎通状況に依らずにデータを取得するか否か</param>
+            <param name="separator">使用するセパレータ文字</param>
+            <returns>エラー番号(なければnull)</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.Byte[]@,System.Text.Encoding@)">
+            <summary>Classify the data</summary>
+            <param name="CName">Connection Instance</param>
+            <param name="ba">Got Data</param>
+            <param name="enc">Encording</param>
+            <returns>byte array to return, or array that calling program is needed to do something</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.String@)">
+            <summary>要求された情報を取得する</summary>
+            <param name="sv">IBIDSsvインスタンス</param>
+            <param name="str">入力されたコマンド文字列</param>
+            <returns>返信すべき文字列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelSend(TR.IBIDSsv,System.Byte[]@,System.Text.Encoding@)">
+            <summary>必要なデータを取得すると同時に, 送信まで行う.</summary>
+            <param name="sv">通信インスタンス</param>
+            <param name="data">入力データ</param>
+            <param name="enc">使用するエンコーディング</param>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelSend(TR.IBIDSsv,System.String@)">
+            <summary>必要なデータを選択すると同時に, 送信まで行う.</summary>
+            <param name="sv">IBIDSsvインスタンス</param>
+            <param name="str">入力されたコマンド文字列</param>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CR_S">
+            <summary>Line Feed (\r)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.LF_S">
+            <summary>Carriage Return (\n)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CR_C">
+            <summary>Line Feed (\r)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.LF_C">
+            <summary>Carriage Return (\n)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.PANEL_ARR_PRINT_COUNT">
+            <summary>Panelの連続出力機能で出力する数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.SOUND_ARR_PRINT_COUNT">
+            <summary>Soundの連続出力機能で出力する数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.PANEL_BIN_ARR_PRINT_COUNT">
+            <summary>Panel状態のBinary出力機能で出力する数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.SOUND_BIN_ARR_PRINT_COUNT">
+            <summary>Sound状態のBinary出力機能で出力する数</summary>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.String2INT(System.String)">
+            <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
+            <param name="str">入力文字列</param>
+            <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.String2Double(System.String)">
+            <summary>stringから小数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
+            <param name="str">入力文字列</param>
+            <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+        </member>
+    </members>
+</doc>

@@ -54,7 +54,7 @@ namespace TR.BIDSsv
 			serial.DataReceived += Serial_DataReceived;
 		}
 
-		private void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
+		private async void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			string gotData = string.Empty;
 			SerialPort sp = (SerialPort)sender;
@@ -85,16 +85,19 @@ namespace TR.BIDSsv
 				if (string.IsNullOrWhiteSpace(sa[i])) continue;//空要素は無視
 
 				if (sa[i].StartsWith(BINARY_DATA_HEADER))
-					try
-					{
-						BinaryDataReceived?.Invoke(this, Convert.FromBase64String(sa[i].Substring(BINARY_DATA_HEADER.Length)));
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
-					}
-				else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) Serial_Setting(sa[i]);
-				else StringDataReceived?.Invoke(this, sa[i]);
+					_ = Task.Run(() =>
+						{
+							try
+							{
+								BinaryDataReceived?.Invoke(this, Convert.FromBase64String(sa[i].Substring(BINARY_DATA_HEADER.Length)));
+							}
+							catch (Exception ex)
+							{
+								Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
+							}
+						});
+				else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[i]));
+				else _ = Task.Run(() => StringDataReceived?.Invoke(this, sa[i]));
 			}
 
 		}
