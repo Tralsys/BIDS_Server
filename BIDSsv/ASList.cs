@@ -13,7 +13,7 @@ namespace TR.BIDSsv
 
     /// <summary>リストの操作権を管理します.</summary>
     ReaderWriterLockSlim LLock = null;
-    public ASList(bool UseTypeChar = true)
+    public ASList()
     {
       LLock = new ReaderWriterLockSlim();
       try
@@ -21,7 +21,7 @@ namespace TR.BIDSsv
         LLock.EnterWriteLock();
         SvList = new List<IBIDSsv>();
         DNums = new List<int>();
-        DTypes = UseTypeChar ? new List<char>() : null;
+        DTypes = new List<char>();
       }
       finally
       {
@@ -35,7 +35,7 @@ namespace TR.BIDSsv
     /// <param name="dnum">データ番号</param>
     /// <param name="dtyp">データタイプ記号</param>
     /// <returns>CountNum以上の</returns>
-    public bool Contains(IBIDSsv sv, int dnum, char dtyp = ConstVals.NULL_CHAR)
+    public bool Contains(IBIDSsv sv, int dnum, char dtyp)
     {
       bool result = false;
       bool LockGot = false;
@@ -44,10 +44,10 @@ namespace TR.BIDSsv
         LLock.EnterReadLock();
         LockGot = true;
         if (sv == null || Count <= 0) return false;
-        Parallel.For(0, SvList.Count, (i) =>
-        {
-          if (SvList[i] == sv && (DTypes == null ? true : DTypes[i] == dtyp) && DNums[i] == dnum) result = true;
-        });
+        _ = Parallel.For(0, SvList.Count, (i) =>
+          {
+            if (!result && SvList[i] == sv && DTypes[i] == dtyp && DNums[i] == dnum) result = true;
+          });
       }
       finally
       {
@@ -79,7 +79,7 @@ namespace TR.BIDSsv
               if (dtyp == null && dnum != DNums[i]) continue;//type not specified and num is not same
               SvList.RemoveAt(i);
               DNums.RemoveAt(i);
-              DTypes?.RemoveAt(i);
+              DTypes.RemoveAt(i);
             }
           }
         }
@@ -96,7 +96,7 @@ namespace TR.BIDSsv
       }
     }
 
-    public void Add(IBIDSsv key, int dnum, char dtyp = ConstVals.NULL_CHAR)
+    public void Add(IBIDSsv key, int dnum, char dtyp)
     {
       bool LockGot = false;
       try
@@ -104,7 +104,7 @@ namespace TR.BIDSsv
         LLock.EnterWriteLock();
         LockGot = true;
         SvList.Add(key);
-        DTypes?.Add(dtyp);
+        DTypes.Add(dtyp);
         DNums.Add(dnum);
       }
       finally
@@ -114,7 +114,7 @@ namespace TR.BIDSsv
       }
     }
 
-    public List<IBIDSsv> GetSV(int dnum, char dtyp = ConstVals.NULL_CHAR)
+    public List<IBIDSsv> GetSV(int dnum, char dtyp)
     {
       List<IBIDSsv> svl = new List<IBIDSsv>();
       bool LockGot = false;
@@ -123,17 +123,16 @@ namespace TR.BIDSsv
       {
         LLock.EnterReadLock();
         LockGot = true;
-        Parallel.For(0, Count, (i) =>
-        {
-          if (DNums[i] == dnum && (DTypes == null ? true : DTypes[i] == dtyp))
+        _ = Parallel.For(0, Count, (i) =>
           {
-            lock (svlLock)
+            if (DNums[i] == dnum && DTypes[i] == dtyp)
             {
-              svl.Add(SvList[i]);
+              lock (svlLock)
+              {
+                svl.Add(SvList[i]);
+              }
             }
-          }
-
-        });
+          });
       }
       finally
       {
@@ -147,7 +146,7 @@ namespace TR.BIDSsv
     /// <param name="printStr">出力する文字列</param>
     /// <param name="dnum">条件とするデータ番号</param>
     /// <param name="dtyp">条件とするタイプ文字</param>
-    public void PrintValue(string printStr, int dnum, char dtyp = ConstVals.NULL_CHAR)
+    public void PrintValue(string printStr, int dnum, char dtyp)
     {
       if (string.IsNullOrWhiteSpace(printStr)) return;
       bool LockGot = false;
@@ -155,11 +154,11 @@ namespace TR.BIDSsv
       {
         LLock.EnterReadLock();
         LockGot = true;
-        Parallel.For(0, Count, (i) =>
-        {
-          if (DNums[i] == dnum && (DTypes == null ? true : DTypes[i] == dtyp))
-            Task.Run(() => SvList[i].Print(printStr));
-        });
+        _ = Parallel.For(0, Count, (i) =>
+          {
+            if (DNums[i] == dnum && DTypes[i] == dtyp)
+              Task.Run(() => SvList[i].Print(printStr));
+          });
       }
       finally
       {
@@ -175,7 +174,7 @@ namespace TR.BIDSsv
       {
         LLock.EnterReadLock();
         LockGot = true;
-        return new Elem(SvList[index], DNums[index], DTypes?[index]);
+        return new Elem(SvList[index], DNums[index], DTypes[index]);
       }
       finally
       {
@@ -185,11 +184,11 @@ namespace TR.BIDSsv
     }
     public class Elem
     {
-      public Elem(IBIDSsv SV, int DN, char? DT)
+      public Elem(IBIDSsv SV, int DN, char DT)
       {
         sv = SV;
         DNum = DN;
-        DType = DT ?? ConstVals.NULL_CHAR;
+        DType = DT;
       }
       public readonly IBIDSsv sv;
       public readonly int DNum;
