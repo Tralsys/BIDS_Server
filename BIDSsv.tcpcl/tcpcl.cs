@@ -7,6 +7,7 @@ using System.Threading;
 using TR;
 using TR.BIDSsv;
 using TR.BIDSSMemLib;
+using System.Threading.Tasks;
 
 namespace BIDSsv.tcpcl
 {
@@ -21,7 +22,7 @@ namespace BIDSsv.tcpcl
 
     TcpClient TC = null;
     NetworkStream NS = null;
-    Thread TD = null;
+    Task TD = null;
     string SvAddr = "127.0.0.1";
     Encoding Enc = Encoding.Default;
     bool IsLooping = true;
@@ -124,13 +125,13 @@ namespace BIDSsv.tcpcl
         catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
       }
 
-      TD = new Thread(LoopDoing);
+      TD = new Task(LoopDoing);
       TD.Start();
 
       return true;
     }
 
-    void LoopDoing()
+    async void LoopDoing()
     {
       try
       {
@@ -149,10 +150,10 @@ namespace BIDSsv.tcpcl
           try
           {
             Print("TRV" + Version.ToString() + "\n");
-            while (IsLooping && TC?.Connected == true && NS?.DataAvailable == false) Thread.Sleep(1);
+            while (IsLooping && TC?.Connected == true && NS?.DataAvailable == false) await Task.Delay(1);
             if (IsLooping)
             {
-              string gs = Read();
+              string gs = await Read();
               if (gs?.StartsWith("TRV") != true)
               {
                 IsLooping = false;
@@ -200,25 +201,19 @@ namespace BIDSsv.tcpcl
         return;
       }
 
-
-      (new Thread(() =>
+      _ = Task.Run(async () =>
       {
-        while (TC?.Connected == true) Thread.Sleep(1);
+        while (TC?.Connected == true) await Task.Delay(1);
         IsLooping = false;
-      })).Start();
+      });
 
 
       while (IsLooping)
       {
         if (TC?.Connected != true) continue;
-        //Print("TRID0\n");
         if (NS?.CanRead != true) continue;
-        /*string ReadData = Read();
-        if (ReadData.Contains("X")) Common.DataGot(ReadData);
-        else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
-        else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));*/
-        byte[] ba = Common.DataSelect(this, ReadByte(), Enc);
-        if (ba != null && ba.Length > 0) Print(ba);
+        byte[] ba = Common.DataSelect(this, await ReadByte(), Enc);
+        if (ba?.Length > 0) Print(ba);
       }
       NS?.Close();
       TC?.Close();
@@ -227,7 +222,7 @@ namespace BIDSsv.tcpcl
     public void Dispose()
     {
       IsLooping = false;
-      if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
+      if (TD?.IsCompleted == false && TD?.Wait(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
       NS?.Dispose();
       TC?.Dispose();
       IsDisposed = true;
@@ -262,14 +257,14 @@ namespace BIDSsv.tcpcl
     }
 
     List<byte> RBytesLRec = new List<byte>();
-    string Read() => Enc.GetString(ReadByte()).Replace("\n", string.Empty);
+    async Task<string> Read() => Enc.GetString(await ReadByte()).Replace("\n", string.Empty);
 
-    byte[] ReadByte()
+    async Task<byte[]> ReadByte()
     {
       List<byte> RBytesL = RBytesLRec;
       try
       {
-        while (NS?.DataAvailable == false && IsLooping) Thread.Sleep(1);
+        while (NS?.DataAvailable == false && IsLooping) await Task.Delay(1);
       }
       catch (Exception e)
       {
@@ -282,7 +277,7 @@ namespace BIDSsv.tcpcl
       while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
       {
         b = new byte[1];
-        nsreadr = NS.Read(b, 0, 1);
+        nsreadr = await NS.ReadAsync(b, 0, 1);
         if (nsreadr <= 0) break;
         RBytesL.Add(b[0]);
       }

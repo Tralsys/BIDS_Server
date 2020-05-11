@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
@@ -21,7 +22,7 @@ namespace TR.BIDSsv
     TcpListener TL = null;
     TcpClient TC = null;
     NetworkStream NS = null;
-    Thread TD = null;
+    Task TD = null;
 
     Encoding Enc = Encoding.Default;
     bool IsLooping = true;
@@ -120,7 +121,7 @@ namespace TR.BIDSsv
       TL = new TcpListener(IPAddress.Any, PortNum);
       TL.Start();
       Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, ((IPEndPoint)TL.LocalEndpoint).Port);
-      TD = PortNum != Common.DefPNum ? new Thread(ReadDoing) : new Thread(ConnectDoing);
+      TD = PortNum != Common.DefPNum ? new Task(ReadDoing) : new Task(ConnectDoing);
 
       TD.Start();
       return true;
@@ -136,7 +137,7 @@ namespace TR.BIDSsv
       PortNum = ((IPEndPoint)TL.LocalEndpoint).Port;
       Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, PortNum);
 
-      TD = new Thread(ReadDoing);
+      TD = new Task(ReadDoing);
 
       return PortNum;
     }
@@ -144,18 +145,18 @@ namespace TR.BIDSsv
     public void Dispose()
     {
       IsLooping = false;
-      if (TD?.IsAlive == true && TD?.Join(5000) == false) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
+      if (TD?.IsCompleted == false && TD?.Wait(5000) == false) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
       NS?.Dispose();
       TC?.Dispose();
       TL?.Stop();
       IsDisposed = true;
     }
 
-    void ConnectDoing()
+    async void ConnectDoing()
     {
       while (IsLooping)
       {
-        while (IsLooping && TL?.Pending() == false) Thread.Sleep(1);
+        while (IsLooping && TL?.Pending() == false) await Task.Delay(1);
         if (!IsLooping) continue;
         try
         {
@@ -168,8 +169,8 @@ namespace TR.BIDSsv
         {
           Console.WriteLine("{0} : ConnectDoing Failed.\n{1}", Name, e);
         }
-        string gs = Read();
-        if (gs.StartsWith("TRV"))
+        string gs = await Read();
+        if (gs.StartsWith("TRV"))//要変更 専用コマンドを用意すること.
         {
           try
           {
@@ -198,7 +199,7 @@ namespace TR.BIDSsv
     }
 
     //https://dobon.net/vb/dotnet/internet/tcpclientserver.html
-    void ReadDoing()
+    async void ReadDoing()
     {
       try
       {
@@ -211,21 +212,19 @@ namespace TR.BIDSsv
         Console.WriteLine("In connection waiting process, An Error has occured on " + Name);
         Console.WriteLine(e);
       }
-      (new Thread(() => {
-        while (TC?.Connected == true) Thread.Sleep(1);
-        IsLooping = false;
-      })).Start();
-
+      _ = Task.Run(async () =>
+        {
+          while (TC?.Connected == true) await Task.Delay(1);
+          IsLooping = false;
+        });
 
       while (IsLooping)
       {
         if (TC?.Connected != true) continue;
         if (!IsLooping) continue;
-        /*string ReadData = Read();
-        if (ReadData.Contains("X")) Common.DataGot(ReadData);
-        else if (ReadData.StartsWith("TR")) Print(Common.DataSelectTR(Name, ReadData));
-        else if (ReadData.StartsWith("TO")) Print(Common.DataSelectTO(ReadData));*/
-        byte[] ba = Common.DataSelect(this, ReadByte(), Enc);
+
+        byte[] ba = Common.DataSelect(this, await ReadByte(), Enc);
+        if (ba?.Length > 0) Print(ba);
       }
       NS?.Close();
       TC?.Close();
@@ -235,14 +234,14 @@ namespace TR.BIDSsv
 
 
     List<byte> RBytesLRec = new List<byte>();
-    string Read() => Enc.GetString(ReadByte()).Replace("\n", string.Empty);
+    async Task<string> Read() =>  Enc.GetString(await ReadByte()).Replace("\n", string.Empty);
     
-    byte[] ReadByte()
+    async Task<byte[]> ReadByte()
     {
       List<byte> RBytesL = RBytesLRec;
       try
       {
-        while (NS?.DataAvailable == false && IsLooping) Thread.Sleep(1);
+        while (NS?.DataAvailable == false && IsLooping) await Task.Delay(1);
       }
       catch (Exception e)
       {
@@ -255,7 +254,7 @@ namespace TR.BIDSsv
       while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
       {
         b = new byte[1];
-        nsreadr = NS.Read(b, 0, 1);
+        nsreadr = await NS.ReadAsync(b, 0, 1);
         if (nsreadr <= 0) break;
         RBytesL.Add(b[0]);
       }
