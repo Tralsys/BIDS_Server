@@ -28,7 +28,7 @@
             <param name="SttInd">Start Index</param>
             <returns>Result Array</returns>
         </member>
-        <member name="M:TR.BIDSsv.Common.ArrDChangedCheck(System.Int32[]@,System.Int32[]@,System.Int32,System.Action{System.Int32},System.Boolean)">
+        <member name="M:TR.BIDSsv.Common.ArrDChangedCheck(System.Int32[]@,System.Int32[]@,System.Int32,System.Action{System.Int32[],System.Int32})">
             <summary>配列を単位長さあたりで分割し, そこに変化があった場合に関数を実行する.</summary>
             <param name="OldArray"></param>
             <param name="NewArray"></param>
