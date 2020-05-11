@@ -257,6 +257,14 @@ namespace TR.BIDSsv
       && oldS.MR == newS.MR
       && oldS.SAP == newS.SAP;
 
+    public static string StringFormatProvider(in int Count, in char separater)
+    {
+      string ReturnStr = "{0}";
+      for (int i = 0; i < Count; i++)
+        ReturnStr += string.Format("{0}{{{1}}}", separater, i);
+      return ReturnStr;
+    }
+
 #if !ID_SERCON
     public static bool ArrayEqual<T>(T[] ar1, int ar1ind, T[] ar2, int ar2ind, in int len = -1)
     {
