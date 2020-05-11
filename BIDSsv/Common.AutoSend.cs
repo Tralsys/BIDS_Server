@@ -162,7 +162,7 @@ namespace TR.BIDSsv
     /// <param name="NewArray"></param>
     /// <param name="OneTimePrintCount"></param>
     /// <param name="onChanged">単位配列長で分割し変化が検知されたとき, 何番目の配列で変化が検知されたかを示す引数とともに実行される関数</param>
-    static void ArrDChangedCheck(in int[] OldArray, in int[] NewArray, int OneTimePrintCount, Action<int> onChanged, bool IsActionThreadsafe = true)
+    static void ArrDChangedCheck(in int[] OldArray, in int[] NewArray, int OneTimePrintCount, Action<int[], int> onChanged)
     {
       int al = Math.Max(OldArray.Length, NewArray.Length);
       if (al % OneTimePrintCount != 0) al = ((int)Math.Floor((double)al / OneTimePrintCount) + 1) * OneTimePrintCount;
@@ -171,12 +171,10 @@ namespace TR.BIDSsv
       int[] na = new int[al];
       Array.Copy(OldArray, oa, OldArray.Length);
       Array.Copy(NewArray, na, NewArray.Length);
-      ParallelOptions popts = new ParallelOptions();
-      if (!IsActionThreadsafe) popts.MaxDegreeOfParallelism = 1;
       Parallel.For(0, al / OneTimePrintCount, (i) =>
       {
         int j = i * OneTimePrintCount;
-        if (!(oa, na).ArrayEqual(j, j, OneTimePrintCount)) onChanged.Invoke(i);
+        if (!(oa, na).ArrayEqual(j, j, OneTimePrintCount)) onChanged.Invoke(na, i);
       });
     }
 
@@ -187,7 +185,7 @@ namespace TR.BIDSsv
       {
         Parallel.Invoke(
           () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
-          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicSound(e.NewArray, i))),
+          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i))),
           () => {
             if (!(SDAutoList?.Count > 0)) return;
             Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
@@ -202,7 +200,7 @@ namespace TR.BIDSsv
           () => {
             if (!(SDAutoList?.Count > 0)) return;
             ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
-              (i) =>
+              (_, i) =>
               {
                 string s = null;
                 if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
@@ -220,7 +218,7 @@ namespace TR.BIDSsv
       {
         Parallel.Invoke(
           () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
-          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicSound(e.NewArray, i))),
+          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na,i) => ASPtr(AutoSendSetting.BasicSound(na, i))),
           () => {
             if (!(SDAutoList?.Count > 0)) return;
             Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
@@ -235,43 +233,13 @@ namespace TR.BIDSsv
           () => {
             if (!(SDAutoList?.Count > 0)) return;
             ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
-              (i) =>
+              (_, i) =>
               {
                 string s = null;
                 if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
               });
           }
           );
-      }
-      if (svlist?.Count > 0)
-      {
-        Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray)));
-
-        //Byte Array Auto Sender
-        Task.Run(() =>
-        {
-          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (i) => ASPtr(AutoSendSetting.BasicPanel(e.NewArray, i)));
-        });
-
-        if (PDAutoList?.Count > 0)
-        {
-          Task.Run(() => Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
-          {
-            int? Num = null;
-            if (e.OldArray.Length <= i) Num = e.NewArray[i];
-            else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
-
-            if (Num != null) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL, i, Num.ToString()), i, ConstVals.DTYPE_PANEL);
-          }));
-          Task.Run(() =>
-          {
-            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_ARR_PRINT_COUNT,
-              (i) => {
-                string s = null;
-                if (Get_TRI_Data(out s, ConstVals.DTYPE_PANEL_ARR, i, true)) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL_ARR, i, s), i, ConstVals.DTYPE_PANEL_ARR);
-                });
-          });
-        }
       }
     }
     private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e)
