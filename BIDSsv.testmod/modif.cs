@@ -16,7 +16,7 @@ namespace BIDSsv.testmod
 		public string Name { get; private set; } = "BsvTest";
 
 		private string LogFileName;
-		SemaphoreSlim swr_lock = new SemaphoreSlim(1, 1);//ref : https://www.atmarkit.co.jp/ait/articles/1411/18/news135.html
+		SemaphoreSlim swr_lock = new SemaphoreSlim(1);//ref : https://www.atmarkit.co.jp/ait/articles/1411/18/news135.html
 		private StreamWriter swr = null;
 		public bool IsDebug { get; set; }
 
@@ -32,7 +32,7 @@ namespace BIDSsv.testmod
 			if (IsLoading) return true;
 			IsLoading = true;
 
-      string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
+			string[] sa = args.Replace(" ", string.Empty).Split(new string[1] { "/" }, StringSplitOptions.RemoveEmptyEntries);
 
 			DateTime dt = DateTime.UtcNow;
 			Name += (dt.Minute * 60 * 1000 * dt.Second * 1000 + dt.Millisecond).ToString();
@@ -147,13 +147,14 @@ namespace BIDSsv.testmod
 		private void AppendText(string s)
 			=> Task.Run(async () =>
 		{
-			if (NoLogMode || disposing) return;
+			DateTime dt = DateTime.UtcNow;
+			if (NoLogMode || disposing || swr == null || swr_lock == null) return;
 			if (string.IsNullOrWhiteSpace(s)) return;
 			try
 			{
-				await swr_lock.WaitAsync();
+				await swr_lock?.WaitAsync();
 				if (IsDisposed || disposedValue) return;
-				await swr?.WriteLineAsync(DateTime.UtcNow.ToString("HH:mm:ss.fffff,\t") + s);
+				await swr?.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
 			}
 			catch (ObjectDisposedException)
 			{
@@ -179,7 +180,7 @@ namespace BIDSsv.testmod
 			if (string.IsNullOrWhiteSpace(cmd)) return false;
 			try
 			{
-				AppendText(string.Format("Send: {0}", cmd));
+				AppendText("Send : "+ cmd);
 				Common.DataSelSend(this, cmd);
 				return true;
 			}catch(Exception e)
@@ -196,11 +197,11 @@ namespace BIDSsv.testmod
 		public void OnSoundDChanged(in int[] data) { }
 		#endregion
 
-		public void Print(in string data) => AppendText(string.Format("Got : {0}", data));
+		public void Print(in string data) => AppendText("Got : " + data);
 		public void Print(in byte[] data)
 		{
 			if (!IsBinaryAllowed) return;
-			AppendText(string.Format("Got : {0}", BitConverter.ToString(data)));
+			AppendText("GotB: " + BitConverter.ToString(data));
 		}
 
 		string[] helps = new string[]
@@ -213,11 +214,12 @@ namespace BIDSsv.testmod
 			"modロード時に指定したコマンドを, 指定されたタイミングで, 連続して送信します.",
 			"実行中に任意のコマンドを送信する機能は, 現状実装されていません.",
 			"# オプション一覧",
-			"-ASALL :\tmod作成時に利用できるAutoSend機能をすべて有効化します(但しPanel/Soundは0~256)  使用例:\"-ASALL\"",
-			"-ONCE :\t起動時に一度のみ送信するコマンドを指定します.  使用例:\"-ONCE:TRAE0\"",
-			"-Lnn :\tnnに指定した長さの間隔をあけて, 指定したコマンドを送信します.  nnには整数を指定し, 単位はミリ秒です.  使用例:\"-L10:TRIE0\"",
-			"-BAREC :\tByte Arrayの受信も記録します.  使用例:\"-BAREC\"",
-			"-NOLOG :\tログ出力を無効化します.  なお, このオプションを指定するよりも前のログは記録されますので, ご了承ください.  また, ファイルハンドルは終了まで保持されます."
+			"-ASALL :\tmod作成時に利用できるAutoSend機能をすべて有効化します(但しPanel/Soundは0~256)  使用例:\"/ASALL\"",
+			"-ONCE :\t起動時に一度のみ送信するコマンドを指定します.  使用例:\"/ONCE:TRAE0\"",
+			"-Lnn :\tnnに指定した長さの間隔をあけて, 指定したコマンドを送信します.  nnには整数を指定し, 単位はミリ秒です.  使用例:\"/L10:TRIE0\"",
+			"-BAREC :\tByte Arrayの受信も記録します.  使用例:\"/BAREC\"",
+			"-NOLOG :\tログ出力を無効化します.  なお, このオプションを指定するよりも前のログは記録されますので, ご了承ください.  また, ファイルハンドルは終了まで保持されます.",
+			"※備考 : 本MODでは, オプション指定を半角スラッシュ(/)で始めます.  ハイフン(-)は負の数を表す記号として解釈されてしまいますので, ご了承ください."
 		};
 		public void WriteHelp(in string args)
 		{
@@ -268,23 +270,35 @@ namespace BIDSsv.testmod
 	internal class CMDSendTimer : IDisposable
 	{
 		readonly int TimeOutNum = 100;
+		TimeSpan IntervalTS = new TimeSpan(0, 0, 0, 0, 10);
 		Task LThread = null;
-		internal CMDSendTimer(modif mif, int interval, string cmd)
+		internal CMDSendTimer(modif mif, in int interval, string cmd)
 		{
 			if (mif == null) throw new ArgumentNullException();
-			if (interval < 0) throw new ArgumentException();
-			TimeOutNum += interval;
-			LThread = new Task(async () =>
+			IntervalTS = interval <= 0 ? new TimeSpan(1 - interval) : new TimeSpan(0, 0, 0, 0, interval);
+
+			TimeOutNum += (int)IntervalTS.TotalMilliseconds;
+			bool OnCmpleted = false;
+			void LoopReader()
+			{
+				if (OnCmpleted || mif?.IsDisposed != false || disposedValue || LThread == null) return;
+				Task.Delay(IntervalTS).GetAwaiter().OnCompleted(LoopReader);
+				if (mif?.SendCMD2sv(cmd) != true) OnCmpleted = true;
+			}
+
+			LThread = new Task(LoopReader); /*new Task(() =>
 				{
-					while (mif?.IsDisposed != true && !disposedValue)
+					while (mif?.IsDisposed != true && !disposedValue && LThread != null)
 					{
+						var ta = Task.Delay(IntervalTS);
 						if (mif?.SendCMD2sv(cmd) != true) return;
-						await Task.Delay(interval);
+						
 					}
-				});
+				});*/
 			try
 			{
-				LThread.Start();
+				//LThread.Start();
+				LoopReader();
 			}
 			catch (Exception e)
 			{
