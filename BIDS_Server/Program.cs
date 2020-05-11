@@ -3,9 +3,7 @@ using System.Reflection;
 using TR.BIDSsv;
 using System.IO;
 using TR;
-using System.IO.Ports;
 using System.Threading.Tasks;
-using System.Threading;
 using System.Linq;
 
 namespace BIDS_Server
@@ -13,7 +11,7 @@ namespace BIDS_Server
   class Program
   {
     static bool IsLooping = true;
-    const string VerNumStr = "012-";
+    const string VerNumStr = "012-200512";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
