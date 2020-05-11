@@ -56,10 +56,6 @@
       <Project>{8c8917ff-842b-49b2-a9b5-f59ae12f19d6}</Project>
       <Name>BIDSSMemLib.structs</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BIDSsv.serial\BIDSsv.serial.csproj">
-      <Project>{d4f23958-eb41-46ee-9e52-b99270505956}</Project>
-      <Name>BIDSsv.serial</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BIDSsv\BIDSsv.csproj">
       <Project>{5a7bbf59-7d25-471e-aa59-41c79ce78d22}</Project>
       <Name>BIDSsv</Name>
