@@ -240,11 +240,21 @@ namespace BIDSsv.testmod
 					if (CSTL?.Count > 0)
 						for (int i = 0; i < CSTL.Count; i++)
 							CSTL[i]?.Dispose();
-					await swr?.FlushAsync();
-					swr?.Close();
-					swr?.Dispose();
+					try
+					{
+						await swr_lock.WaitAsync();
+						//await swr?.FlushAsync();
+						swr?.Close();
+						swr?.Dispose();
+					}
+					finally
+					{
+						swr_lock.Release();
+					}
 				}
-				
+				swr = null;
+				swr_lock.Dispose();
+				swr_lock = null;
 				disposedValue = true;
 			}
 			IsDisposed = true;
