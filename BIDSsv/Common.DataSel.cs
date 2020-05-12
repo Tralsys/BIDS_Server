@@ -414,14 +414,14 @@ namespace TR.BIDSsv
                 s.Z = ba.GetDouble(i += 4);
                 s.V = ba.GetFloat(i += 8);
                 s.I = ba.GetFloat(i += 4);
-                _ = ba.GetFloat(i += 4);//WireVoltage
-                s.T = ba.GetInt(i += 4);
+                //_ = ba.GetFloat(i += 4);//WireVoltage
+                s.T = ba.GetInt(i += 8);
                 s.BC = ba.GetFloat(i += 4);
                 s.MR = ba.GetFloat(i += 4);
                 s.ER = ba.GetFloat(i += 4);
                 s.BP = ba.GetFloat(i += 4);
                 s.SAP = ba.GetFloat(i += 4);
-                bsmd.IsDoorClosed = (ba[13 * 4] & 0b10000000) > 0;
+                bsmd.IsDoorClosed = ba[i += 8] == 1;
                 bsmd.StateData = s;
                 BSMD = bsmd;
               }
@@ -505,7 +505,7 @@ namespace TR.BIDSsv
 
       //StringデータかBinaryデータかを識別し, 適切なメソッドに処理を渡す
 
-      if (ba[0] == (byte)'T') return enc.GetBytes(DataSelect(CName, enc.GetString(ba)) ?? string.Empty);
+      if (ba[0] == (byte)'T') return enc.GetBytes(DataSelect(CName, enc.GetString(ba)) ?? string.Empty);//It is string data
       else return DataSelBin(ba);
     }
 
