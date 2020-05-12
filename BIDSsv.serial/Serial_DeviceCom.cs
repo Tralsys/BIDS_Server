@@ -83,21 +83,21 @@ namespace TR.BIDSsv
 			for(int i = 0; i < sa_len; i++)
 			{
 				if (string.IsNullOrWhiteSpace(sa[i])) continue;//空要素は無視
-
-				if (sa[i].StartsWith(BINARY_DATA_HEADER))
+				int ind = i;
+				if (sa[ind].StartsWith(BINARY_DATA_HEADER))
 					_ = Task.Run(() =>
 						{
 							try
 							{
-								BinaryDataReceived?.Invoke(this, Convert.FromBase64String(sa[i].Substring(BINARY_DATA_HEADER.Length)));
+								BinaryDataReceived?.Invoke(this, Convert.FromBase64String(sa[ind].Substring(BINARY_DATA_HEADER.Length)));
 							}
 							catch (Exception ex)
 							{
 								Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
 							}
 						});
-				else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[i]));
-				else _ = Task.Run(() => StringDataReceived?.Invoke(this, sa[i]));
+				else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[ind]));
+				else _ = Task.Run(() => StringDataReceived?.Invoke(this, sa[ind]));
 			}
 
 		}
