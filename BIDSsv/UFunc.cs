@@ -1,12 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace TR.BIDSsv
 {
   static public class UFunc
   {
     public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
+
+    public static void SetBIDSHeader(this byte[] ba, byte ba_2, byte ba_3, ref int index)
+    {
+      ba[0] = (byte)ConstVals.BIN_CMD_HEADER_0;
+      ba[1] = (byte)ConstVals.BIN_CMD_HEADER_1;
+      ba[2] = ba_2;
+      ba[3] = ba_3;
+      index += 4;
+    }
+    public static void ValueSet2Arr(this byte[] ba, int value, ref int index)
+    {
+      Array.Copy(GetBytes(value), 0, ba, index, sizeof(int));
+      index += sizeof(int);
+    }
+    public static void ValueSet2Arr(this byte[] ba, double value, ref int index)
+    {
+      Array.Copy(GetBytes(value), 0, ba, index, sizeof(double));
+      index += sizeof(double);
+    }
+    public static void ValueSet2Arr(this byte[] ba, float value, ref int index)
+    {
+      Array.Copy(GetBytes(value), 0, ba, index, sizeof(float));
+      index += sizeof(float);
+    }
+    public static void ValueSet2Arr(this byte[] ba, short value, ref int index)
+    {
+      Array.Copy(GetBytes(value), 0, ba, index, sizeof(short));
+      index += sizeof(short);
+    }
+    public static void ValueSet2Arr(this byte[] ba, bool value, ref int index)
+    {
+      Array.Copy(GetBytes(value), 0, ba, index, sizeof(bool));
+      index += sizeof(bool);
+    }
+
+
 
     private static readonly bool isLE = BitConverter.IsLittleEndian;
 
