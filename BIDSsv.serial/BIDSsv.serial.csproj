@@ -4,6 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>TR.BIDSsv.serial</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
+		<Version>1.0.2</Version>
     <Authors>Tetsu Otter</Authors>
     <Company>Tech Otter</Company>
     <Product>BIDS Project</Product>
