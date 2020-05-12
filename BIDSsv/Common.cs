@@ -78,11 +78,11 @@ namespace TR.BIDSsv
       StrFormat_BSMD_HandAll = UFunc.StringFormatProvider(4, ConstVals.CMD_SEPARATOR);
     }
 
-    static public void Start(int Interval = 10, bool NO_SMEM_MODE = false)
+    static public void Start(int Interval = 10, bool NO_SMEM_MODE = false, bool NO_Event_Mode = false)
     {
       if (!IsStarted)
       {
-        SML = new SMemLib(0, true, NO_SMEM_MODE);
+        SML = new SMemLib(0, true, NO_SMEM_MODE, NO_Event_Mode);
         CI = new CtrlInput();
         SML?.ReadStart(0, Interval);
 
