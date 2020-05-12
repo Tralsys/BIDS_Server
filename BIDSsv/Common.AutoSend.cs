@@ -45,70 +45,76 @@ namespace TR.BIDSsv
       public const uint PanelSize = 129 * sizeof(int);
       public const uint HeaderSound = 0x74727300;
       public const uint SoundSize = PanelSize;
-
-      public static bool BasicConstAS = false;
-      public static bool BasicCommonAS = false;
-      public static bool BasicBVE5AS = false;
-      public static bool BasicOBVEAS = false;
-      public static bool BasicHandleAS = false;
-      public static bool BasicPanelAS = false;
-      public static bool BasicSoundAS = false;
-
+      //デフォルトはtrue BIDS_Serverの場合はautodelで無効化する.
+      public static bool BasicConstAS = true;
+      public static bool BasicCommonAS = true;
+      public static bool BasicBVE5AS = true;
+      public static bool BasicOBVEAS = true;
+      public static bool BasicHandleAS = true;
+      public static bool BasicPanelAS = true;
+      public static bool BasicSoundAS = true;
       static internal byte[] BasicConst(in Spec s, in OpenD o)
       {
+        if (!BasicConstAS) return null;
         byte[] ba = new byte[BasicConstSize];
         int i = 0;
-        Array.Copy(UFunc.GetBytes((int)HeaderBasicConst), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((short)202), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(UFunc.GetBytes((short)s.B), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(UFunc.GetBytes((short)s.P), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(UFunc.GetBytes((short)s.A), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(UFunc.GetBytes((short)s.J), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(UFunc.GetBytes((short)s.C), 0, ba, i, sizeof(short)); i += sizeof(short);
-        Array.Copy(UFunc.GetBytes((short)o.SelfBCount), 0, ba, i, sizeof(short));
+        ba.SetBIDSHeader(ConstVals.BIN_CMD_INFO_DATA, (byte)ConstVals.BIN_CMD_INFOD_TYPES.SPEC, ref i);
+        ba.ValueSet2Arr((short)Version, ref i);
+        ba.ValueSet2Arr((short)s.B, ref i);
+        ba.ValueSet2Arr((short)s.P, ref i);
+        ba.ValueSet2Arr((short)s.A, ref i);
+        ba.ValueSet2Arr((short)s.J, ref i);
+        ba.ValueSet2Arr((short)s.C, ref i);
+        ba.ValueSet2Arr((short)o.SelfBCount, ref i);
         return ba;
       }
       static internal byte[] BasicCommon(in State s, byte DoorState, int SigNum = 0)
       {
+        if (!BasicCommonAS) return null;
         byte[] ba = new byte[BasicCommonSize];
         int i = 0;
-        Array.Copy(UFunc.GetBytes((int)HeaderBasicCommon), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((double)s.Z), 0, ba, i, sizeof(double)); i += sizeof(double);
-        Array.Copy(UFunc.GetBytes((float)s.V), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)s.I), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)0.0), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((int)s.T), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((float)s.BC), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)s.MR), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)s.ER), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)s.BP), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((float)s.SAP), 0, ba, i, sizeof(float)); i += sizeof(float);
-        Array.Copy(UFunc.GetBytes((int)SigNum), 0, ba, i, sizeof(int)); i += sizeof(int);
+        ba.SetBIDSHeader(ConstVals.BIN_CMD_INFO_DATA, (byte)ConstVals.BIN_CMD_INFOD_TYPES.STATE, ref i);
+        ba.ValueSet2Arr((double)s.Z, ref i);
+        ba.ValueSet2Arr((float)s.V, ref i);
+        ba.ValueSet2Arr((float)s.I, ref i);
+        ba.ValueSet2Arr((float)0.0, ref i);
+        ba.ValueSet2Arr((int)s.T, ref i);
+        ba.ValueSet2Arr((float)s.BC, ref i);
+        ba.ValueSet2Arr((float)s.MR, ref i);
+        ba.ValueSet2Arr((float)s.ER, ref i);
+        ba.ValueSet2Arr((float)s.BP, ref i);
+        ba.ValueSet2Arr((float)s.SAP, ref i);
+        ba.ValueSet2Arr((int)SigNum, ref i);
         ba[i] = DoorState;
         return ba;
       }
       static internal byte[] BasicBVE5(object o)
       {
+        if (!BasicBVE5AS) return null;
         return null;
       }
       static internal byte[] BasicOBVE(OpenD o)
       {
+        if (!BasicOBVEAS) return null;
         byte[] ba = new byte[Marshal.SizeOf(new OpenD()) + 4];
-        Array.Copy(UFunc.GetBytes((int)HeaderBasicOBVE), 0, ba, 0, sizeof(int));
+        int i = 0;
+        ba.SetBIDSHeader(ConstVals.BIN_CMD_INFO_DATA, (byte)ConstVals.BIN_CMD_INFOD_TYPES.OPEND, ref i);
+        
         IntPtr ip = new IntPtr();
         Marshal.StructureToPtr(o, ip, true);
-        Marshal.Copy(ip, ba, 4, ba.Length);
+        Marshal.Copy(ip, ba, i, ba.Length);
         return ba;
       }
       static internal byte[] BasicHandle(Hand h, int SelfB)
       {
+        if (!BasicHandleAS) return null;
         byte[] ba = new byte[BasicHandleSize];
         int i = 0;
-        Array.Copy(UFunc.GetBytes((int)HeaderBasicHandle), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((int)h.P), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((int)h.B), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((int)h.R), 0, ba, i, sizeof(int)); i += sizeof(int);
-        Array.Copy(UFunc.GetBytes((int)SelfB), 0, ba, i, sizeof(int));
+        ba.SetBIDSHeader(ConstVals.BIN_CMD_INFO_DATA, (byte)ConstVals.BIN_CMD_INFOD_TYPES.HANDLE, ref i);
+        ba.ValueSet2Arr((int)h.P, ref i);
+        ba.ValueSet2Arr((int)h.B, ref i);
+        ba.ValueSet2Arr((int)h.R, ref i);
+        ba.ValueSet2Arr((int)SelfB, ref i);
         return ba;
       }
       /// <summary>
@@ -119,6 +125,7 @@ namespace TR.BIDSsv
       /// <returns>Result Array</returns>
       static internal byte[] BasicPanel(int[] a, int SttInd)
       {
+        if (!BasicPanelAS) return null;
         byte[] ba = new byte[PanelSize];
         Array.Copy(HeaderPanel.GetBytes(), 0, ba, 0, sizeof(uint));
         ba[3] = (byte)(SttInd / 128);
@@ -133,6 +140,7 @@ namespace TR.BIDSsv
       }
       static internal byte[] BasicSound(int[] a, int SttInd)
       {
+        if (!BasicSoundAS) return null;
         byte[] ba = new byte[SoundSize];
 
         Parallel.For(0, 128, (i) =>
@@ -180,102 +188,107 @@ namespace TR.BIDSsv
 
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
-      if (!IsStarted) return;
-      if (svlist?.Count > 0)
-      {
-        Parallel.Invoke(
-          () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
-          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i))),
-          () => {
-            if (!(SDAutoList?.Count > 0)) return;
-            Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+      if (!IsStarted || !(svlist?.Count > 0)) return;
+      Task.Run(()=> Parallel.Invoke(
+        () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
+        () =>
+        {
+          if (AutoSendSetting.BasicSoundAS)
+            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i)));
+        },
+        () =>
+        {
+          if (!(SDAutoList?.Count > 0)) return;
+          Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+          {
+            int? Num = null;
+            if (e.OldArray.Length <= i) Num = e.NewArray[i];
+            else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+
+            if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+          });
+        },
+        () =>
+        {
+          if (!(SDAutoList?.Count > 0)) return;
+          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
+            (_, i) =>
             {
-              int? Num = null;
-              if (e.OldArray.Length <= i) Num = e.NewArray[i];
-              else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
-
-              if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+              string s = null;
+              if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
             });
-          },
-          () => {
-            if (!(SDAutoList?.Count > 0)) return;
-            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
-              (_, i) =>
-              {
-                string s = null;
-                if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
-              });
-          }
-          );
-      }
+        }
+        ));
     }
-
 
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
-      if (!IsStarted) return;
-      if (svlist?.Count > 0)
-      {
-        Parallel.Invoke(
-          () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
-          () => ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na,i) => ASPtr(AutoSendSetting.BasicSound(na, i))),
-          () => {
-            if (!(SDAutoList?.Count > 0)) return;
-            Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
-            {
-              int? Num = null;
-              if (e.OldArray.Length <= i) Num = e.NewArray[i];
-              else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+      if (!IsStarted || (svlist?.Count > 0)) return;
+      Task.Run(() => Parallel.Invoke(
+        () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
+        () =>
+        {
+          if (AutoSendSetting.BasicPanelAS)
+            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i)));
+        },
+        () =>
+        {
+          if (!(SDAutoList?.Count > 0)) return;
+          Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+          {
+            int? Num = null;
+            if (e.OldArray.Length <= i) Num = e.NewArray[i];
+            else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
 
-              if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+            if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+          });
+        },
+        () =>
+        {
+          if (!(SDAutoList?.Count > 0)) return;
+          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
+            (_, i) =>
+            {
+              string s = null;
+              if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
             });
-          },
-          () => {
-            if (!(SDAutoList?.Count > 0)) return;
-            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
-              (_, i) =>
-              {
-                string s = null;
-                if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
-              });
-          }
-          );
-      }
+        }));
     }
     private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e)
     {
-      if (!IsStarted) return;
-      if (svlist?.Count > 0)
+      if (!IsStarted || !(svlist?.Count>0)) return;
+      Task.Run(() => Parallel.Invoke(
+      () =>
       {
-        if (!Equals(e.OldData.SelfBPosition, e.NewData.SelfBPosition))
+        if (AutoSendSetting.BasicOBVEAS && !Equals(e.OldData.SelfBPosition, e.NewData.SelfBPosition))
           ASPtr(AutoSendSetting.BasicHandle(BSMD.HandleData, e.NewData.SelfBPosition));
-
-        Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(in e.NewData));
-      }
+      },
+      () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(in e.NewData))
+      ));
     }
     private static void Common_BSMDChanged(object sender, SMemLib.BSMDChangedEArgs e)
     {
-      if (!IsStarted) return;
-      if (svlist?.Count > 0)
-      {
-        Task.Run(() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData)));
-
-        Parallel.Invoke(
-          () => {
-            if (!Equals(e.OldData.SpecData, e.NewData.SpecData))
-              ASPtr(AutoSendSetting.BasicConst(e.NewData.SpecData, OD));
-          },
-        () => {
-          if (!Equals(e.OldData.StateData, e.NewData.StateData) || e.OldData.IsDoorClosed != e.NewData.IsDoorClosed)
+      if (!IsStarted || !(svlist?.Count > 0)) return;
+      Task.Run(() => Parallel.Invoke(
+        () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData)),
+        () =>
+        {
+          if (AutoSendSetting.BasicConstAS && !Equals(e.OldData.SpecData, e.NewData.SpecData))
+            ASPtr(AutoSendSetting.BasicConst(e.NewData.SpecData, OD));
+        },
+        () =>
+        {
+          if (AutoSendSetting.BasicCommonAS && (!Equals(e.OldData.StateData, e.NewData.StateData) || e.OldData.IsDoorClosed != e.NewData.IsDoorClosed))
             ASPtr(AutoSendSetting.BasicCommon(e.NewData.StateData, (byte)(e.NewData.IsDoorClosed ? 1 : 0)));
         },
-        () => {
-          if (!Equals(e.NewData.HandleData, e.OldData.HandleData))
-            ASPtr(AutoSendSetting.BasicHandle(e.NewData.HandleData, OD.SelfBPosition));
-        });
-
-        if (AutoNumL?.Count > 0)
+        () =>
         {
+          if (AutoSendSetting.BasicHandleAS && !Equals(e.NewData.HandleData, e.OldData.HandleData))
+            ASPtr(AutoSendSetting.BasicHandle(e.NewData.HandleData, OD.SelfBPosition));
+        },
+        () =>
+        {
+          if (!(AutoNumL?.Count > 0)) return;
           Parallel.For(0, AutoNumL.Count, (ind) =>
           {
             ASList.Elem elem = AutoNumL.ElementAt(ind);
@@ -344,10 +357,10 @@ namespace TR.BIDSsv
 
               _ => null
             }
-            == false) elem.sv.Print(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, elem.DType, elem.DNum, data));
+              == false) elem.sv.Print(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, elem.DType, elem.DNum, data));
           });
         }
-      }
+      ));
     }
 
   }
