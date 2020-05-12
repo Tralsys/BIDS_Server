@@ -120,5 +120,13 @@
         Car_Count
       }
     }
+
+    public static class BINARY_DATA_POS
+    {
+      public const int HEADER_0 = 0;
+      public const int HEADER_1 = 1;
+
+
+    }
   }
 }
