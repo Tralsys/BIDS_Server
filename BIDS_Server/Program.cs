@@ -1,56 +1,94 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
-using TR.BIDScs;
-using TR.BIDSSMemLib;
+using System.Reflection;
 using TR.BIDSsv;
+using System.IO;
+using TR;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace BIDS_Server
 {
   class Program
   {
-    /*BIDS Server
-     * HTML+JavaScriptとの間でWebSocketでの通信。
-     */
-     
-    static SMemLib SML = null;
-    static CtrlInput CI = null;
     static bool IsLooping = true;
-    const string VerNumStr = "011a";
+    const string VerNumStr = "012-200512";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
       Console.WriteLine("ver : " + VerNumStr);
-      Console.WriteLine("In this version(" + VerNumStr + "), only Serial Connection is supported.");
-      //SocketDo();
-      SMemLib.BIDSSMemChanged += SMemLib_BIDSSMemChanged;
-      SMemLib.OpenDChanged += SMemLib_OpenDChanged;
-      SMemLib.PanelDChanged += SMemLib_PanelDChanged;
-      SMemLib.SoundDChanged += SMemLib_SoundDChanged;
-      SML = new SMemLib(true, 0);
-      SML.ReadStart(0, 10);
-      CI = new CtrlInput();
+
+      Common.Start(1);
+
+      for (int i = 0; i < args.Length; i++) Console.WriteLine("{0}[{1}] :: {2}", "args", i, args[i]);
+      if (args?.Length > 0)
+      {
+        for(int i = 0; i < args.Length; i++)
+        {
+          if (args[i].StartsWith("/"))
+          {
+            //do some process
+            continue;
+          }
+          if (args[i].StartsWith("-"))
+          {
+            //do some process
+            continue;
+          }
+
+          ReadLineDO(args[i]);
+        }
+      }
+
       do ReadLineDO(); while (IsLooping);
-      SML.ReadStop();
-      SML.Dispose();
+      Common.Dispose();
+
       Console.WriteLine("Please press any key to exit...");
       Console.ReadKey();
     }
 
-    private static void SMemLib_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e) => Parallel.For(0, svlist.Count, (i) => svlist[i]?.OnSoundDChanged(in e.NewArray));
-    private static void SMemLib_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e) => Parallel.For(0, svlist.Count, (i) => svlist[i]?.OnPanelDChanged(in e.NewArray));
-    private static void SMemLib_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e) => Parallel.For(0, svlist.Count, (i) => svlist[i]?.OnOpenDChanged(in e.NewData));
-    private static void SMemLib_BIDSSMemChanged(object sender, SMemLib.BSMDChangedEArgs e) => Parallel.For(0, svlist.Count, (i) => svlist[i]?.OnBSMDChanged(in e.NewData));
-
-    static List<IBIDSsv> svlist = new List<IBIDSsv>();
-
-    static void ReadLineDO()
+    static void ReadLineDO() => ReadLineDO(Console.ReadLine());
+    static async void ReadLineDO(string s)
     {
-      string s = Console.ReadLine();
-      string[] cmd = s.ToLower().Split(' ');
+      if (s.EndsWith(".bsvcmd"))
+      {
+        Console.WriteLine("{0} => BIDS_Server Command preset file", s);
+        try
+        {
+          using (StreamReader sr = new StreamReader(s))
+          {
+            string[] sa = sr.ReadToEnd().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            if (sa?.Length > 0)
+              for (int pi = 0; pi < sa.Length; pi++)
+              {
+                Console.WriteLine("do {0}[{1}] : {2}", s, pi, sa[pi]);
+                ReadLineDO(sa[pi]);
+              }
+            else Console.WriteLine("{0} : There is no command in the file.", s);
+          }
+        } catch (FileNotFoundException){ Console.WriteLine("Program.ReadLineDO : the file \"{0}\" is not found.", s); }
+        catch(DirectoryNotFoundException) { Console.WriteLine("Program.ReadLineDO : the directory is not found. (file path:\"{0}\")", s); }
+        catch(Exception e)
+        {
+          Console.WriteLine("Program.ReadLineDO : an exception has occured (file path:\"{0}\")\n{1}", s, e);
+        }
+
+        return;
+      }
+
+      if (s.EndsWith(".btsetting"))
+      {
+        Console.WriteLine("{0} => Button assignment setting file to keep the compatibility with GIPI", s);
+        using (StreamReader sr = new StreamReader(s))
+        {
+          GIPI.LoadFromStream(sr);
+        }
+
+        return;
+      }
+
+      string[] cmd_orig = s?.Split(' ');
+      string[] cmd = cmd_orig?.Select((str) => str.ToLower()).ToArray();
+      
       switch (cmd[0])
       {
         case "man":
@@ -58,8 +96,13 @@ namespace BIDS_Server
           {
             switch (cmd[1])
             {
-              case "serial":
-                (new Serial()).WriteHelp(in s);
+              case "auto":
+                Console.WriteLine("auto sending process turn on command : auto send will start when this command is entered.");
+                Console.WriteLine("  Option : bve5, common, const, handle, obve, panel, sound");
+                break;
+              case "autodel":
+                Console.WriteLine("auto sending process turn off command : auto send will stop when this command is entered.");
+                Console.WriteLine("  Option : bve5, common, const, handle, obve, panel, sound");
                 break;
               case "exit":
                 Console.WriteLine("exit command : Used when user want to close this program.  This command has no arguments.");
@@ -67,11 +110,23 @@ namespace BIDS_Server
               case "ls":
                 Console.WriteLine("connection listing command : Print the list of the Name of alive connection.  This command has no arguments.");
                 break;
+              case "lsmods":
+                Console.WriteLine("mods listing command : Print the list of the Name of mods you can use.  This command has no arguments.");
+                break;
               case "close":
                 Console.WriteLine("close connection command : Used when user want to close the connection.  User must set the Connection Name to be closed.");
                 break;
+              case "delay":
+                Console.WriteLine("insert pause command : Insert Pause function.  You can set 0 ~ Int.Max[ms]");
+                break;
               default:
-                Console.WriteLine("Command not found.");
+                IBIDSsv ibsv = LoadMod(FindMod(cmd[1]));
+                if (ibsv != null)
+                {
+                  ibsv.WriteHelp(string.Empty);
+                  ibsv.Dispose();
+                }
+                else Console.WriteLine("Mod not found.");
                 break;
             }
           }
@@ -79,208 +134,179 @@ namespace BIDS_Server
           {
             Console.WriteLine("BIDS Server Application");
             Console.WriteLine("ver : " + VerNumStr + "\n");
+            Console.WriteLine("auto : Set the Auto Sending Function");
             Console.WriteLine("close: Close the connection.");
+            Console.WriteLine("delay : insert delay function.");
             Console.WriteLine("exit : close this program.");
             Console.WriteLine("ls : Print the list of the Name of alive connection.");
+            Console.WriteLine("lsmods : Print the list of the Name of mods you can use.");
             Console.WriteLine("man : Print the mannual of command.");
-            Console.WriteLine("serial : Start the serial connection.  If you want to know more info, please do the command \"man serial\".");
+            Console.WriteLine("  If you want to check the manual of each mod, please check the mod name and type \"man + (mod name)\"");
           }
           break;
-        case "serial":
-          Serial sl = new Serial();
-          sl.KeyCtrl += KeyCtrl;
-          sl.HandleCtrl += HandleCtrl;
+        case "ls": Console.Write(Common.PrintList()); break;
+        case "lsmods":
           try
           {
-            IBIDSsvSetUp(ref sl, in s);
-            svlist.Add(sl);
+            string[] fs = LSMod();
+            if (fs == null || fs.Length <= 0)
+            {
+              Console.WriteLine("There are no modules in the mods folder.");
+            }
+            else
+            {
+              for (int i = 0; i < fs.Length; i++)
+              {
+                string[] cn = fs[i].Split('.');
+                Console.WriteLine(" {0} : {1}", cn[cn.Length - 2], fs[i]);
+              }
+            }
           }
-          catch (Exception e)
+          catch (Exception e) { Console.WriteLine(e); }
+          break;
+        case "auto":
+          foreach(string str in cmd)
           {
-            Console.WriteLine(e);
-            sl.Dispose();
+            if (str == null || str == string.Empty) continue;
+            if (str.StartsWith("/") || str.StartsWith("-"))
+            {
+              switch(str.Remove(0, 1).Substring(0,3))
+              {
+                case "com": Common.AutoSendSetting.BasicCommonAS = true; Console.WriteLine("Common Data Autosend Enabled"); break;
+                case "bve": Common.AutoSendSetting.BasicBVE5AS = true; Console.WriteLine("BVE5 Data Autosend Enabled"); break;
+                case "obv": Common.AutoSendSetting.BasicOBVEAS = true; Console.WriteLine("OBVE Data Autosend Enabled"); break;
+                case "pan": Common.AutoSendSetting.BasicPanelAS = true; Console.WriteLine("Panel Data Autosend Enabled"); break;
+                case "sou": Common.AutoSendSetting.BasicPanelAS = true; Console.WriteLine("Sound Data Autosend Enabled"); break;
+                case "con": Common.AutoSendSetting.BasicConstAS = true; Console.WriteLine("Const Data Autosend Enabled"); break;
+                case "han": Common.AutoSendSetting.BasicHandleAS = true; Console.WriteLine("Handle Data Autosend Enabled"); break;
+                default: Console.WriteLine("Option Not Found : {0}", str); break;
+              }
+            }
           }
           break;
-        case "ls":
-          if (svlist.Count > 0) for (int i = 0; i < svlist.Count; i++) Console.WriteLine(i.ToString() + " : " + svlist[i].Name);
-          else Console.WriteLine("No connection is alive.");
+        case "autodel":
+          foreach (string str in cmd)
+          {
+            if (str == null || str == string.Empty) continue;
+            if (str.StartsWith("/") || str.StartsWith("-"))
+            {
+              switch (str.Remove(0, 1).Substring(0, 3))
+              {
+                case "com": Common.AutoSendSetting.BasicCommonAS = false; Console.WriteLine("Common Data Autosend Disabled"); break;
+                case "bve": Common.AutoSendSetting.BasicBVE5AS = false; Console.WriteLine("BVE5 Data Autosend Disabled"); break;
+                case "obv": Common.AutoSendSetting.BasicOBVEAS = false; Console.WriteLine("OBVE Data Autosend Disabled"); break;
+                case "pan": Common.AutoSendSetting.BasicPanelAS = false; Console.WriteLine("Panel Data Autosend Disabled"); break;
+                case "sou": Common.AutoSendSetting.BasicPanelAS = false; Console.WriteLine("Sound Data Autosend Disabled"); break;
+                case "con": Common.AutoSendSetting.BasicConstAS = false; Console.WriteLine("Const Data Autosend Disabled"); break;
+                case "han": Common.AutoSendSetting.BasicHandleAS = false; Console.WriteLine("Handle Data Autosend Disabled"); break;
+                default: Console.WriteLine("Option Not Found : {0}", str); break;
+              }
+            }
+          }
           break;
+
         case "exit":
-          for (int i = 0; i < svlist.Count; i++) IBIDSsvDispose(i);
+          Common.Remove();
           IsLooping = false;
           break;
         case "close":
-          if (svlist.Count > 0)
-          {
-            for (int i = 0; i < svlist.Count; i++)
-            {
-              if (svlist[i].Name == cmd[1])
-              {
-                svlist[i].Dispose();
-                svlist.RemoveAt(i);
-              }
-            }
-          }
-          else Console.WriteLine("No connection is alive.");
+          if (cmd.Length >= 2) Common.Remove(cmd_orig[1]);
+          else Common.Remove();
           break;
         case "debug":
-          if (svlist.Count > 0)
-          {
-            for (int i = 0; i < svlist.Count; i++)
-            {
-              if (cmd.Length <= 1 || svlist[i].Name == cmd[1])
-              {
-                Console.WriteLine("debug start");
-                svlist[i].IsDebug = true;
-                Console.ReadKey();
-                svlist[i].IsDebug = false;
-                Console.WriteLine("debug end");
-              }
-            }
-          }
-          else Console.WriteLine("No connection is alive.");
+          if (cmd.Length >= 2) Common.DebugDo(cmd_orig[1]);
+          else Common.DebugDo();
+          break;
+        case "print":
+          if (cmd.Length >= 3)
+            for (int i = 2; i < cmd.Length; i++)
+              if (Common.Print(cmd_orig[1], cmd_orig[i]) != true) break;
+          break;
+        case "delay":
+          await Task.Delay(int.Parse(cmd[1]));
           break;
         default:
-          Console.WriteLine("Command Not Found");
+          string modn = FindMod(cmd[0]);
+          if (modn != null && modn != string.Empty)
+          {
+            IBIDSsv ibsv = LoadMod(modn);
+            if (ibsv != null)
+            {
+              try
+              {
+                if (ibsv.Connect(s)) Common.Add(ref ibsv);
+              }
+              catch (Exception e)
+              {
+                Console.WriteLine(e);
+                ibsv.Dispose();
+                Common.Remove(ibsv);
+              }
+            }
+            else Console.WriteLine("The specified dll file does not implement the IBIDSsv interface.");
+          }
+          else Console.WriteLine("Command({0}) Not Found", cmd[0]);
           break;
       }
     }
 
-
-    private static void IBIDSsvDispose(int ind)
+    static string[] LSMod()
     {
-      svlist[ind].BSMDChanged -= BSMDChanged;
-      svlist[ind].HandleCtrl -= HandleCtrl;
-      svlist[ind].KeyCtrl -= KeyCtrl;
-      svlist[ind].OpenDChanged -= OpenDChanged;
-      svlist[ind].PanelDChanged -= PanelDChanged;
-      svlist[ind].SoundDChanged -= SoundDChanged;
-      svlist[ind].Dispose();
-    }
-    private static void IBIDSsvSetUp<T>(ref T sv, in string s) where T : IBIDSsv
-    {
-      sv.Connect(in s);
-      sv.BSMDChanged += BSMDChanged;
-      sv.HandleCtrl += HandleCtrl;
-      sv.KeyCtrl += KeyCtrl;
-      sv.OpenDChanged += OpenDChanged;
-      sv.PanelDChanged += PanelDChanged;
-      sv.SoundDChanged += SoundDChanged;
-    }
-
-    private static void SoundDChanged(object sender, EventArgs e)
-    {
-      throw new NotImplementedException();
-    }
-
-    private static void PanelDChanged(object sender, EventArgs e)
-    {
-      throw new NotImplementedException();
-    }
-
-    private static void OpenDChanged(object sender, EventArgs e)
-    {
-      throw new NotImplementedException();
-    }
-
-    private static void KeyCtrl(object sender, KeyCtrlEvArgs e)
-    {
-      bool[] ks = CI.GetIsKeyPushed();
-      Parallel.For(0, ks.Length, (i) => ks[i] = e.KeyState[i] ?? ks[i]);
-      CI.SetIsKeyPushed(ks);
-    }
-
-    private static void HandleCtrl(object sender, HandleCtrlEvArgs e)
-    {
-      Hand hd = CI.GetHandD();
-      hd.B = e.Brake ?? hd.B;
-      hd.P = e.Power ?? hd.P;
-      hd.R = e.Reverser ?? hd.R;
-      CI.SetHandD(ref hd);
-    }
-
-    private static void BSMDChanged(object sender, EventArgs e)
-    {
-      throw new NotImplementedException();
-    }
-
-    static async void SocketDo()
-    {
-      HttpListener HL = new HttpListener();
-      HL.Prefixes.Add("http://localhost:12835/");
-      HL.Start();
-      while (true)
+      string[] fl = null;
+      try
       {
-        HttpListenerContext HLC = await HL.GetContextAsync();
-        if (HLC.Request.IsWebSocketRequest)
+        fl = Directory.GetFiles(@"mods\", "*.dll");
+        if (fl.Length > 0)
         {
-          Console.WriteLine("WebSocket接続要求を確認しました。");
-          WebSocketContext WSC = null;
-          try
-          {
-            WSC = await HLC.AcceptWebSocketAsync(subProtocol: null);
-          }catch(Exception e)
-          {
-            Console.WriteLine("Socket開始エラー : " + e.Message);
-            HLC.Response.StatusCode = 500;
-            HLC.Response.Close();
-            Console.WriteLine("再度接続試行を行います。");
-          }
-          Console.WriteLine("WebSocket接続を開始します。");
-          WebSocket WS = WSC.WebSocket;
-          try
-          {
-            using (Pipe Pp = new Pipe())
-            {
-              Pp.Open();
-              byte[] SendArray = new byte[64];
-              Pipe.StateData ST1 = new Pipe.StateData();
-              Pipe.State2Data ST2 = new Pipe.State2Data();
-              while (WS.State == WebSocketState.Open)
-              {
-                if (!Equals(ST1, Pp.NowState) || !Equals(ST2, Pp.NowState2))
-                {
-                  ST1 = Pp.NowState;
-                  ST2 = Pp.NowState2;
-                  BitConverter.GetBytes(2).CopyTo(SendArray, 0);
-                  BitConverter.GetBytes(ST1.Location).CopyTo(SendArray, 4);
-                  BitConverter.GetBytes(ST1.Speed).CopyTo(SendArray, 12);
-                  BitConverter.GetBytes(ST2.BC).CopyTo(SendArray, 16);
-                  BitConverter.GetBytes(ST2.MR).CopyTo(SendArray, 20);
-                  BitConverter.GetBytes(ST2.ER).CopyTo(SendArray, 24);
-                  BitConverter.GetBytes(ST2.BP).CopyTo(SendArray, 28);
-                  BitConverter.GetBytes(ST2.SAP).CopyTo(SendArray, 32);
-                  BitConverter.GetBytes(ST1.Current).CopyTo(SendArray, 36);
-                  BitConverter.GetBytes(ST1.PowerNotch).CopyTo(SendArray, 40);
-                  BitConverter.GetBytes(ST1.BrakeNotch).CopyTo(SendArray, 44);
-                  BitConverter.GetBytes((sbyte)ST1.Reverser).CopyTo(SendArray, 48);
-                  BitConverter.GetBytes(ST2.IsDoorClosed).CopyTo(SendArray, 49);
-                  BitConverter.GetBytes((byte)ST2.Hour).CopyTo(SendArray, 50);
-                  BitConverter.GetBytes((byte)ST2.Minute).CopyTo(SendArray, 51);
-                  BitConverter.GetBytes((byte)ST2.Second).CopyTo(SendArray, 52);
-                  BitConverter.GetBytes((byte)ST2.Millisecond).CopyTo(SendArray, 53);
-                  BitConverter.GetBytes(0xFEFEFEFE).CopyTo(SendArray, 60);
-                  await WS.SendAsync(new ArraySegment<byte>(SendArray, 0, SendArray.Length), WebSocketMessageType.Binary, true, CancellationToken.None);
-                }
-                Thread.Sleep(10);
-              }
-            }
-          }catch(Exception e)
-          {
-            Console.WriteLine("Socket通信エラー : " + e.Message);
-            HLC.Response.StatusCode = 500;
-            HLC.Response.Close();
-          }
-          finally { if (WS != null) WS.Dispose(); }
-          Console.WriteLine("WebSocket接続が終了しました。再度接続を試行します。");
-        }
-        else
-        {
-          Console.WriteLine("WebSocket接続ではありませんでした。");
-          HLC.Response.StatusCode = 400;
-          HLC.Response.Close();
+          for (int i = 0; i < fl.Length; i++) fl[i] = fl[i].Replace(@"mods\", string.Empty);
         }
       }
+      catch (DirectoryNotFoundException)
+      {
+        Directory.CreateDirectory(@"mods");
+        Console.WriteLine("Created \"mods\" folder.");
+      }
+      
+      return fl;
+    }
+
+    static string FindMod(string keyword)
+    {
+      string[] ml = LSMod();
+      if (ml?.Length > 0)
+      {
+        for (int i = 0; i < ml.Length; i++)
+        {
+          string[] sa = ml[i].Split('.');
+          if (sa.Length >= 2 && sa[sa.Length - 2] == keyword) return ml[i];
+        }
+      }
+      return string.Empty;
+    }
+
+    //https://qiita.com/rita0222/items/609583c31cb7f0132086
+    static IBIDSsv LoadMod(string fname)
+    {
+      IBIDSsv ibs = null;
+      Assembly a = null;
+      try
+      {
+        a = Assembly.LoadFrom(@"mods\" + (fname ?? string.Empty));
+      }
+      catch(FileNotFoundException) { return null; }
+      catch(Exception) { throw; }
+      try
+      {
+        foreach (var t in a?.GetTypes())
+        {
+          if (t.IsInterface) continue;
+          ibs = Activator.CreateInstance(t) as IBIDSsv;
+          if (ibs != null) return ibs;
+        }
+      }
+      catch (ReflectionTypeLoadException e) { foreach (var ex in e.LoaderExceptions) Console.WriteLine(ex); }
+      catch (Exception e) { Console.WriteLine(e); }
+      return ibs;
     }
   }
 }

@@ -1,12 +1,7 @@
 ﻿using System;
-using TR.BIDSSMemLib;
 
-namespace TR.BIDSsv
+namespace TR
 {
-  public class Main
-  {
-    static public readonly int Version = 202;
-  }
   public class HandleCtrlEvArgs : EventArgs
   {
     public int? Reverser;
@@ -19,17 +14,13 @@ namespace TR.BIDSsv
   }
   public interface IBIDSsv : IDisposable
   {
-    event EventHandler<HandleCtrlEvArgs> HandleCtrl;
-    event EventHandler<KeyCtrlEvArgs> KeyCtrl;
-    event EventHandler BSMDChanged;
-    event EventHandler OpenDChanged;
-    event EventHandler PanelDChanged;
-    event EventHandler SoundDChanged;
-
-    int Version { get; }
-    string Name { get; set; }
+    bool IsDisposed { get; }
+    int Version { get; set; }
+    string Name { get; }
     bool IsDebug { get; set; }
     bool Connect(in string args);
+    void Print(in string data);
+    void Print(in byte[] data);
     void OnBSMDChanged(in BIDSSharedMemoryData data);
     void OnOpenDChanged(in OpenD data);
     void OnPanelDChanged(in int[] data);
