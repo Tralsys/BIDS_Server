@@ -25,7 +25,7 @@ namespace TR.BIDSsv
       SP.DtrEnable = true;
       SP.ReadTimeout = 20;
       SP.WriteTimeout = 500;
-      SP.Encoding = Encoding.Default;
+      SP.Encoding = Encoding.ASCII;
       SP.NewLine = "\n";
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
       for (int i = 0; i < sa.Length; i++)
