@@ -24,12 +24,16 @@ namespace TR.BIDSsv
 		public Encoding Enc { get => serial?.Encoding ?? Encoding.ASCII; }
 
 		public bool ReConnectWhenTimedOut { get; set; } = false;
+		/// <summary>1秒の間隔をあけて, 生存報告をNULL文字送出にて行う.</summary>
+		public bool IamAliveCMD { get; set; } = false;
+		private Task AliveCMDTask = null;
+		private readonly TimeSpan AliveCMDTimeSpan = new TimeSpan(0, 0, 1);
+		private readonly TimeSpan ReConnectTimeSpan = new TimeSpan(0, 0, 0, 0, 100);
 
 		private const string BINARY_DATA_HEADER = "B64E";
 		private const string SERIAL_SETTING_HEADER = "S";
 
 		object Locker = new object();
-
 
 		string ReadBuf = string.Empty;
 		/// <summary>使用するSerial IF</summary>
@@ -56,6 +60,41 @@ namespace TR.BIDSsv
 				return;
 			}
 
+			if (IamAliveCMD)
+			{
+				byte[] NULL_BA = new byte[1] { 0x00 };
+				AliveCMDTask = new Task(async () =>
+					{
+						while (!disposingValue) {
+							lock (Locker)
+							{
+								try
+								{
+									serial.Write(NULL_BA, 0, 1);
+								}
+								catch (TimeoutException e)
+								{
+									if (ReConnectWhenTimedOut)
+									{
+										ReConnect();
+										continue;
+									}
+									else
+									{
+										Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
+									}
+								}
+								catch(Exception e)
+								{
+									Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
+									return;
+								}
+							}
+							await Task.Delay(AliveCMDTimeSpan);
+						}
+					});//生存確認パケット送出用
+			}
+
 			serial.DataReceived += Serial_DataReceived;
 		}
 
@@ -69,7 +108,14 @@ namespace TR.BIDSsv
 				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived : CanRead:{0}, CanWrite:{1}", sp.BaseStream.CanRead, sp.BaseStream.CanWrite);
 				lock (Locker)
 				{
-					gotData = sp.ReadExisting();
+					try
+					{
+						gotData = sp.ReadExisting();
+					}
+					catch (InvalidOperationException)
+					{
+						if (ReConnectWhenTimedOut) ReConnect();
+					}
 				}
 			}catch(Exception ex)
 			{
@@ -150,40 +196,22 @@ namespace TR.BIDSsv
 			try
 			{
 				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.PrintString() : DataSend=>{0}", s);
-				try
+				lock (Locker)
 				{
-					lock (Locker)
+					try
 					{
 						serial.WriteLine(s);
 					}
-				}
-				catch (TimeoutException)
-				{
-					Console.WriteLine("\tTimeOut ({0})", s);
-					if (ReConnectWhenTimedOut)
+					catch (TimeoutException)
 					{
-						Console.WriteLine("Reconnect doing...");
-						try
+						Console.WriteLine("\tTimeOut ({0})", s);
+						if (ReConnectWhenTimedOut)
 						{
-							serial.Close();
+							ReConnect();
+							return PrintString(s);
 						}
-						catch (Exception e)
-						{
-							Console.WriteLine("SerialPort Close Failed. : {0}", e);
-							return false;
-						}
-						try
-						{
-							serial.Open();
-						}
-						catch(Exception e)
-						{
-							Console.WriteLine("SerialPort ReOpen Failed. : {0}", e);
-							return false;
-						}
-						return PrintString(s);
+						return false;
 					}
-					return false;
 				}
 				return true;
 			}catch(Exception e)
@@ -213,11 +241,41 @@ namespace TR.BIDSsv
 		}
 		#endregion
 
+
+		/// <summary>ロックは呼び出し元で取得してください.</summary>
+		async void ReConnect()
+		{
+			Console.WriteLine("Reconnect doing...");
+			try
+			{
+				if (serial?.IsOpen == true) serial.Close();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("SerialPort Close Failed. : {0}", e);
+				return;
+			}
+
+			await Task.Delay(ReConnectTimeSpan);
+
+			try
+			{
+				if (serial?.IsOpen == false) serial.Open();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("SerialPort ReOpen Failed. : {0}", e);
+				return;
+			}
+		}
+
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには
+		private bool disposingValue = false;
 
 		protected virtual void Dispose(bool disposing)
 		{
+			disposingValue = true;
 			if (!disposedValue)
 			{
 				if (disposing)
