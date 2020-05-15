@@ -20,9 +20,6 @@ namespace TR.BIDSsv
     {
       SerialPort SP = new SerialPort();
 
-      SP.ReadBufferSize = 64;
-      SP.WriteBufferSize = 64;
-
       SP.BaudRate = 19200;
       SP.RtsEnable = true;
       SP.DtrEnable = true;
