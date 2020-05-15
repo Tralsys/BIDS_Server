@@ -58,15 +58,27 @@ namespace TR.BIDSsv
 		{
 			string gotData = string.Empty;
 			SerialPort sp = (SerialPort)sender;
-			
-			gotData = sp.ReadExisting();
+			try
+			{
+				if (!sp.IsOpen) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived => Serial Already Closed.");
+				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived : CanRead:{0}, CanWrite:{1}", sp.BaseStream.CanRead, sp.BaseStream.CanWrite);
+				gotData = sp.ReadExisting();
+			}catch(Exception ex)
+			{
+				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived ReadExisting : {0}", ex);
+			}
 			
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
 
 			if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
-
-			string[] sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
+			string[] sa = null;
+			try
+			{
+				sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+			}catch(Exception ex)
+			{
+				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
+			}
 			if (!(sa?.Length > 0)) return;//要素なし
 
 			int sa_len = sa.Length;
@@ -97,7 +109,16 @@ namespace TR.BIDSsv
 							}
 						});
 				else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[ind]));
-				else _ = Task.Run(() => StringDataReceived?.Invoke(this, sa[ind]));
+				else _ = Task.Run(() =>
+				{
+					try
+					{
+						StringDataReceived?.Invoke(this, sa[ind]);
+					}catch(Exception ex)
+					{
+						Console.WriteLine("Serial_DataCom.Serial_DataReceived() StringDatReceived.Invoke Error : {0}", ex);
+					}
+				});
 			}
 
 		}
