@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -12,6 +11,7 @@ namespace TR.BIDSsv
 	/// </summary>
 	internal class Serial_DeviceCom : IDisposable
 	{
+		#region 使用する変数類
 		/// <summary>Serial IFが疎通しているかどうか</summary>
 		public bool IsOpen { get => serial?.IsOpen == true; }
 
@@ -21,18 +21,20 @@ namespace TR.BIDSsv
 		public event EventHandler<string> StringDataReceived;
 		public event EventHandler<byte[]> BinaryDataReceived;
 
-		public Encoding Enc { get => serial?.Encoding ?? Encoding.UTF8; }
+		public Encoding Enc { get => serial?.Encoding ?? Encoding.ASCII; }
 
 		public bool ReConnectWhenTimedOut { get; set; } = false;
 
 		private const string BINARY_DATA_HEADER = "B64E";
 		private const string SERIAL_SETTING_HEADER = "S";
-		
+
+		object Locker = new object();
 
 
 		string ReadBuf = string.Empty;
 		/// <summary>使用するSerial IF</summary>
 		SerialPort serial = null;
+		#endregion
 
 		/// <summary>インスタンスを初期化します.</summary>
 		/// <param name="ser">使用するシリアルインターフェイス</param>
@@ -44,7 +46,10 @@ namespace TR.BIDSsv
 
 			try
 			{
-				serial.Open();
+				lock (Locker)
+				{
+					serial.Open();
+				}
 			}catch(Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom intialize : Serial Port Open Error=>{0}", e);
@@ -54,7 +59,7 @@ namespace TR.BIDSsv
 			serial.DataReceived += Serial_DataReceived;
 		}
 
-		private async void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
+		private void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			string gotData = string.Empty;
 			SerialPort sp = (SerialPort)sender;
@@ -62,65 +67,71 @@ namespace TR.BIDSsv
 			{
 				if (!sp.IsOpen) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived => Serial Already Closed.");
 				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived : CanRead:{0}, CanWrite:{1}", sp.BaseStream.CanRead, sp.BaseStream.CanWrite);
-				gotData = sp.ReadExisting();
+				lock (Locker)
+				{
+					gotData = sp.ReadExisting();
+				}
 			}catch(Exception ex)
 			{
 				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived ReadExisting : {0}", ex);
 			}
-			
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
-
-			if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
-			string[] sa = null;
-			try
+			Task.Run( async() =>
 			{
-				sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-			}catch(Exception ex)
-			{
-				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
-			}
-			if (!(sa?.Length > 0)) return;//要素なし
 
-			int sa_len = sa.Length;
-			if (gotData.EndsWith("\n") || gotData.EndsWith("\r")) ReadBuf = string.Empty;
-			else
-			{
-				//最後の要素が改行記号で終わらない場合, その要素は次に判定を行う.
-				ReadBuf = sa.Last() ?? string.Empty;
-				sa_len -= 1;
-			}
-
-			if (sa_len <= 0) return;//要素なし
-
-			for(int i = 0; i < sa_len; i++)
-			{
-				if (string.IsNullOrWhiteSpace(sa[i])) continue;//空要素は無視
-				int ind = i;
-				if (sa[ind].StartsWith(BINARY_DATA_HEADER))
-					_ = Task.Run(() =>
-						{
-							try
-							{
-								BinaryDataReceived?.Invoke(this, Convert.FromBase64String(sa[ind].Substring(BINARY_DATA_HEADER.Length)));
-							}
-							catch (Exception ex)
-							{
-								Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
-							}
-						});
-				else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[ind]));
-				else _ = Task.Run(() =>
+				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
+				string[] sa = null;
+				try
 				{
-					try
-					{
-						StringDataReceived?.Invoke(this, sa[ind]);
-					}catch(Exception ex)
-					{
-						Console.WriteLine("Serial_DataCom.Serial_DataReceived() StringDatReceived.Invoke Error : {0}", ex);
-					}
-				});
-			}
+					sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
+				}
+				if (!(sa?.Length > 0)) return;//要素なし
 
+				int sa_len = sa.Length;
+				if (gotData.EndsWith("\n") || gotData.EndsWith("\r")) ReadBuf = string.Empty;
+				else
+				{
+					//最後の要素が改行記号で終わらない場合, その要素は次に判定を行う.
+					ReadBuf = sa.Last() ?? string.Empty;
+					sa_len -= 1;
+				}
+
+				if (sa_len <= 0) return;//要素なし
+
+				for (int i = 0; i < sa_len; i++)
+				{
+					if (string.IsNullOrWhiteSpace(sa[i])) continue;//空要素は無視
+					int ind = i;
+					if (sa[ind].StartsWith(BINARY_DATA_HEADER))
+						_ = Task.Run(() =>
+							{
+								try
+								{
+									BinaryDataReceived?.Invoke(this, Convert.FromBase64String(sa[ind].Substring(BINARY_DATA_HEADER.Length)));
+								}
+								catch (Exception ex)
+								{
+									Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
+								}
+							});
+					else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[ind]));
+					else _ = Task.Run(() =>
+					{
+						try
+						{
+							StringDataReceived?.Invoke(this, sa[ind]);
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine("Serial_DataCom.Serial_DataReceived() StringDatReceived.Invoke Error : {0}", ex);
+						}
+					});
+				}
+			});
 		}
 
 		void Serial_Setting(string cmd)
@@ -141,7 +152,10 @@ namespace TR.BIDSsv
 				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.PrintString() : DataSend=>{0}", s);
 				try
 				{
-					serial.WriteLine(s);
+					lock (Locker)
+					{
+						serial.WriteLine(s);
+					}
 				}
 				catch (TimeoutException)
 				{
@@ -213,9 +227,10 @@ namespace TR.BIDSsv
 
 				// TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
 				// TODO: 大きなフィールドを null に設定します。
-
-				serial?.Dispose();
-
+				lock (Locker)
+				{
+					serial?.Dispose();
+				}
 				disposedValue = true;
 			}
 		}
