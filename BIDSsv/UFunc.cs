@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace TR.BIDSsv
 {
@@ -17,37 +18,40 @@ namespace TR.BIDSsv
       ba[3] = ba_3;
       index += 4;
     }
-    public static void ValueSet2Arr(this byte[] ba, int value, ref int index)
+
+		//配列複製速度 参照 : http://dalmore.blog7.fc2.com/blog-entry-57.html
+
+		#region ValueSet2Arr
+		public static void ValueSet2Arr(this byte[] ba, int value, ref int index)
     {
-      Array.Copy(GetBytes(value), 0, ba, index, sizeof(int));
+      Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(int));
       index += sizeof(int);
     }
     public static void ValueSet2Arr(this byte[] ba, double value, ref int index)
     {
-      Array.Copy(GetBytes(value), 0, ba, index, sizeof(double));
+      Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(double));
       index += sizeof(double);
     }
     public static void ValueSet2Arr(this byte[] ba, float value, ref int index)
     {
-      Array.Copy(GetBytes(value), 0, ba, index, sizeof(float));
+      Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(float));
       index += sizeof(float);
     }
     public static void ValueSet2Arr(this byte[] ba, short value, ref int index)
     {
-      Array.Copy(GetBytes(value), 0, ba, index, sizeof(short));
+      Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(short));
       index += sizeof(short);
     }
     public static void ValueSet2Arr(this byte[] ba, bool value, ref int index)
     {
-      Array.Copy(GetBytes(value), 0, ba, index, sizeof(bool));
+      Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(bool));
       index += sizeof(bool);
     }
+		#endregion
 
-
-
-    private static readonly bool isLE = BitConverter.IsLittleEndian;
-
-    public static byte[] ToBytes(this in int arg)
+		private static readonly bool isLE = BitConverter.IsLittleEndian;
+		#region ToBytes
+		public static byte[] ToBytes(this in int arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
@@ -107,16 +111,13 @@ namespace TR.BIDSsv
       if (isLE) Array.Reverse(ba);
       return ba;
     }
-
-    public static int GetInt(this byte[] ab, int ind = 0)
+		#endregion
+		#region Get Value
+		public static int GetInt(this byte[] ab, int ind = 0)
     {
-      int sz = sizeof(int);
-
-      byte[] ba = new byte[sz];
-      int i = sz - ab.Length;
-      Array.Copy(ab, ind, ba, i < 0 ? 0 : i, sz);
+      byte[] ba = new byte[sizeof(int)];
+      Buffer.BlockCopy(ab, ind, ba, 0, ba.Length);
       if (isLE) Array.Reverse(ba);
-
       return BitConverter.ToInt32(ba, 0);
     }
     public static float GetFloat(this byte[] ab, int ind = 0)
@@ -218,8 +219,9 @@ namespace TR.BIDSsv
 
       return BitConverter.ToChar(ba, 0);
     }
-
-    public static byte[] GetBytes(this in int arg) => ToBytes(arg);
+		#endregion
+		#region GetBytes
+		public static byte[] GetBytes(this in int arg) => ToBytes(arg);
     public static byte[] GetBytes(this in uint arg) => ToBytes(arg);
     public static byte[] GetBytes(this in float arg) => ToBytes(arg);
     public static byte[] GetBytes(this in double arg) => ToBytes(arg);
@@ -229,8 +231,9 @@ namespace TR.BIDSsv
     public static byte[] GetBytes(this in long arg) => ToBytes(arg);
     public static byte[] GetBytes(this in ulong arg) => ToBytes(arg);
     public static byte[] GetBytes(this in char arg) => ToBytes(arg);
-
-    public static int ToInt32(this byte[] ab, int ind = 0) => GetInt(ab, ind);
+		#endregion
+		#region To Value
+		public static int ToInt32(this byte[] ab, int ind = 0) => GetInt(ab, ind);
     public static float ToSingle(this byte[] ab, int ind = 0) => GetFloat(ab, ind);
     public static double ToDouble(this byte[] ab, int ind = 0) => GetDouble(ab, ind);
     public static bool ToBoolean(this byte[] ab, int ind = 0) => GetBool(ab, ind);
@@ -251,11 +254,13 @@ namespace TR.BIDSsv
     public static long ToInt64(IEnumerable<byte> ab, int ind = 0) => GetLong(ab.ToArray(), ind);
     public static ulong ToUInt64(IEnumerable<byte> ab, int ind = 0) => GetULong(ab.ToArray(), ind);
     public static char ToChar(IEnumerable<byte> ab, int ind = 0) => GetChar(ab.ToArray(), ind);
+		#endregion
 
-    /// <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
-    /// <param name="str">入力文字列</param>
-    /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
-    public static int? String2INT(string str)
+
+		/// <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
+		/// <param name="str">入力文字列</param>
+		/// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+		public static int? String2INT(string str)
     {
       if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException();
 
@@ -283,9 +288,32 @@ namespace TR.BIDSsv
 
 
     public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
-      => string.Format("{0}{1}{2}{3}{4}{5}", ConstVals.CMD_HEADER, CMDType, DType, DNum, data == null ? string.Empty : separator.ToString(), data ?? string.Empty);
+    {
+      StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity);
+      sb.Append(ConstVals.CMD_HEADER);
+      sb.Append(CMDType);
+      sb.Append(DType);
+      sb.Append(DNum);
+      if (data != null)
+      {
+        sb.Append(separator);
+        sb.Append(data);
+      }
+      return sb.ToString();
+    }
     public static string BIDSCMDMaker(in char CMDType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
-      => string.Format("{0}{1}{2}{3}{4}", ConstVals.CMD_HEADER, CMDType, DNum, data == null ? string.Empty : separator.ToString(), data ?? string.Empty);
+    {
+      StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity);
+      sb.Append(ConstVals.CMD_HEADER);
+      sb.Append(CMDType);
+      sb.Append(DNum);
+      if (data != null)
+      {
+        sb.Append(separator);
+        sb.Append(data);
+      }
+      return sb.ToString();
+    }
 
     public static bool State_Pressure_IsSame(in State oldS, in State newS)
       => oldS.BC == newS.BC
@@ -293,14 +321,6 @@ namespace TR.BIDSsv
       && oldS.ER == newS.ER
       && oldS.MR == newS.MR
       && oldS.SAP == newS.SAP;
-
-    public static string StringFormatProvider(in int Count, in char separater)
-    {
-      string ReturnStr = "{0}";
-      for (int i = 0; i < Count; i++)
-        ReturnStr += string.Format("{0}{{{1}}}", separater, i);
-      return ReturnStr;
-    }
 
 #if !ID_SERCON
     public static bool ArrayEqual<T>(T[] ar1, int ar1ind, T[] ar2, int ar2ind, in int len = -1)
