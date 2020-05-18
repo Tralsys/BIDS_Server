@@ -71,11 +71,6 @@ namespace TR.BIDSsv
 
     static Common()
     {
-      StrFormat_BSMD_SpecAll = UFunc.StringFormatProvider(5, ConstVals.CMD_SEPARATOR);
-      StrFormat_BSMD_StateAll = UFunc.StringFormatProvider(10, ConstVals.CMD_SEPARATOR);
-      StrFormat_BSMD_Pressures = UFunc.StringFormatProvider(5, ConstVals.CMD_SEPARATOR);
-      StrFormat_BSMD_Time = "{0}:{1}:{2}.{3}";
-      StrFormat_BSMD_HandAll = UFunc.StringFormatProvider(4, ConstVals.CMD_SEPARATOR);
     }
 
     static public void Start(int Interval = 10, bool NO_SMEM_MODE = false, bool NO_Event_Mode = false)
