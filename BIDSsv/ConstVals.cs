@@ -2,6 +2,12 @@
 {
   public static class ConstVals
   {
+    /// <summary>BIDSで使用するコマンドの最小サイズ</summary>
+    public static readonly int CMD_LEN_MIN = 4;//バージョンアップによって変わる可能性があるため, constは使用しない
+    /// <summary>BIDSで使用するコマンドの最大サイズ</summary>
+    public static readonly int CMD_LEN_MAX = 1024;//バージョンアップによって変わる可能性があるため, constは使用しない
+    /// <summary>BIDSで使用する文字列コマンドの最大サイズ</summary>
+    public static readonly int StringBuilder_Capacity = 512;
     public const string ToStrFormatInt = "D";
     public const string ToStrFormatFloat = "0.0#####";
 
@@ -9,7 +15,8 @@
 
     public const char BIN_CMD_HEADER_0 = 't';
     public const char BIN_CMD_HEADER_1 = 'r';
-
+    public const char STR_CMD_HEADER_0 = 'T';
+    public const char STR_CMD_HEADER_1 = 'R';
     public const byte BIN_CMD_INFO_DATA = 0x62;
     public const byte BIN_CMD_PANEL_DATA = 0x70;
     public const byte BIN_CMD_SOUND_DATA = 0x73;
@@ -25,6 +32,7 @@
 
     public const string CMD_HEADER = "TR";
     public const string GIPI_HEADER = "TO";
+    public const string CMD_HEADER_ERROR = "TRE";
 
     public const string CRLF = "\r\n";
 
@@ -126,7 +134,89 @@
       public const int HEADER_0 = 0;
       public const int HEADER_1 = 1;
 
+      public const int TYP = 2;
+    }
 
+    public static class BINARY_DATA
+    {
+      public const byte HEADER_0 = (byte)ASCII.t;
+      public const byte HEADER_1 = (byte)ASCII.r;
+
+      public const byte TYP_INFO_DATA = (byte)ASCII.b;
+      public const byte TYP_PANEL_DATA = (byte)ASCII.p;
+      public const byte TYP_SOUND_DATA = (byte)ASCII.s;
+      public const byte TYP_REQUEST = (byte)ASCII.r;
+      public const byte TYP_HANDLE_CTRL = (byte)ASCII.h;
+      public const byte TYP_SECSYS_DATA = (byte)ASCII.a;
+    }
+
+    public enum ASCII : byte
+    {
+      D0=0x30,
+      D1,
+      D2,
+      D3,
+      D4,
+      D5,
+      D6,
+      D7,
+      D8,
+      D9,
+
+      A=0x41,
+      B,
+      C,
+      D,
+      E,
+      F,
+      G,
+      H,
+      I,
+      J,
+      K,
+      L,
+      M,
+      N,
+      O,
+      P,
+      Q,
+      R,
+      S,
+      T,
+      U,
+      V,
+      W,
+      X,
+      Y,
+      Z,
+
+      a =0x61,
+      b,
+      c,
+      d,
+      e,
+      f,
+      g,
+      h,
+      i,
+      j,
+      k,
+      l,
+      m,
+      n,
+      o,
+      p,
+      q,
+      r,
+      s,
+      t,
+      u,
+      v,
+      w,
+      x,
+      y,
+      z
+      
     }
   }
 }
