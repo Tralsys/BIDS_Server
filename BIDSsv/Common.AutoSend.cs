@@ -243,6 +243,7 @@ namespace TR.BIDSsv
         });
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted || !(svlist?.Count > 0)) return;
@@ -278,6 +279,7 @@ namespace TR.BIDSsv
           ));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
       if (!IsStarted || (svlist?.Count > 0)) return;
@@ -311,6 +313,7 @@ namespace TR.BIDSsv
               });
           }));
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e)
     {
       if (!IsStarted || !(svlist?.Count>0)) return;
@@ -323,6 +326,7 @@ namespace TR.BIDSsv
         () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(in e.NewData))
         ));
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private static void Common_BSMDChanged(object sender, SMemLib.BSMDChangedEArgs e)
     {
       if (!IsStarted || !(svlist?.Count > 0)) return;

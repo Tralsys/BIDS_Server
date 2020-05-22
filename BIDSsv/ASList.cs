@@ -37,6 +37,7 @@ namespace TR.BIDSsv
     /// <param name="dnum">データ番号</param>
     /// <param name="dtyp">データタイプ記号</param>
     /// <returns>CountNum以上の</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public bool Contains(IBIDSsv sv, int dnum, char dtyp)
     {
       bool result = false;
@@ -59,6 +60,7 @@ namespace TR.BIDSsv
       return result;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Remove(IBIDSsv sv, int? dnum = null, char? dtyp = null)
     {
       bool LockGot = false;
@@ -117,6 +119,7 @@ namespace TR.BIDSsv
       }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public List<IBIDSsv> GetSV(int dnum, char dtyp)
     {
       List<IBIDSsv> svl = new List<IBIDSsv>();
@@ -149,6 +152,7 @@ namespace TR.BIDSsv
     /// <param name="printStr">出力する文字列</param>
     /// <param name="dnum">条件とするデータ番号</param>
     /// <param name="dtyp">条件とするタイプ文字</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void PrintValue(string printStr, int dnum, char dtyp)
     {
       if (string.IsNullOrWhiteSpace(printStr)) return;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TR.BIDSsv
@@ -215,8 +216,10 @@ namespace TR.BIDSsv
       return sdc.IsOpen;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private void Sdc_BinaryDataReceived(object sender, byte[] e) => Common.DataSelSend(this, e, sdc.Enc);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private void Sdc_StringDataReceived(object sender, string e) => Common.DataSelSend(this, e);
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
@@ -255,10 +258,12 @@ namespace TR.BIDSsv
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Print(in string data) => sdc?.PrintString(data);
 
     /// <summary>(IsBinaryAllowedがtrueの場合のみ)Binaryデータを送信します.</summary>
     /// <param name="data">送信するデータ</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Print(in byte[] data)
     {
       if (IsBinaryAllowed) sdc?.PrintBinary(data);

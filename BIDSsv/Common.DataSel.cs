@@ -10,11 +10,12 @@ namespace TR.BIDSsv
 {
   static public partial class Common
   {
-		#region String型を使用したMethod群
+    #region String型を使用したMethod群
 
     /// <summary>ヘッダがTOであるコマンドでの要求を処理する.</summary>
     /// <param name="GotStr">接尾辞が取り除かれたコマンド文字列</param>
     /// <returns>返信すべき文字列(なければnull)</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static private string DataSelTO(in string GotStr)
     {
       if (string.IsNullOrWhiteSpace(GotStr)) return null;
@@ -81,6 +82,7 @@ namespace TR.BIDSsv
     /// <param name="SVc">受信したインスタンス</param>
     /// <param name="GotString">接尾辞が取り除かれたコマンド文字列</param>
     /// <returns>返信すべき文字列(不要時はnull)</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static private string DataSelTR(IBIDSsv SVc, in string GotString)
     {
       if (SVc == null || string.IsNullOrWhiteSpace(GotString)) return Errors.GetCMD(Errors.ErrorNums.CMD_ERROR);
@@ -296,6 +298,7 @@ namespace TR.BIDSsv
     /// <param name="sv">IBIDSsvインスタンス</param>
     /// <param name="str">入力されたコマンド文字列</param>
     /// <returns>返信すべき文字列</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public string DataSelect(IBIDSsv sv, in string str)
     {
       if (sv == null) throw new ArgumentNullException();
@@ -320,9 +323,9 @@ namespace TR.BIDSsv
     [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public void DataSelSend(IBIDSsv sv, in string str) => sv?.Print(DataSelect(sv, str));
 
-		#endregion
+    #endregion
 
-		#region StringBuilderを使用したMethod群
+    #region StringBuilderを使用したMethod群
     /// <summary>TRIで始まるコマンドに対するデータを取得します.</summary>
     /// <param name="ReturnStrB"></param>
     /// <param name="DType"></param>
@@ -330,6 +333,7 @@ namespace TR.BIDSsv
     /// <param name="GetDataAnyway"></param>
     /// <param name="separator"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public bool Get_TRI_Data(StringBuilder ReturnStrB, in char DType, in int DNum, in bool GetDataAnyway = false, in char separator = ConstVals.CMD_SEPARATOR)
     {
       [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -373,6 +377,7 @@ namespace TR.BIDSsv
     /// <param name="sv"></param>
     /// <param name="str"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public StringBuilder DataSelect(IBIDSsv sv, StringBuilder str)
     {
       throw new NotImplementedException();

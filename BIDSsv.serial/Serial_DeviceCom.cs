@@ -43,6 +43,7 @@ namespace TR.BIDSsv
 
 		/// <summary>インスタンスを初期化します.</summary>
 		/// <param name="ser">使用するシリアルインターフェイス</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public Serial_DeviceCom(in SerialPort ser)
 		{
 			if (ser == null) throw new ArgumentNullException();
@@ -99,6 +100,7 @@ namespace TR.BIDSsv
 			serial.DataReceived += Serial_DataReceived;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			string gotData = string.Empty;
@@ -181,6 +183,7 @@ namespace TR.BIDSsv
 			});
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		void Serial_Setting(string cmd)
 		{
 
@@ -190,6 +193,7 @@ namespace TR.BIDSsv
 		/// <summary>文字列を出力</summary>
 		/// <param name="s">出力する文字列</param>
 		/// <returns>出力に成功したかどうか</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public bool PrintString(string s)
 		{
 			if (!IsOpen) return false;//null or openしてないなら実行しない.
@@ -227,6 +231,7 @@ namespace TR.BIDSsv
 		/// <param name="offset">出力開始位置(nullで既定値"0")</param>
 		/// <param name="length">出力するByte Arrayの長さ(nullで既定値"ba.length")</param>
 		/// <returns>出力に成功したかどうか</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public bool PrintBinary(byte[] ba, int? offset = null, int? length = null)
 		{
 			if (!IsOpen) return false;//null or openしてないなら実行しない.

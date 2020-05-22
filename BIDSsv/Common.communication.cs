@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace TR.BIDSsv
@@ -71,6 +72,7 @@ namespace TR.BIDSsv
     /// <param name="PA"></param>
     /// <param name="SA"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public CommunicationStruct CommunicationBAGot(in byte[] ba, out int[] PA, out int[] SA)
     {
       PA = new int[256];
@@ -97,6 +99,7 @@ namespace TR.BIDSsv
     /// <param name="PD">Panel Data</param>
     /// <param name="SD">Sound Data</param>
     /// <returns>Communication.dll Byte Array</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public byte[] CommunicationBAGet(in CommunicationStruct cs, in int[] PD, in int[] SD)
     {
       int[] pda = new int[256];
@@ -126,11 +129,13 @@ namespace TR.BIDSsv
     /// <summary>CommunicationStructをBIDSSharedMemoryDataに変換する</summary>
     /// <param name="cs"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public BIDSSharedMemoryData ComStrtoBSMD(this in CommunicationStruct cs) => cs.ComStrtoBSMD(out _);
     /// <summary>CommunicationStructをBIDSSharedMemoryDataに変換する</summary>
     /// <param name="cs"></param>
     /// <param name="deltaT">フレーム間経過時間[ms]</param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public BIDSSharedMemoryData ComStrtoBSMD(this in CommunicationStruct cs, out int deltaT)
     {
       deltaT = cs.deltaT;
@@ -172,6 +177,7 @@ namespace TR.BIDSsv
     /// <param name="bsmd"></param>
     /// <param name="deltaT">フレーム間経過時間[ms]</param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public CommunicationStruct BSMDtoComStr(this in BIDSSharedMemoryData bsmd, int deltaT) => new CommunicationStruct()
     {
       Header = CommunicationStructHeader,

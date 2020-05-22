@@ -5,6 +5,7 @@ namespace TR.BIDSsv
 {
   static public partial class Common
   {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public object DataPicker(in char DType, in int DNum)
     {
       switch (DType)
