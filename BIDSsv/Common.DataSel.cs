@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -280,90 +283,13 @@ namespace TR.BIDSsv
     /// <param name="GetDataAnyway">BIDS SMemの疎通状況に依らずにデータを取得するか否か</param>
     /// <param name="separator">使用するセパレータ文字</param>
     /// <returns>エラー番号(なければnull)</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public bool Get_TRI_Data(out string ReturnStr, in char DType, in int DNum, in bool GetDataAnyway = false, in char separator = ConstVals.CMD_SEPARATOR)
     {
-			#region Local Function
-      string ArrDGet(in int[] arr, in int dnum, in int DPerOneSending, in char separ)
-      {
-        if (dnum < 0) return DPerOneSending.ToString(ConstVals.ToStrFormatInt);//一度に送信する要素数
-        StringBuilder sb = new StringBuilder();
-        sb.Append(((dnum * DPerOneSending) >= arr.Length) ? 0 : arr[dnum * DPerOneSending]);
-        for (int i = (dnum * DPerOneSending) + 1; i < (dnum + 1) * DPerOneSending; i++)
-          sb.Append(separ).Append((i >= arr.Length) ? 0 : arr[i]);
-        return sb.ToString();
-      }
-      #endregion
-
-      //データ強制取得F && SMem未疎通 => NotConnected
-      //データ強制取得F && SMem疎通済 => 値を返す
-      //データ強制取得T && (疎通不依存) => 値を返す
-      if (!GetDataAnyway && !BSMD.IsEnabled) {
-        ReturnStr = Errors.GetCMD(Errors.ErrorNums.BIDS_Not_Connected);
-        return false;
-      }
-
-      TimeSpan ts = TimeSpan.FromMilliseconds(BSMD.StateData.T);
-
-			#region データ取得部
-			ReturnStr = DType switch
-      {
-        ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)DNum switch
-        {
-          ConstVals.DNums.ConstD.AllData => new StringBuilder().Append(BSMD.SpecData.B).Append(separator).Append(BSMD.SpecData.P).Append(separator).Append(BSMD.SpecData.A).Append(separator).Append(BSMD.SpecData.J).Append(separator).Append(BSMD.SpecData.C).ToString(),
-          ConstVals.DNums.ConstD.Brake_Count => BSMD.SpecData.B.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ConstD.Power_Count => BSMD.SpecData.P.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ConstD.ATSCheckPos => BSMD.SpecData.A.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ConstD.B67_Pos => BSMD.SpecData.J.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ConstD.Car_Count => BSMD.SpecData.C.ToString(ConstVals.ToStrFormatInt),
-          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR)
-        },
-        ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)DNum switch
-        {
-          ConstVals.DNums.ElapD.Time_HMSms => new StringBuilder().Append(ts.Hours).Append(':').Append(ts.Minutes).Append(':').Append(ts.Seconds).Append('.').Append(ts.Milliseconds).ToString(),
-          ConstVals.DNums.ElapD.Pressures => new StringBuilder().Append(BSMD.StateData.BC).Append(separator).Append(BSMD.StateData.MR).Append(separator).Append(BSMD.StateData.ER).Append(separator).Append(BSMD.StateData.BP).Append(separator).Append(BSMD.StateData.SAP).ToString(),
-          ConstVals.DNums.ElapD.AllData => new StringBuilder().Append(BSMD.StateData.Z).Append(separator).Append(BSMD.StateData.V).Append(separator).Append(BSMD.StateData.T).Append(separator).Append(BSMD.StateData.BC).Append(separator).Append(BSMD.StateData.MR).Append(separator).Append(BSMD.StateData.ER).Append(separator).Append(BSMD.StateData.BP).Append(separator).Append(BSMD.StateData.SAP).Append(separator).Append(BSMD.StateData.I).Append(separator).Append(0).ToString(),
-          ConstVals.DNums.ElapD.Distance => BSMD.StateData.Z.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.Speed => BSMD.StateData.V.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.Time => BSMD.StateData.T.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ElapD.BC_Pres => BSMD.StateData.BC.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.MR_Pres => BSMD.StateData.MR.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.ER_Pres => BSMD.StateData.ER.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.BP_Pres => BSMD.StateData.BP.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.SAP_Pres => BSMD.StateData.SAP.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.Current => BSMD.StateData.I.ToString(ConstVals.ToStrFormatFloat),
-          ConstVals.DNums.ElapD.Voltage => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR),
-          ConstVals.DNums.ElapD.TIME_Hour => ts.Hours.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ElapD.TIME_Min => ts.Minutes.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ElapD.TIME_Sec => ts.Seconds.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.ElapD.TIME_MSec => ts.Milliseconds.ToString(ConstVals.ToStrFormatInt),
-          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR),
-        },
-        ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)DNum switch
-        {
-          ConstVals.DNums.HandPos.AllData => new StringBuilder().Append(BSMD.HandleData.B).Append(separator).Append(BSMD.HandleData.P).Append(separator).Append(BSMD.HandleData.R).Append(separator).Append(BSMD.HandleData.C).ToString(),
-          ConstVals.DNums.HandPos.Brake => BSMD.HandleData.B.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.HandPos.Power => BSMD.HandleData.P.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.HandPos.Reverser => BSMD.HandleData.R.ToString(ConstVals.ToStrFormatInt),
-          ConstVals.DNums.HandPos.ConstSpd => BSMD.HandleData.C.ToString(ConstVals.ToStrFormatInt),//定速状態は予約
-          ConstVals.DNums.HandPos.SelfB => (GetDataAnyway || OD.IsEnabled) ? OD.SelfBPosition.ToString(ConstVals.ToStrFormatInt) : Errors.GetCMD(Errors.ErrorNums.BIDS_Not_Connected),
-          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR)
-        },
-        ConstVals.DTYPE_PANEL => DNum < 0 ? PD.Length.ToString(ConstVals.ToStrFormatInt) : (DNum < PD.Length ? PD.Panels[DNum] : 0).ToString(ConstVals.ToStrFormatInt),
-        ConstVals.DTYPE_SOUND => DNum < 0 ? SD.Length.ToString(ConstVals.ToStrFormatInt) : (DNum < SD.Length ? SD.Sounds[DNum] : 0).ToString(ConstVals.ToStrFormatInt),
-        ConstVals.DTYPE_DOOR => DNum switch
-        {
-          0 => BSMD.IsDoorClosed ? "1" : "0",
-          1 => "0",
-          2 => "0",
-          _ => Errors.GetCMD(Errors.ErrorNums.DNUM_ERROR)
-        },
-        ConstVals.DTYPE_PANEL_ARR => ArrDGet(PD.Panels, DNum, ConstVals.PANEL_ARR_PRINT_COUNT, ConstVals.CMD_SEPARATOR),
-        ConstVals.DTYPE_SOUND_ARR => ArrDGet(SD.Sounds, DNum, ConstVals.SOUND_ARR_PRINT_COUNT, ConstVals.CMD_SEPARATOR),
-        _ => Errors.GetCMD(Errors.ErrorNums.DTYPE_ERROR)
-      };
-			#endregion
-
-			return !ReturnStr.StartsWith(ConstVals.CMD_HEADER_ERROR);
+      StringBuilder sb = new StringBuilder();
+      bool ret = Get_TRI_Data(sb, DType, DNum, GetDataAnyway, separator);
+      ReturnStr = sb.ToString();
+			return ret;
     }
 
     /// <summary>要求された情報を取得する</summary>
@@ -391,22 +317,71 @@ namespace TR.BIDSsv
     /// <summary>必要なデータを選択すると同時に, 送信まで行う.</summary>
     /// <param name="sv">IBIDSsvインスタンス</param>
     /// <param name="str">入力されたコマンド文字列</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public void DataSelSend(IBIDSsv sv, in string str) => sv?.Print(DataSelect(sv, str));
 
 		#endregion
 
 		#region StringBuilderを使用したMethod群
-
-    static public bool Get_TRI_Data(out StringBuilder ReturnStr, in char DType, in int DNum, in bool GetDataAnyway = false, in char separator = ConstVals.CMD_SEPARATOR)
+    /// <summary>TRIで始まるコマンドに対するデータを取得します.</summary>
+    /// <param name="ReturnStrB"></param>
+    /// <param name="DType"></param>
+    /// <param name="DNum"></param>
+    /// <param name="GetDataAnyway"></param>
+    /// <param name="separator"></param>
+    /// <returns></returns>
+    static public bool Get_TRI_Data(StringBuilder ReturnStrB, in char DType, in int DNum, in bool GetDataAnyway = false, in char separator = ConstVals.CMD_SEPARATOR)
     {
-      throw new NotImplementedException();
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+      string ArrayPrinter<T>(StringBuilder sb,in IList<T> arr, in char separ)
+      {
+        sb.Append(arr[0]);
+        for (int i = 1; i < arr.Count; i++)
+          sb.Append(separ).Append(arr[i]);
+        return sb.ToString();
+      }
+      //データ強制取得F && SMem未疎通 => NotConnected
+      //データ強制取得F && SMem疎通済 => 値を返す
+      //データ強制取得T && (疎通不依存) => 値を返す
+      if (!GetDataAnyway && !BSMD.IsEnabled)
+      {
+        ReturnStrB.Clear();
+        ReturnStrB.Append(Errors.GetCMD(Errors.ErrorNums.BIDS_Not_Connected));
+        return false;
+      }
+
+      #region データ取得部
+      object gotD = DataPicker(DType, DNum);
+      if (gotD is int || gotD is float || gotD is double od) ReturnStrB.Append(gotD.ToString());
+      else if (gotD is Spec spec) ReturnStrB.Append(spec.B).Append(separator).Append(spec.P).Append(separator).Append(spec.A).Append(separator).Append(spec.J).Append(separator).Append(spec.C).ToString();
+      else if (gotD is TimeSpan ts) ReturnStrB.Append(ts.Hours).Append(':').Append(ts.Minutes).Append(':').Append(ts.Seconds).Append('.').Append(ts.Milliseconds).ToString();
+      else if (gotD is State state) ReturnStrB.Append(state.Z).Append(separator).Append(state.V).Append(separator).Append(state.T).Append(separator).Append(state.BC).Append(separator).Append(state.MR).Append(separator).Append(state.ER).Append(separator).Append(state.BP).Append(separator).Append(state.SAP).Append(separator).Append(state.I).Append(separator).Append(0).ToString();
+      else if (gotD is Hand hand) ReturnStrB.Append(hand.B).Append(separator).Append(hand.P).Append(separator).Append(hand.R).Append(separator).Append(hand.C).ToString();
+      else if (gotD is float[] farr) ArrayPrinter(ReturnStrB, farr, separator);
+      else if (gotD is int[] iarr) ArrayPrinter(ReturnStrB, iarr, separator);
+      else
+      {
+        ReturnStrB.Clear();
+        ReturnStrB.Append(Errors.GetCMD(Errors.ErrorNums.ERROR_in_DType_or_DNum));
+      }
+      #endregion
+
+      return true;
     }
 
+    /// <summary>受信したコマンドにより, 適切な操作を行います.</summary>
+    /// <param name="sv"></param>
+    /// <param name="str"></param>
+    /// <returns></returns>
     static public StringBuilder DataSelect(IBIDSsv sv, StringBuilder str)
     {
       throw new NotImplementedException();
     }
 
+    /// <summary>受信したコマンドにより, 適切な操作を行い, 必要があれば結果を自動で返信します.</summary>
+    /// <param name="sv"></param>
+    /// <param name="str"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public void DataSelSend(IBIDSsv sv, StringBuilder str) => sv?.Print(DataSelect(sv, str).ToString());
 
     #endregion
