@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace TR.BIDSsv
 {
 	public static partial class Common
 	{
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static private void DataGot(in string GotStr)
     {
       if (string.IsNullOrWhiteSpace(GotStr)) return;
@@ -308,7 +310,7 @@ namespace TR.BIDSsv
               if (PD.Length >= mx)
               {
                 pda = new int[mx];
-                Array.Copy(PD.Panels, pda, PD.Length);
+                Buffer.BlockCopy(PD.Panels, 0, pda, 0, PD.Length * sizeof(int));
               }
               else pda = PD.Panels;
 
@@ -326,7 +328,7 @@ namespace TR.BIDSsv
               if (SD.Length >= mx)
               {
                 sda = new int[mx];
-                Array.Copy(SD.Sounds, sda, SD.Length);
+                Buffer.BlockCopy(SD.Sounds, 0, sda, 0, SD.Length * sizeof(int));
               }
               else sda = SD.Sounds;
 

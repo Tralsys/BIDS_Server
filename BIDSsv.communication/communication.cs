@@ -140,14 +140,14 @@ namespace TR.BIDSsv
     public void OnPanelDChanged(in int[] data)
     {
       if (!IsWriteable) return;
-      Array.Copy(data, 0, PDA, 0, Math.Min(256, data.Length));
+      Buffer.BlockCopy(data, 0, PDA, 0, Math.Min(256, data.Length) * sizeof(int));
       if (data.Length < 256) Array.Clear(PDA, data.Length, 256 - data.Length);
     }
 
     public void OnSoundDChanged(in int[] data)
     {
       if (!IsWriteable) return;
-      Array.Copy(data, 0, SDA, 0, Math.Min(256, data.Length));
+      Buffer.BlockCopy(data, 0, SDA, 0, Math.Min(256, data.Length) * sizeof(int));
       if (data.Length < 256) Array.Clear(SDA, data.Length, 256 - data.Length);
     }
 

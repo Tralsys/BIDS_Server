@@ -33,7 +33,15 @@ namespace TR.BIDSsv
       else return DataSelBin(ba);
     }
 
-
+    /// <summary>指定のデータ群から指定のデータを取り出します</summary>
+    /// <param name="sv"></param>
+    /// <param name="ba"></param>
+    /// <param name="bsmd_in"></param>
+    /// <param name="od_in"></param>
+    /// <param name="pa_in"></param>
+    /// <param name="sa_in"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public byte[] DataSelect(IBIDSsv sv, in byte[] ba, in BIDSSharedMemoryData? bsmd_in = null, in OpenD? od_in = null, in int[] pa_in = null, in int[] sa_in = null)
     {
       
@@ -133,6 +141,7 @@ namespace TR.BIDSsv
       throw new NotImplementedException();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static private byte[] DataSelBin(byte[] ba)
     {
       if (!(ba?.Length >= 6)) return null;//データ長6未満 or nullは対象外(念のためチェック)
@@ -219,7 +228,7 @@ namespace TR.BIDSsv
             if ((pai + 1) * 128 >= pd.Length)
             {
               int[] pa = new int[(pai + 1) * 128];
-              Array.Copy(pd.Panels, pa, pd.Length);
+              Buffer.BlockCopy(pd.Panels, 0, pa, 0, pd.Length * sizeof(int));
               pd.Panels = pa;
             }
             Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = ba.GetInt(4 + (4 * i)));
@@ -238,7 +247,7 @@ namespace TR.BIDSsv
             if ((sai + 1) * 128 >= sd.Length)
             {
               int[] sa = new int[(sai + 1) * 128];
-              Array.Copy(sd.Sounds, sa, sd.Length);
+              Buffer.BlockCopy(sd.Sounds, 0, sa, 0, sd.Length * sizeof(int));
               sd.Sounds = sa;
             }
             Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = ba.GetInt(4 + (4 * i)));

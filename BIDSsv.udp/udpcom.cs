@@ -129,7 +129,7 @@ namespace TR.BIDSsv
 
       if (MyID == UFunc.GetUInt(ba, 0)) return true;
 
-      Array.Copy(ba, sizeof(uint), rba, 0, rba.Length);
+      Buffer.BlockCopy(ba, sizeof(uint), rba, 0, rba.Length);
       return false;
     }
 
@@ -138,8 +138,8 @@ namespace TR.BIDSsv
       if (!(ba?.Length > 0)) return null;
       byte[] rba = new byte[ba.Length + sizeof(uint)];
 
-      Array.Copy(MyID.GetBytes(), 0, rba, 0, sizeof(uint));
-      Array.Copy(ba, 0, rba, sizeof(uint), ba.Length);
+      Buffer.BlockCopy(MyID.GetBytes(), 0, rba, 0, sizeof(uint));
+      Buffer.BlockCopy(ba, 0, rba, sizeof(uint), ba.Length);
 
       return rba;
     }
