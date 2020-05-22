@@ -20,13 +20,118 @@
             <param name="dnum">条件とするデータ番号</param>
             <param name="dtyp">条件とするタイプ文字</param>
         </member>
+        <member name="E:TR.BIDSsv.Common.BSMDChanged">
+            <summary>BSMD変化時に発火</summary>
+        </member>
+        <member name="E:TR.BIDSsv.Common.OpenDChanged">
+            <summary>openD変化時に発火</summary>
+        </member>
+        <member name="E:TR.BIDSsv.Common.PanelDChanged">
+            <summary>PanelD変化時に発火</summary>
+        </member>
+        <member name="E:TR.BIDSsv.Common.SoundDChanged">
+            <summary>SoundD変化時に発火</summary>
+        </member>
+        <member name="T:TR.BIDSsv.Common.AutoSendSetting">
+            <summary>AutoSendに関する各種定数や設定など</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderBasicConst">
+            <summary>BasicConstデータ群のヘッダ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicConstSize">
+            <summary>BasicConstデータ群のデータコマンド長</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderBasicCommon">
+            <summary>BasicCommonデータ群のヘッダ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicCommonSize">
+            <summary>BasicCommonデータ群のデータコマンド長</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderBasicBVE5">
+            <summary>BasicBVE5</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderBasicOBVE">
+            <summary>BasicOBVE</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderBasicHandle">
+            <summary>BasicHandle</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicHandleSize">
+            <summary>BasicHandle</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderPanel">
+            <summary>PanelArr</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.PanelSize">
+            <summary>PanelArr</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.HeaderSound">
+            <summary>SoundArr</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.SoundSize">
+            <summary>SoundArr</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicConstAS">
+            <summary>BasicConstデータ群のAutoSend死活設定</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicCommonAS">
+            <summary>BasicCommonデータ群のAutoSend死活設定</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicBVE5AS">
+            <summary>BasicBVE5データ群のAutoSend死活設定</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicOBVEAS">
+            <summary>BasicOBVEデータ群のAutoSend死活設定</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicHandleAS">
+            <summary>BasicHandleデータ群のAutoSend死活設定</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicPanelAS">
+            <summary>BasicPanelArrデータ群のAutoSend死活設定</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.AutoSendSetting.BasicSoundAS">
+            <summary>BasicSoundArrデータ群のAutoSend死活設定</summary>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicConst(Spec@,OpenD@)">
+            <summary>BasicConstデータ群のデータコマンドを構成します.</summary>
+            <param name="s">Specデータ</param>
+            <param name="o">OpenDデータ</param>
+            <returns>BasicConstデータ群のデータコマンド</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicCommon(State@,System.Byte,System.Int32)">
+            <summary>BasicCommon</summary>
+            <param name="s"></param>
+            <param name="DoorState">ドアが閉扉状態か</param>
+            <param name="SigNum">信号の現示番号</param>
+            <returns>データコマンド</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicBVE5(System.Object)">
+            <summary>BVE5 Data Group</summary>
+            <param name="o"></param>
+            <returns>Data Command</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicOBVE(OpenD)">
+            <summary>openBVE</summary>
+            <param name="o"></param>
+            <returns>Data Command</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicHandle(Hand,System.Int32)">
+            <summary>Handle State</summary>
+            <param name="h"></param>
+            <param name="SelfB"></param>
+            <returns>Data Command</returns>
+        </member>
         <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicPanel(System.Int32[],System.Int32)">
-            <summary>
-            
-            </summary>
+            <summary>パネル</summary>
             <param name="a">Source Array</param>
-            <param name="SttInd">Start Index</param>
+            <param name="SttInd">Start Index Number</param>
             <returns>Result Array</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.AutoSendSetting.BasicSound(System.Int32[],System.Int32)">
+            <summary>Sound Arr Auto Sender Command</summary>
+            <param name="a"></param>
+            <param name="SttInd"></param>
+            <returns>Data Command</returns>
         </member>
         <member name="M:TR.BIDSsv.Common.ArrDChangedCheck(System.Int32[]@,System.Int32[]@,System.Int32,System.Action{System.Int32[],System.Int32})">
             <summary>配列を単位長さあたりで分割し, そこに変化があった場合に関数を実行する.</summary>
@@ -35,15 +140,45 @@
             <param name="OneTimePrintCount"></param>
             <param name="onChanged">単位配列長で分割し変化が検知されたとき, 何番目の配列で変化が検知されたかを示す引数とともに実行される関数</param>
         </member>
-        <member name="M:TR.BIDSsv.Common.CommunicationBAGet(TR.BIDSsv.CommunicationStruct,System.Int32[],System.Int32[])">
-            <summary>
-            BIDS Data to Communication.dll data
-            </summary>
-            <param name="BSMD">BIDS SharedMemory Data</param>
+        <member name="F:TR.BIDSsv.Common.CommunicationStructHeader">
+            <summary>Communication.dllで使用されているデータフォーマットのヘッダ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.ComStrSize">
+            <summary>CommunicationStructのデータサイズ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.Common.PSArrSize">
+            <summary>送受信するPanel/Sound配列長</summary>
+        </member>
+        <member name="M:TR.BIDSsv.Common.CommunicationBAGot(System.Byte[]@,System.Int32[]@,System.Int32[]@)">
+            <summary>Communication.dll規格のbyte配列データを適切な形式に変換する.</summary>
+            <param name="ba"></param>
+            <param name="PA"></param>
+            <param name="SA"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.CommunicationBAGet(TR.BIDSsv.CommunicationStruct@,System.Int32[]@,System.Int32[]@)">
+            <summary>BIDS Data to Communication.dll data</summary>
+            <param name="cs">CommunicationStruct Data</param>
             <param name="PD">Panel Data</param>
             <param name="SD">Sound Data</param>
-            <param name="deltaT">delta T Data</param>
             <returns>Communication.dll Byte Array</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.ComStrtoBSMD(TR.BIDSsv.CommunicationStruct@)">
+            <summary>CommunicationStructをBIDSSharedMemoryDataに変換する</summary>
+            <param name="cs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.ComStrtoBSMD(TR.BIDSsv.CommunicationStruct@,System.Int32@)">
+            <summary>CommunicationStructをBIDSSharedMemoryDataに変換する</summary>
+            <param name="cs"></param>
+            <param name="deltaT">フレーム間経過時間[ms]</param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.BSMDtoComStr(BIDSSharedMemoryData@,System.Int32)">
+            <summary>BIDSSharedMemoryDataをCommunicationStructに変換する</summary>
+            <param name="bsmd"></param>
+            <param name="deltaT">フレーム間経過時間[ms]</param>
+            <returns></returns>
         </member>
         <member name="F:TR.BIDSsv.Common.Version">
             <summary>BIDSsvの対応バージョン</summary>
@@ -51,7 +186,16 @@
         <member name="F:TR.BIDSsv.Common.DefPNum">
             <summary>デフォルトのポート番号</summary>
         </member>
-        <member name="M:TR.BIDSsv.Common.PickData(Spec@,System.Char,System.Int32,System.Boolean@)">
+        <member name="M:TR.BIDSsv.Common.PickData(Spec@,System.Char@,System.Int32@)">
+            <summary>
+            Returns the data that matches the data specification information.
+            </summary>
+            <param name="inData">Data Source</param>
+            <param name="DType">Data Type specification char</param>
+            <param name="DNum">Data Number</param>
+            <returns>result value or null</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.PickData(State@,System.Char@,System.Int32@)">
             <summary>
             Returns the data that matches the data specification information.
             </summary>
@@ -61,7 +205,7 @@
             <param name="IsFloatVal">set value that whether the return value is float</param>
             <returns>result value or null</returns>
         </member>
-        <member name="M:TR.BIDSsv.Common.PickData(State@,System.Char,System.Int32,System.Boolean@)">
+        <member name="M:TR.BIDSsv.Common.PickData(OpenD@,System.Char@,System.Int32@)">
             <summary>
             Returns the data that matches the data specification information.
             </summary>
@@ -71,17 +215,7 @@
             <param name="IsFloatVal">set value that whether the return value is float</param>
             <returns>result value or null</returns>
         </member>
-        <member name="M:TR.BIDSsv.Common.PickData(OpenD@,System.Char,System.Int32,System.Boolean@)">
-            <summary>
-            Returns the data that matches the data specification information.
-            </summary>
-            <param name="inData">Data Source</param>
-            <param name="DType">Data Type specification char</param>
-            <param name="DNum">Data Number</param>
-            <param name="IsFloatVal">set value that whether the return value is float</param>
-            <returns>result value or null</returns>
-        </member>
-        <member name="M:TR.BIDSsv.Common.PickData(Hand@,System.Char,System.Int32,System.Boolean@)">
+        <member name="M:TR.BIDSsv.Common.PickData(Hand@,System.Char@,System.Int32@)">
             <summary>
             Returns the data that matches the data specification information.
             </summary>
@@ -111,18 +245,36 @@
             <param name="separator">使用するセパレータ文字</param>
             <returns>エラー番号(なければnull)</returns>
         </member>
-        <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.Byte[]@,System.Text.Encoding@)">
-            <summary>Classify the data</summary>
-            <param name="CName">Connection Instance</param>
-            <param name="ba">Got Data</param>
-            <param name="enc">Encording</param>
-            <returns>byte array to return, or array that calling program is needed to do something</returns>
-        </member>
         <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.String@)">
             <summary>要求された情報を取得する</summary>
             <param name="sv">IBIDSsvインスタンス</param>
             <param name="str">入力されたコマンド文字列</param>
             <returns>返信すべき文字列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelSend(TR.IBIDSsv,System.String@)">
+            <summary>必要なデータを選択すると同時に, 送信まで行う.</summary>
+            <param name="sv">IBIDSsvインスタンス</param>
+            <param name="str">入力されたコマンド文字列</param>
+        </member>
+        <member name="M:TR.BIDSsv.Common.Get_TRI_Data(System.Text.StringBuilder,System.Char@,System.Int32@,System.Boolean@,System.Char@)">
+            <summary>TRIで始まるコマンドに対するデータを取得します.</summary>
+            <param name="ReturnStrB"></param>
+            <param name="DType"></param>
+            <param name="DNum"></param>
+            <param name="GetDataAnyway"></param>
+            <param name="separator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.Text.StringBuilder)">
+            <summary>受信したコマンドにより, 適切な操作を行います.</summary>
+            <param name="sv"></param>
+            <param name="str"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelSend(TR.IBIDSsv,System.Text.StringBuilder)">
+            <summary>受信したコマンドにより, 適切な操作を行い, 必要があれば結果を自動で返信します.</summary>
+            <param name="sv"></param>
+            <param name="str"></param>
         </member>
         <member name="M:TR.BIDSsv.Common.DataSelSend(TR.IBIDSsv,System.Byte[]@,System.Text.Encoding@)">
             <summary>必要なデータを取得すると同時に, 送信まで行う.</summary>
@@ -130,10 +282,159 @@
             <param name="data">入力データ</param>
             <param name="enc">使用するエンコーディング</param>
         </member>
-        <member name="M:TR.BIDSsv.Common.DataSelSend(TR.IBIDSsv,System.String@)">
-            <summary>必要なデータを選択すると同時に, 送信まで行う.</summary>
-            <param name="sv">IBIDSsvインスタンス</param>
-            <param name="str">入力されたコマンド文字列</param>
+        <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.Byte[]@,System.Text.Encoding@)">
+            <summary>Classify the data</summary>
+            <param name="CName">Connection Instance</param>
+            <param name="ba">Got Data</param>
+            <param name="enc">Encording</param>
+            <returns>byte array to return, or array that calling program is needed to do something</returns>
+        </member>
+        <member name="T:TR.BIDSsv.CommunicationStruct">
+            <summary>Communication.dllで使用されているデータ構造</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.Header">
+            <summary>Header</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.Location">
+            <summary>列車位置 [m]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.speed">
+            <summary>列車速度 [km/h]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.time">
+            <summary>0時からの経過時間 [ms]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.BCPres">
+            <summary>BC Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.MRPres">
+            <summary>MR Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.ERPres">
+            <summary>ER Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.BPPres">
+            <summary>BP Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.SAPPres">
+            <summary>SAP Pressure[kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.Current">
+            <summary>電流 [A]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.isDoorClosed">
+            <summary>ドアが閉まっているかどうか</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.SpeedAbs">
+            <summary>速度の絶対値 [km/h]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.deltaT">
+            <summary>フレーム間経過時間 [ms]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.BrakeHPos">
+            <summary>制動ハンドルの位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.PowerHPos">
+            <summary>力行ハンドルの位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.ReverHPos">
+            <summary>逆転ハンドルの位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.ConstSPD">
+            <summary>定速制御状態</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.BrakeNNum">
+            <summary>制動ハンドルの設定可能位置数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.PowerNNum">
+            <summary>力行ハンドルの設定可能位置数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.ATSCheckPos">
+            <summary>ATS確認を行う位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.B67NNum">
+            <summary>67°位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.CarCount">
+            <summary>編成両数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.EBPos">
+            <summary>非常ブレーキ位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.CommunicationStruct.MaxServiceBrakeNNum">
+            <summary>常用最大段数?</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals">
+            <summary>BIDSsvで使用する定数値が含まれます.</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_LEN_MIN">
+            <summary>BIDSで使用するコマンドの最小サイズ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_LEN_MAX">
+            <summary>BIDSで使用するコマンドの最大サイズ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.StringBuilder_Capacity">
+            <summary>BIDSで使用する文字列コマンドの最大サイズ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.NULL_CHAR">
+            <summary>NULL文字</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.TRUE_VALUE">
+            <summary>TRUEを意味する値</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.FALSE_VALUE">
+            <summary>FALSEを意味する値</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_HEADER_0">
+            <summary>Binaryデータコマンドのヘッダ0</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_HEADER_1">
+            <summary>Binary Data CommandのHeader1</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.STR_CMD_HEADER_0">
+            <summary>String Data CommandのHeader0</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.STR_CMD_HEADER_1">
+            <summary>String Data CommandのHeader1</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_INFO_DATA">
+            <summary>BDCのデータ識別子(INFO Data)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_PANEL_DATA">
+            <summary>BDCのデータ識別子(Panel Data)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_SOUND_DATA">
+            <summary>BDCのデータ識別子(Sound Data)</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.BIN_CMD_INFOD_TYPES">
+            <summary>BDCのInfoDの種類一覧</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_INFOD_TYPES.SPEC">
+            <summary>Specデータ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_INFOD_TYPES.STATE">
+            <summary>Stateデータ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_INFOD_TYPES.BVE5D">
+            <summary>BVE5独自データ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_INFOD_TYPES.OPEND">
+            <summary>openBVE独自データ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BIN_CMD_INFOD_TYPES.HANDLE">
+            <summary>ハンドル位置データ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_HEADER">
+            <summary>BIDS String CommandのHeader</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.GIPI_HEADER">
+            <summary>GIPI CommandのHeader</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_HEADER_ERROR">
+            <summary>BIDS String CommandのError Command Header</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CRLF">
+            <summary>CRLF</summary>
         </member>
         <member name="F:TR.BIDSsv.ConstVals.CR_S">
             <summary>Line Feed (\r)</summary>
@@ -147,6 +448,69 @@
         <member name="F:TR.BIDSsv.ConstVals.LF_C">
             <summary>Carriage Return (\n)</summary>
         </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_VERSION">
+            <summary>String Command - Version</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_INFOREQ">
+            <summary>String Command - Info Request</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_AUTOSEND_ADD">
+            <summary>String Command - AutoSend Add Request</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_AUTOSEND_DEL">
+            <summary>String Command - AutoSend Remove Request</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_ERROR">
+            <summary>String Command - Error report</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_REVERSER">
+            <summary>String Command - Reverser Control Command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_POWER">
+            <summary>String Command - Power Lever Control Command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_BREAK">
+            <summary>String Command - Brake Lever Control Command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_SPoleMC">
+            <summary>String Command - Single Pole MasterController Control Command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_KeyCtrl">
+            <summary>String Command - Key Control Command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.CMD_SEPARATOR">
+            <summary>Separator between request command and response data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNUM_POS">
+            <summary>Position of DNum in the command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_CHAR_POS">
+            <summary>Position of DType char in the command</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_ELAPD">
+            <summary>DType Char - ElapD</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_DOOR">
+            <summary>DType Char - Door State</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_HANDPOS">
+            <summary>DType Char - Handle Position Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_CONSTD">
+            <summary>DType Char - Const Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_PANEL">
+            <summary>DType Char - Panel Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_SOUND">
+            <summary>DType Char - Sound Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_PANEL_ARR">
+            <summary>DType Char - Panel Array</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DTYPE_SOUND_ARR">
+            <summary>DType Char - Sound Array</summary>
+        </member>
         <member name="F:TR.BIDSsv.ConstVals.PANEL_ARR_PRINT_COUNT">
             <summary>Panelの連続出力機能で出力する数</summary>
         </member>
@@ -158,6 +522,333 @@
         </member>
         <member name="F:TR.BIDSsv.ConstVals.SOUND_BIN_ARR_PRINT_COUNT">
             <summary>Sound状態のBinary出力機能で出力する数</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.DNums">
+            <summary>String InfoReqのDNumに入る数値</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.DNums.ElapD">
+            <summary>ElapDに使用するDNum</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Time_HMSms">
+            <summary>時刻情報(hh:mm:ss.fff)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Pressures">
+            <summary>圧力一覧 [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.AllData">
+            <summary>ElapDの全データ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Distance">
+            <summary>列車位置 [m]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Speed">
+            <summary>列車速度 [km/h]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Time">
+            <summary>0時からの経過時間 [ms]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.BC_Pres">
+            <summary>BC Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.MR_Pres">
+            <summary>MR Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.ER_Pres">
+            <summary>ER Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.BP_Pres">
+            <summary>BP Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.SAP_Pres">
+            <summary>SAP Pressure [kPa]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Current">
+            <summary>電流値 [A]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.Voltage">
+            <summary>架線電圧 [V]</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.TIME_Hour">
+            <summary>現在時刻 (hh)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.TIME_Min">
+            <summary>現在時刻 (mm)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.TIME_Sec">
+            <summary>現在時刻 (ss)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ElapD.TIME_MSec">
+            <summary>現在時刻 (fff)</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.DNums.HandPos">
+            <summary>ハンドル位置情報</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.HandPos.AllData">
+            <summary>Handleデータ一覧</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.HandPos.Brake">
+            <summary>制動ハンドル位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.HandPos.Power">
+            <summary>力行ハンドル位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.HandPos.Reverser">
+            <summary>逆転ハンドル位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.HandPos.ConstSpd">
+            <summary>定速制御状態</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.HandPos.SelfB">
+            <summary>単弁ハンドル位置</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.DNums.ConstD">
+            <summary>車両固有情報</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ConstD.AllData">
+            <summary>全データ</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ConstD.Brake_Count">
+            <summary>制動段数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ConstD.Power_Count">
+            <summary>力行段数</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ConstD.ATSCheckPos">
+            <summary>ATS確認位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ConstD.B67_Pos">
+            <summary>制動67°位置</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.DNums.ConstD.Car_Count">
+            <summary>編成両数</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.BINARY_DATA_POS">
+            <summary>Binary Data Commandの各データ位置情報</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA_POS.HEADER_0">
+            <summary>Position of Header0</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA_POS.HEADER_1">
+            <summary>Position of Header1</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA_POS.TYP">
+            <summary>Position of Data Type</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.BINARY_DATA">
+            <summary>byte型での各char</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.HEADER_0">
+            <summary>Header0 ('t'=116)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.HEADER_1">
+            <summary>Header1 ('r'=114)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.TYP_INFO_DATA">
+            <summary>Info Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.TYP_PANEL_DATA">
+            <summary>Panel Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.TYP_SOUND_DATA">
+            <summary>Sound Data</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.TYP_REQUEST">
+            <summary>Data Request</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.TYP_HANDLE_CTRL">
+            <summary>Handle Control Request</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.BINARY_DATA.TYP_SECSYS_DATA">
+            <summary>Security System Data Request</summary>
+        </member>
+        <member name="T:TR.BIDSsv.ConstVals.ASCII">
+            <summary>ASCIIコードを列挙</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D0">
+            <summary>0</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D1">
+            <summary>1</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D2">
+            <summary>2</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D3">
+            <summary>3</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D4">
+            <summary>4</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D5">
+            <summary>5</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D6">
+            <summary>6</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D7">
+            <summary>7</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D8">
+            <summary>8</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D9">
+            <summary>9</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.A">
+            <summary>A</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.B">
+            <summary>B</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.C">
+            <summary>C</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.D">
+            <summary>D</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.E">
+            <summary>E</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.F">
+            <summary>F</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.G">
+            <summary>G</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.H">
+            <summary>H</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.I">
+            <summary>I</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.J">
+            <summary>J</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.K">
+            <summary>K</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.L">
+            <summary>L</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.M">
+            <summary>M</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.N">
+            <summary>N</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.O">
+            <summary>O</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.P">
+            <summary>P</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.Q">
+            <summary>Q</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.R">
+            <summary>R</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.S">
+            <summary>S</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.T">
+            <summary>T</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.U">
+            <summary>U</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.V">
+            <summary>V</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.W">
+            <summary>W</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.X">
+            <summary>X</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.Y">
+            <summary>Y</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.Z">
+            <summary>Z</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.a">
+            <summary>a</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.b">
+            <summary>b</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.c">
+            <summary>c</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.d">
+            <summary>d</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.e">
+            <summary>e</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.f">
+            <summary>f</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.g">
+            <summary>g</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.h">
+            <summary>h</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.i">
+            <summary>i</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.j">
+            <summary>j</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.k">
+            <summary>k</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.l">
+            <summary>l</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.m">
+            <summary>m</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.n">
+            <summary>n</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.o">
+            <summary>o</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.p">
+            <summary>p</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.q">
+            <summary>q</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.r">
+            <summary>r</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.s">
+            <summary>s</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.t">
+            <summary>t</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.u">
+            <summary>u</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.v">
+            <summary>v</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.w">
+            <summary>w</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.x">
+            <summary>x</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.y">
+            <summary>y</summary>
+        </member>
+        <member name="F:TR.BIDSsv.ConstVals.ASCII.z">
+            <summary>z</summary>
         </member>
         <member name="M:TR.BIDSsv.UFunc.String2INT(System.String)">
             <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>

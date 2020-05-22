@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TR.BIDSsv
@@ -21,7 +22,11 @@ namespace TR.BIDSsv
       Num_Parsing_Failed
     }
 
-    public static string GetCMD(this ErrorNums ErrNum) => ConstVals.CMD_HEADER + ConstVals.CMD_ERROR + ((int)ErrNum).ToString();
-    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static string GetCMD(this ErrorNums ErrNum) => ErrNum.GetCMD_SB().ToString();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static StringBuilder GetCMD_SB(this ErrorNums ErrNum) => new StringBuilder(ConstVals.CMD_HEADER_ERROR).Append((int)ErrNum);
+
+
   }
 }

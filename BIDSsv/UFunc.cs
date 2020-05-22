@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -8,6 +9,7 @@ namespace TR.BIDSsv
 {
   static public class UFunc
   {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
 
     public static void SetBIDSHeader(this byte[] ba, byte ba_2, byte ba_3, ref int index)
@@ -19,107 +21,124 @@ namespace TR.BIDSsv
       index += 4;
     }
 
-		//配列複製速度 参照 : http://dalmore.blog7.fc2.com/blog-entry-57.html
+    //配列複製速度 参照 : http://dalmore.blog7.fc2.com/blog-entry-57.html
 
-		#region ValueSet2Arr
-		public static void ValueSet2Arr(this byte[] ba, int value, ref int index)
+    #region ValueSet2Arr
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static void ValueSet2Arr(this byte[] ba, int value, ref int index)
     {
       Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(int));
       index += sizeof(int);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static void ValueSet2Arr(this byte[] ba, double value, ref int index)
     {
       Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(double));
       index += sizeof(double);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static void ValueSet2Arr(this byte[] ba, float value, ref int index)
     {
       Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(float));
       index += sizeof(float);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static void ValueSet2Arr(this byte[] ba, short value, ref int index)
     {
       Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(short));
       index += sizeof(short);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static void ValueSet2Arr(this byte[] ba, bool value, ref int index)
     {
       Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(bool));
       index += sizeof(bool);
     }
-		#endregion
+    #endregion
 
-		private static readonly bool isLE = BitConverter.IsLittleEndian;
-		#region ToBytes
-		public static byte[] ToBytes(this in int arg)
+    private static readonly bool isLE = BitConverter.IsLittleEndian;
+    #region ToBytes
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static byte[] ToBytes(this in int arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in float arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in double arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in bool arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in uint arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in short arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in ushort arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in long arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in ulong arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static byte[] ToBytes(this in char arg)
     {
       byte[] ba = BitConverter.GetBytes(arg);
       if (isLE) Array.Reverse(ba);
       return ba;
     }
-		#endregion
-		#region Get Value
-		public static int GetInt(this byte[] ab, int ind = 0)
+    #endregion
+    #region Get Value
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static int GetInt(this byte[] ab, int ind = 0)
     {
       byte[] ba = new byte[sizeof(int)];
       Buffer.BlockCopy(ab, ind, ba, 0, ba.Length);
       if (isLE) Array.Reverse(ba);
       return BitConverter.ToInt32(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static float GetFloat(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(float);
@@ -131,6 +150,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToSingle(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static double GetDouble(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(double);
@@ -142,6 +162,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToDouble(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static bool GetBool(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(bool);
@@ -153,6 +174,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToBoolean(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static uint GetUInt(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(uint);
@@ -164,6 +186,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToUInt32(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static short GetShort(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(short);
@@ -175,6 +198,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToInt16(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static ushort GetUShort(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(ushort);
@@ -186,6 +210,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToUInt16(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static long GetLong(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(long);
@@ -197,6 +222,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToInt64(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static ulong GetULong(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(long);
@@ -208,6 +234,7 @@ namespace TR.BIDSsv
 
       return BitConverter.ToUInt64(ba, 0);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static char GetChar(this byte[] ab, int ind = 0)
     {
       int sz = sizeof(char);
@@ -254,13 +281,14 @@ namespace TR.BIDSsv
     public static long ToInt64(IEnumerable<byte> ab, int ind = 0) => GetLong(ab.ToArray(), ind);
     public static ulong ToUInt64(IEnumerable<byte> ab, int ind = 0) => GetULong(ab.ToArray(), ind);
     public static char ToChar(IEnumerable<byte> ab, int ind = 0) => GetChar(ab.ToArray(), ind);
-		#endregion
+    #endregion
 
 
-		/// <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
-		/// <param name="str">入力文字列</param>
-		/// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
-		public static int? String2INT(string str)
+    /// <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
+    /// <param name="str">入力文字列</param>
+    /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static int? String2INT(string str)
     {
       if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException();
 
@@ -272,6 +300,7 @@ namespace TR.BIDSsv
     /// <summary>stringから小数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
     /// <param name="str">入力文字列</param>
     /// <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static double? String2Double(string str)
     {
       if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException();
@@ -287,26 +316,13 @@ namespace TR.BIDSsv
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum)
+      => new StringBuilder(ConstVals.StringBuilder_Capacity).Append(ConstVals.CMD_HEADER).Append(CMDType).Append(DType).Append(DNum).ToString();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
     {
-      StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity);
-      sb.Append(ConstVals.CMD_HEADER);
-      sb.Append(CMDType);
-      sb.Append(DType);
-      sb.Append(DNum);
-      if (data != null)
-      {
-        sb.Append(separator);
-        sb.Append(data);
-      }
-      return sb.ToString();
-    }
-    public static string BIDSCMDMaker(in char CMDType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
-    {
-      StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity);
-      sb.Append(ConstVals.CMD_HEADER);
-      sb.Append(CMDType);
-      sb.Append(DNum);
+      StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity).Append(ConstVals.CMD_HEADER).Append(CMDType).Append(DType).Append(DNum);
       if (data != null)
       {
         sb.Append(separator);
@@ -315,6 +331,15 @@ namespace TR.BIDSsv
       return sb.ToString();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static string BIDSCMDMaker(in char CMDType, in int DNum)
+      => new StringBuilder(ConstVals.StringBuilder_Capacity).Append(ConstVals.CMD_HEADER).Append(CMDType).Append(DNum).ToString();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+    public static string BIDSCMDMaker(in char CMDType, in int DNum, in string data, in char separator = ConstVals.CMD_SEPARATOR)
+      => new StringBuilder(ConstVals.StringBuilder_Capacity).Append(ConstVals.CMD_HEADER).Append(CMDType).Append(DNum).Append(separator).Append(data).ToString();
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static bool State_Pressure_IsSame(in State oldS, in State newS)
       => oldS.BC == newS.BC
       && oldS.BP == newS.BP
@@ -323,6 +348,7 @@ namespace TR.BIDSsv
       && oldS.SAP == newS.SAP;
 
 #if !ID_SERCON
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static bool ArrayEqual<T>(T[] ar1, int ar1ind, T[] ar2, int ar2ind, in int len = -1)
     {
       int l = len;
@@ -335,7 +361,9 @@ namespace TR.BIDSsv
       });
       return IsEqual == 1;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static bool ArrayEqual<T>(in T[] ar1, in T[] ar2, in int len = -1) => ArrayEqual<T>(ar1, 0, ar2, 0, len);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public static bool ArrayEqual<T>(in this (T[], T[]) ar, in int item1ind = 0, in int item2ind = 0, in int len = -1) => ArrayEqual<T>(ar.Item1, item1ind, ar.Item2, item2ind, len);
 #endif
   }

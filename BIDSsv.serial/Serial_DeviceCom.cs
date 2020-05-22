@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -243,6 +244,7 @@ namespace TR.BIDSsv
 
 
 		/// <summary>ロックは呼び出し元で取得してください.</summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		async void ReConnect()
 		{
 			Console.WriteLine("Reconnect doing...");

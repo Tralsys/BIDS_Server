@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using TR.BIDSSMemLib;
@@ -121,6 +122,7 @@ namespace TR.BIDSsv
       return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private void Udpc_DataGotEv(object sender, UDPGotEvArgs e)
     {
       if (!(e?.DataLen > 0)) return;
@@ -128,6 +130,7 @@ namespace TR.BIDSsv
       Common.DataSelSend(this, e.Data, Enc);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Print(in string data)
     {
       if (IsDebug) Console.WriteLine("{0} >> {1}", Name, data);
@@ -142,6 +145,7 @@ namespace TR.BIDSsv
         Console.WriteLine("{0} : {1}", Name, e);
       }
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Print(in byte[] data) => udpc.DataSend(data);
 
     readonly string[] ArgInfo = new string[]
@@ -154,6 +158,7 @@ namespace TR.BIDSsv
       "  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)",
       "  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)"
     };
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void WriteHelp(in string args)
     {
       Console.WriteLine("BIDS Server Program UDP Interface");

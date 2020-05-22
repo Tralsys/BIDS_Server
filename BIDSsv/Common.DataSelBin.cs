@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace TR.BIDSsv
     /// <param name="sv">通信インスタンス</param>
     /// <param name="data">入力データ</param>
     /// <param name="enc">使用するエンコーディング</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public void DataSelSend(IBIDSsv sv, in byte[] data, in Encoding enc) => sv?.Print(DataSelect(sv, data, enc));
 
     /// <summary>Classify the data</summary>
@@ -20,6 +22,7 @@ namespace TR.BIDSsv
     /// <param name="ba">Got Data</param>
     /// <param name="enc">Encording</param>
     /// <returns>byte array to return, or array that calling program is needed to do something</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     static public byte[] DataSelect(IBIDSsv CName, in byte[] ba, in Encoding enc)
     {
       if (!(ba?.Length >= 4)) return null;//データ長4未満 or nullは対象外

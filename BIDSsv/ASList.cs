@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace TR.BIDSsv
 
     /// <summary>リストの操作権を管理します.</summary>
     ReaderWriterLockSlim LLock = null;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public ASList()
     {
       LLock = new ReaderWriterLockSlim();
@@ -96,6 +98,7 @@ namespace TR.BIDSsv
       }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Add(IBIDSsv key, int dnum, char dtyp)
     {
       bool LockGot = false;
@@ -167,6 +170,7 @@ namespace TR.BIDSsv
       }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public Elem ElementAt(int index)
     {
       bool LockGot = false;
@@ -184,6 +188,7 @@ namespace TR.BIDSsv
     }
     public class Elem
     {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
       public Elem(IBIDSsv SV, int DN, char DT)
       {
         sv = SV;
