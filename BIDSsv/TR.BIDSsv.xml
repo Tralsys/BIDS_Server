@@ -186,6 +186,12 @@
         <member name="F:TR.BIDSsv.Common.DefPNum">
             <summary>デフォルトのポート番号</summary>
         </member>
+        <member name="M:TR.BIDSsv.Common.DataPicker(System.Char@,System.Int32@)">
+            <summary>指定のデータタイプ/番号のデータを取得します.</summary>
+            <param name="DType"></param>
+            <param name="DNum"></param>
+            <returns></returns>
+        </member>
         <member name="M:TR.BIDSsv.Common.PickData(Spec@,System.Char@,System.Int32@)">
             <summary>
             Returns the data that matches the data specification information.
@@ -288,6 +294,16 @@
             <param name="ba">Got Data</param>
             <param name="enc">Encording</param>
             <returns>byte array to return, or array that calling program is needed to do something</returns>
+        </member>
+        <member name="M:TR.BIDSsv.Common.DataSelect(TR.IBIDSsv,System.Byte[]@,System.Nullable{BIDSSharedMemoryData}@,System.Nullable{OpenD}@,System.Int32[]@,System.Int32[]@)">
+            <summary>指定のデータ群から指定のデータを取り出します</summary>
+            <param name="sv"></param>
+            <param name="ba"></param>
+            <param name="bsmd_in"></param>
+            <param name="od_in"></param>
+            <param name="pa_in"></param>
+            <param name="sa_in"></param>
+            <returns></returns>
         </member>
         <member name="T:TR.BIDSsv.CommunicationStruct">
             <summary>Communication.dllで使用されているデータ構造</summary>
@@ -850,6 +866,391 @@
         <member name="F:TR.BIDSsv.ConstVals.ASCII.z">
             <summary>z</summary>
         </member>
+        <member name="T:TR.BIDSsv.BtnAssign">
+            <summary>ボタンアサイン</summary>
+        </member>
+        <member name="F:TR.BIDSsv.BtnAssign.Num">
+            <summary>ボタン番号 (コマンドで送られてくる番号)</summary>
+        </member>
+        <member name="F:TR.BIDSsv.BtnAssign.Job">
+            <summary>ボタンの役割 (BVEに送出する番号)</summary>
+        </member>
+        <member name="T:TR.BIDSsv.GIPI">
+            <summary>Buttonについて, GIPI互換となるよう, Assign変更機能を提供します.</summary>
+        </member>
+        <member name="P:TR.BIDSsv.GIPI.BtnAssignList">
+            <summary>Button Assign List</summary>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.LoadFromFile(System.String)">
+            <summary>ファイル名を指定して, ファイルから設定を読み込みます</summary>
+            <param name="FName">設定ファイル名</param>
+            <returns>成功したかどうか</returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.LoadFromStream(System.IO.StreamReader)">
+            <summary>Streamから設定を読み込みます.</summary>
+            <param name="s">設定ファイルのStream</param>
+            <returns>成功したかどうか</returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.LoadFromSArr(System.Collections.Generic.List{System.String},System.String)">
+            <summary>String Listから設定を読み込みます</summary>
+            <param name="sa">String List</param>
+            <param name="separator">設定同士を隔てるセパレーター</param>
+            <returns>成功したかどうか</returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.LoadFromSArr(System.String[],System.String)">
+            <summary>String Arrayから設定を読み込みます</summary>
+            <param name="sa">String Array</param>
+            <param name="separator">設定同士を隔てるセパレーター</param>
+            <returns>成功したかどうか</returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.SetTable(System.Collections.Generic.List{TR.BIDSsv.BtnAssign},System.Boolean)">
+            <summary>変換テーブルの初期化, あるいは要素の挿入を行う</summary>
+            <param name="ba"></param>
+            <param name="init"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.SetTable(TR.BIDSsv.BtnAssign[],System.Boolean)">
+            <summary>変換テーブルの初期化, あるいは要素の挿入を行う</summary>
+            <param name="ba"></param>
+            <param name="init"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.GetBtJobNum(System.Int32)">
+            <summary>Buttonの役割を取得</summary>
+            <param name="Num">Button番号</param>
+            <returns>Buttonの役割</returns>
+        </member>
+        <member name="M:TR.BIDSsv.GIPI.GetBtJobNum(System.UInt32)">
+            <summary>Buttonの役割を取得</summary>
+            <param name="Num">Button番号</param>
+            <returns>Buttonの役割</returns>
+        </member>
+        <member name="T:TR.BIDSsv.UFunc">
+            <summary>便利関数をまとめたクラス</summary>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.Comp(System.Object@,System.Object@)">
+            <summary>両者が一致するならEmptyを, 一致しないなら新しいobjをToStringして返します.</summary>
+            <param name="oldobj"></param>
+            <param name="newobj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.SetBIDSHeader(System.Byte[],System.Byte,System.Byte,System.Int32@)">
+            <summary>Byte Arrayに対し, BIDS規格のヘッダを記録します.</summary>
+            <param name="ba">対象の配列</param>
+            <param name="ba_2">コマンドタイプ</param>
+            <param name="ba_3">データタイプ</param>
+            <param name="index">配列の末尾記録</param>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ValueSet2Arr(System.Byte[],System.Int32,System.Int32@)">
+            <summary>byte配列に引数の値を記録します.</summary>
+            <param name="ba">書き込み先の配列</param>
+            <param name="value">書き込む値</param>
+            <param name="index">配列の末尾を記録した変数</param>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ValueSet2Arr(System.Byte[],System.Double,System.Int32@)">
+            <summary>byte配列に引数の値を記録します.</summary>
+            <param name="ba">書き込み先の配列</param>
+            <param name="value">書き込む値</param>
+            <param name="index">配列の末尾を記録した変数</param>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ValueSet2Arr(System.Byte[],System.Single,System.Int32@)">
+            <summary>byte配列に引数の値を記録します.</summary>
+            <param name="ba">書き込み先の配列</param>
+            <param name="value">書き込む値</param>
+            <param name="index">配列の末尾を記録した変数</param>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ValueSet2Arr(System.Byte[],System.Int16,System.Int32@)">
+            <summary>byte配列に引数の値を記録します.</summary>
+            <param name="ba">書き込み先の配列</param>
+            <param name="value">書き込む値</param>
+            <param name="index">配列の末尾を記録した変数</param>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ValueSet2Arr(System.Byte[],System.Boolean,System.Int32@)">
+            <summary>byte配列に引数の値を記録します.</summary>
+            <param name="ba">書き込み先の配列</param>
+            <param name="value">書き込む値</param>
+            <param name="index">配列の末尾を記録した変数</param>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Int32@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Single@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Double@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Boolean@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.UInt32@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Int16@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.UInt16@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Int64@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.UInt64@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBytes(System.Char@)">
+            <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する数値</param>
+            <returns>変換後のbyte配列</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetInt(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetFloat(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetDouble(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBool(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetUInt(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetShort(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetUShort(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetLong(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetULong(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetChar(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+            <param name="ab">ソースの配列</param>
+            <param name="ind">値が入った位置</param>
+            <returns>取得した値</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Int32@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.UInt32@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Single@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Double@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Boolean@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Int16@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.UInt16@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Int64@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.UInt64@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.GetBytes(System.Char@)">
+            <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+            <param name="arg">変換する値</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToInt32(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToSingle(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToDouble(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBoolean(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToUInt32(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToInt16(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToUInt16(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToInt64(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToUInt64(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToChar(System.Byte[],System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToInt32(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToSingle(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToDouble(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToBoolean(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToUInt32(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToInt16(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToUInt16(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToInt64(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToUInt64(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ToChar(System.Collections.Generic.IEnumerable{System.Byte},System.Int32)">
+            <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+            <param name="ab">byte配列</param>
+            <param name="ind">取り出す値が格納された位置</param>
+            <returns>変換結果</returns>
+        </member>
         <member name="M:TR.BIDSsv.UFunc.String2INT(System.String)">
             <summary>stringから整数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
             <param name="str">入力文字列</param>
@@ -859,6 +1260,69 @@
             <summary>stringから小数値に変換(最初に見つかった数値文字から可能な限り変換を行う.)</summary>
             <param name="str">入力文字列</param>
             <returns>変換結果(数値が見つからなければnullを返す.)</returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.BIDSCMDMaker(System.Char@,System.Char@,System.Int32@)">
+            <summary>BIDS規格のString Commandを構成します.</summary>
+            <param name="CMDType"></param>
+            <param name="DType"></param>
+            <param name="DNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.BIDSCMDMaker(System.Char@,System.Char@,System.Int32@,System.String@,System.Char@)">
+            <summary>BIDS規格のString Commandを構成します</summary>
+            <param name="CMDType"></param>
+            <param name="DType"></param>
+            <param name="DNum"></param>
+            <param name="data"></param>
+            <param name="separator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.BIDSCMDMaker(System.Char@,System.Int32@)">
+            <summary>BIDS規格のString Commandを構成します.</summary>
+            <param name="CMDType"></param>
+            <param name="DNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.BIDSCMDMaker(System.Char@,System.Int32@,System.String@,System.Char@)">
+            <summary>BIDS規格のString Commandを構成します</summary>
+            <param name="CMDType"></param>
+            <param name="DNum"></param>
+            <param name="data"></param>
+            <param name="separator"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.State_Pressure_IsSame(State@,State@)">
+            <summary>State構造体のうち, 圧力状態値がすべて等しいか確認します.</summary>
+            <param name="oldS"></param>
+            <param name="newS"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ArrayEqual``1(``0[],System.Int32,``0[],System.Int32,System.Int32@)">
+            <summary>配列が指定位置から指定数分だけ等しいか確認します.</summary>
+            <typeparam name="T"></typeparam>
+            <param name="ar1"></param>
+            <param name="ar1ind"></param>
+            <param name="ar2"></param>
+            <param name="ar2ind"></param>
+            <param name="len"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ArrayEqual``1(``0[]@,``0[]@,System.Int32@)">
+            <summary>配列が指定位置から指定数分だけ等しいか確認します</summary>
+            <typeparam name="T"></typeparam>
+            <param name="ar1"></param>
+            <param name="ar2"></param>
+            <param name="len"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TR.BIDSsv.UFunc.ArrayEqual``1(System.ValueTuple{``0[],``0[]}@,System.Int32@,System.Int32@,System.Int32@)">
+            <summary>配列が指定位置から指定数分だけ等しいか確認します</summary>
+            <typeparam name="T"></typeparam>
+            <param name="ar"></param>
+            <param name="item1ind"></param>
+            <param name="item2ind"></param>
+            <param name="len"></param>
+            <returns></returns>
         </member>
     </members>
 </doc>
