@@ -143,7 +143,7 @@ namespace TR.BIDSsv
 			/// <param name="o"></param>
 			/// <returns>Data Command</returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-			static public byte[] BasicOBVE(OpenD o)
+			static public byte[] BasicOBVE(in OpenD o)
 			{
 				if (!BasicOBVEAS) return null;
 				byte[] ba = new byte[Marshal.SizeOf(new OpenD()) + 4];
@@ -160,7 +160,7 @@ namespace TR.BIDSsv
 			/// <param name="SelfB"></param>
 			/// <returns>Data Command</returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-			static public byte[] BasicHandle(Hand h, int SelfB)
+			static public byte[] BasicHandle(in Hand h, int SelfB)
 			{
 				if (!BasicHandleAS) return null;
 				byte[] ba = new byte[BasicHandleSize];

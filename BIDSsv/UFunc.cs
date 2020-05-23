@@ -21,7 +21,7 @@ namespace TR.BIDSsv
 		/// <param name="ba_2">コマンドタイプ</param>
 		/// <param name="ba_3">データタイプ</param>
 		/// <param name="index">配列の末尾記録</param>
-		public static void SetBIDSHeader(this byte[] ba, byte ba_2, byte ba_3, ref int index)
+		public static void SetBIDSHeader(this byte[] ba, in byte ba_2, in byte ba_3, ref int index)
 		{
 			ba[0] = (byte)ConstVals.BIN_CMD_HEADER_0;
 			ba[1] = (byte)ConstVals.BIN_CMD_HEADER_1;
@@ -38,7 +38,7 @@ namespace TR.BIDSsv
 		/// <param name="value">書き込む値</param>
 		/// <param name="index">配列の末尾を記録した変数</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static void ValueSet2Arr(this byte[] ba, int value, ref int index)
+		public static void ValueSet2Arr(this byte[] ba, in int value, ref int index)
 		{
 			Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(int));
 			index += sizeof(int);
@@ -48,7 +48,7 @@ namespace TR.BIDSsv
 		/// <param name="value">書き込む値</param>
 		/// <param name="index">配列の末尾を記録した変数</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static void ValueSet2Arr(this byte[] ba, double value, ref int index)
+		public static void ValueSet2Arr(this byte[] ba, in double value, ref int index)
 		{
 			Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(double));
 			index += sizeof(double);
@@ -58,7 +58,7 @@ namespace TR.BIDSsv
 		/// <param name="value">書き込む値</param>
 		/// <param name="index">配列の末尾を記録した変数</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static void ValueSet2Arr(this byte[] ba, float value, ref int index)
+		public static void ValueSet2Arr(this byte[] ba, in float value, ref int index)
 		{
 			Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(float));
 			index += sizeof(float);
@@ -68,7 +68,7 @@ namespace TR.BIDSsv
 		/// <param name="value">書き込む値</param>
 		/// <param name="index">配列の末尾を記録した変数</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static void ValueSet2Arr(this byte[] ba, short value, ref int index)
+		public static void ValueSet2Arr(this byte[] ba, in short value, ref int index)
 		{
 			Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(short));
 			index += sizeof(short);
@@ -78,7 +78,7 @@ namespace TR.BIDSsv
 		/// <param name="value">書き込む値</param>
 		/// <param name="index">配列の末尾を記録した変数</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static void ValueSet2Arr(this byte[] ba, bool value, ref int index)
+		public static void ValueSet2Arr(this byte[] ba, in bool value, ref int index)
 		{
 			Buffer.BlockCopy(GetBytes(value), 0, ba, index, sizeof(bool));
 			index += sizeof(bool);
@@ -194,7 +194,7 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static int GetInt(this byte[] ab, int ind = 0)
+		public static int GetInt(this byte[] ab, in int ind = 0)
 		{
 			byte[] ba = new byte[sizeof(int)];
 			Buffer.BlockCopy(ab, ind, ba, 0, ba.Length);
@@ -206,13 +206,10 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static float GetFloat(this byte[] ab, int ind = 0)
+		public static float GetFloat(this byte[] ab, in int ind = 0)
 		{
-			int sz = sizeof(float);
-
-			byte[] ba = new byte[sz];
-			int i = sz - ab.Length;
-			Buffer.BlockCopy(ab, ind, ba, i < 0 ? 0 : i, sz);
+			byte[] ba = new byte[sizeof(float)];
+			Buffer.BlockCopy(ab, ind, ba, 0, sizeof(float));
 			if (isLE) Array.Reverse(ba);
 
 			return BitConverter.ToSingle(ba, 0);
@@ -222,13 +219,10 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static double GetDouble(this byte[] ab, int ind = 0)
+		public static double GetDouble(this byte[] ab, in int ind = 0)
 		{
-			int sz = sizeof(double);
-
-			byte[] ba = new byte[sz];
-			int i = sz - ab.Length;
-			Buffer.BlockCopy(ab, ind, ba, i < 0 ? 0 : i, sz);
+			byte[] ba = new byte[sizeof(double)];
+			Buffer.BlockCopy(ab, ind, ba, 0, sizeof(double));
 			if (isLE) Array.Reverse(ba);
 
 			return BitConverter.ToDouble(ba, 0);
@@ -238,13 +232,10 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static bool GetBool(this byte[] ab, int ind = 0)
+		public static bool GetBool(this byte[] ab, in int ind = 0)
 		{
-			int sz = sizeof(bool);
-
-			byte[] ba = new byte[sz];
-			int i = sz - ab.Length;
-			Buffer.BlockCopy(ab, ind, ba, i < 0 ? 0 : i, sz);
+			byte[] ba = new byte[sizeof(bool)];
+			Buffer.BlockCopy(ab, ind, ba, 0, sizeof(bool));
 			if (isLE) Array.Reverse(ba);
 
 			return BitConverter.ToBoolean(ba, 0);
@@ -254,13 +245,10 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static uint GetUInt(this byte[] ab, int ind = 0)
+		public static uint GetUInt(this byte[] ab, in int ind = 0)
 		{
-			int sz = sizeof(uint);
-
-			byte[] ba = new byte[sz];
-			int i = sz - ab.Length;
-			Buffer.BlockCopy(ab, ind, ba, i < 0 ? 0 : i, sz);
+			byte[] ba = new byte[sizeof(uint)];
+			Buffer.BlockCopy(ab, ind, ba, 0, sizeof(uint));
 			if (isLE) Array.Reverse(ba);
 
 			return BitConverter.ToUInt32(ba, 0);
@@ -270,13 +258,10 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static short GetShort(this byte[] ab, int ind = 0)
+		public static short GetShort(this byte[] ab, in int ind = 0)
 		{
-			int sz = sizeof(short);
-
-			byte[] ba = new byte[sz];
-			int i = sz - ab.Length;
-			Buffer.BlockCopy(ab, ind, ba, i < 0 ? 0 : i, sz);
+			byte[] ba = new byte[sizeof(short)];
+			Buffer.BlockCopy(ab, ind, ba, 0, sizeof(short));
 			if (isLE) Array.Reverse(ba);
 
 			return BitConverter.ToInt16(ba, 0);
@@ -286,13 +271,10 @@ namespace TR.BIDSsv
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static ushort GetUShort(this byte[] ab, int ind = 0)
+		public static ushort GetUShort(this byte[] ab, in int ind = 0)
 		{
-			int sz = sizeof(ushort);
-
-			byte[] ba = new byte[sz];
-			int i = sz - ab.Length;
-			Buffer.BlockCopy(ab, ind, ba, i < 0 ? 0 : i, sz);
+			byte[] ba = new byte[sizeof(ushort)];
+			Buffer.BlockCopy(ab, ind, ba, 0, sizeof(ushort));
 			if (isLE) Array.Reverse(ba);
 
 			return BitConverter.ToUInt16(ba, 0);
