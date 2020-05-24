@@ -25,15 +25,27 @@ namespace TR.BIDSsv
 			get => SMemLib.OpenData;
 			set => SMemLib.Write(in value);
 		}
+		[Obsolete]
 		static public PanelD PD
 		{
 			get => new PanelD() { Panels = SMemLib.PanelA };
 			set => SMemLib.Write(in value);
 		}
+		static public int[] PDA
+		{
+			get => SMemLib.PanelA;
+			set => SMemLib.WritePanel(value);
+		}
+		[Obsolete]
 		static public SoundD SD
 		{
 			get => new SoundD() { Sounds = SMemLib.SoundA };
 			set => SMemLib.Write(in value);
+		}
+		static public int[] SDA
+		{
+			get => SMemLib.SoundA;
+			set => SMemLib.WriteSound(value);
 		}
 
 		static public Hands Ctrl_Hand
