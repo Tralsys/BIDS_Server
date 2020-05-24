@@ -161,14 +161,19 @@ namespace TR.BIDSsv
 			Console.WriteLine("Copyright (C) Tetsu Otter 2019");
 			foreach (string s in ArgInfo) Console.WriteLine(s);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void OnOpenDChanged(in OpenD data) { }
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void OnPanelDChanged(in int[] data) { }
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void OnSoundDChanged(in int[] data) { }
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposedValue)
@@ -193,6 +198,7 @@ namespace TR.BIDSsv
 		// }
 
 		// このコードは、破棄可能なパターンを正しく実装できるように追加されました。
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Dispose()
 		{
 			// このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
