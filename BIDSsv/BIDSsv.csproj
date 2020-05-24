@@ -5,7 +5,7 @@
 		<LangVersion>preview</LangVersion>
     <AssemblyName>TR.BIDSsv</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
     <Authors>Tetsu Otter</Authors>
     <Company>Tech Otter</Company>
     <Product>BIDS Project</Product>

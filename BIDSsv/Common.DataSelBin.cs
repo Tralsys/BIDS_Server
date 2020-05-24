@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+
+using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
@@ -148,116 +151,111 @@ namespace TR.BIDSsv
 
 			//Header Check
 			if (ba[0] != ConstVals.BIN_CMD_HEADER_0 || ba[1] != ConstVals.BIN_CMD_HEADER_1) return null;//t:0x74, r:0x72
-
-			switch (ba[2])
+			if (ba[2] == ConstVals.BIN_CMD_INFO_DATA)
 			{
-				case ConstVals.BIN_CMD_INFO_DATA://Info Data
-					switch ((ConstVals.BIN_CMD_INFOD_TYPES)ba[3])
-					{
-						case ConstVals.BIN_CMD_INFOD_TYPES.SPEC://Spec
-							if (ba.GetShort(4) < Version) return null;
-							else if (ba.Length >= AutoSendSetting.BasicConstSize)
-							{
-								BIDSSharedMemoryData bsmd = BSMD;
-								OpenD od = OD;
-								Spec s = bsmd.SpecData;
-								int i = 0;
-								s.B = ba.GetShort(i += 8);
-								s.P = ba.GetShort(i += 2);
-								s.A = ba.GetShort(i += 2);
-								s.J = ba.GetShort(i += 2);
-								s.C = ba.GetShort(i += 2);
-								od.SelfBCount = ba.GetShort(i++);
-								bsmd.SpecData = s;
-								BSMD = bsmd;
-								OD = od;
-							}
-							//else return ba;
-							break;
-						case ConstVals.BIN_CMD_INFOD_TYPES.STATE://State
-							if (ba.Length >= AutoSendSetting.BasicCommonSize)
-							{
-								BIDSSharedMemoryData bsmd = BSMD;
-								State s = bsmd.StateData;
-								int i = 0;
-								s.Z = ba.GetDouble(i += 4);
-								s.V = ba.GetFloat(i += 8);
-								s.I = ba.GetFloat(i += 4);
-								//_ = ba.GetFloat(i += 4);//WireVoltage
-								s.T = ba.GetInt(i += 8);
-								s.BC = ba.GetFloat(i += 4);
-								s.MR = ba.GetFloat(i += 4);
-								s.ER = ba.GetFloat(i += 4);
-								s.BP = ba.GetFloat(i += 4);
-								s.SAP = ba.GetFloat(i += 4);
-								bsmd.IsDoorClosed = ba[i += 8] == 1;
-								bsmd.StateData = s;
-								BSMD = bsmd;
-							}
-							//else return ba;
-							break;
-						case ConstVals.BIN_CMD_INFOD_TYPES.BVE5D://BVE5D
-							break;
-						case ConstVals.BIN_CMD_INFOD_TYPES.OPEND://OpenD
-							break;
-						case ConstVals.BIN_CMD_INFOD_TYPES.HANDLE://Handle
-							if (ba.Length >= AutoSendSetting.BasicHandleSize)
-							{
-								BIDSSharedMemoryData bsmd = BSMD;
-								OpenD od = OD;
-								Hand h = bsmd.HandleData;
-								int i = 0;
-								h.P = ba.GetInt(i += 4);
-								h.B = ba.GetInt(i += 4);
-								h.R = ba.GetInt(i += 4);
-								od.SelfBPosition = ba.GetInt(i += 4);
-								bsmd.HandleData = h;
-								BSMD = bsmd;
-								OD = od;
-							}
-							break;
-					}
-					break;
-				case ConstVals.BIN_CMD_PANEL_DATA://Panel Data
-					if (ba.Length < AutoSendSetting.PanelSize) return null;
-					int pai = 0;
-					try
-					{
-						PanelD pd = PD;
-						pai = Convert.ToInt32(ba[3]);
-						if ((pai + 1) * 128 >= pd.Length)
+				switch ((ConstVals.BIN_CMD_INFOD_TYPES)ba[3])
+				{
+					case ConstVals.BIN_CMD_INFOD_TYPES.SPEC://Spec
+						if (ba.GetShort(4) < Version) return null;
+						else if (ba.Length >= AutoSendSetting.BasicConstSize)
 						{
-							int[] pa = new int[(pai + 1) * 128];
-							Buffer.BlockCopy(pd.Panels, 0, pa, 0, pd.Length * sizeof(int));
-							pd.Panels = pa;
+							BIDSSharedMemoryData bsmd = BSMD;
+							OpenD od = OD;
+							Spec s = bsmd.SpecData;
+							int i = 0;
+							s.B = ba.GetShort(i += 8);
+							s.P = ba.GetShort(i += 2);
+							s.A = ba.GetShort(i += 2);
+							s.J = ba.GetShort(i += 2);
+							s.C = ba.GetShort(i += 2);
+							od.SelfBCount = ba.GetShort(i++);
+							bsmd.SpecData = s;
+							BSMD = bsmd;
+							OD = od;
 						}
-						Parallel.For(0, 128, (i) => pd.Panels[(pai * 128) + i] = ba.GetInt(4 + (4 * i)));
-						PD = pd;
-					}
-					catch (ObjectDisposedException) { return null; }
-					catch (Exception) { throw; }
-					break;
-				case ConstVals.BIN_CMD_SOUND_DATA://SoundData
-					if (ba.Length < 129 * 4) return null;
-					int sai = 0;
-					try
-					{
-						SoundD sd = SD;
-						sai = Convert.ToInt32(ba[3]);
-						if ((sai + 1) * 128 >= sd.Length)
+						//else return ba;
+						break;
+					case ConstVals.BIN_CMD_INFOD_TYPES.STATE://State
+						if (ba.Length >= AutoSendSetting.BasicCommonSize)
 						{
-							int[] sa = new int[(sai + 1) * 128];
-							Buffer.BlockCopy(sd.Sounds, 0, sa, 0, sd.Length * sizeof(int));
-							sd.Sounds = sa;
+							BIDSSharedMemoryData bsmd = BSMD;
+							State s = bsmd.StateData;
+							int i = 0;
+							s.Z = ba.GetDouble(i += 4);
+							s.V = ba.GetFloat(i += 8);
+							s.I = ba.GetFloat(i += 4);
+							//_ = ba.GetFloat(i += 4);//WireVoltage
+							s.T = ba.GetInt(i += 8);
+							s.BC = ba.GetFloat(i += 4);
+							s.MR = ba.GetFloat(i += 4);
+							s.ER = ba.GetFloat(i += 4);
+							s.BP = ba.GetFloat(i += 4);
+							s.SAP = ba.GetFloat(i += 4);
+							bsmd.IsDoorClosed = ba[i += 8] == 1;
+							bsmd.StateData = s;
+							BSMD = bsmd;
 						}
-						Parallel.For(0, 128, (i) => sd.Sounds[(sai * 128) + i] = ba.GetInt(4 + (4 * i)));
-						SD = sd;
+						//else return ba;
+						break;
+					case ConstVals.BIN_CMD_INFOD_TYPES.BVE5D://BVE5D
+						break;
+					case ConstVals.BIN_CMD_INFOD_TYPES.OPEND://OpenD
+						break;
+					case ConstVals.BIN_CMD_INFOD_TYPES.HANDLE://Handle
+						if (ba.Length >= AutoSendSetting.BasicHandleSize)
+						{
+							BIDSSharedMemoryData bsmd = BSMD;
+							OpenD od = OD;
+							Hand h = bsmd.HandleData;
+							int i = 0;
+							h.P = ba.GetInt(i += 4);
+							h.B = ba.GetInt(i += 4);
+							h.R = ba.GetInt(i += 4);
+							od.SelfBPosition = ba.GetInt(i += 4);
+							bsmd.HandleData = h;
+							BSMD = bsmd;
+							OD = od;
+						}
+						break;
+				}
+			}
+			else if (ba[2] == ConstVals.BIN_CMD_PANEL_DATA)
+			{
+				if (ba.Length < (ConstVals.PANEL_BIN_ARR_PRINT_COUNT * sizeof(int) + sizeof(int)) * 4) return null;
+				try
+				{
+					int[] cache = SMemLib.PanelA;
+					int ind = ba[3], bias = ind * ConstVals.PANEL_BIN_ARR_PRINT_COUNT, needed_len = bias + ConstVals.PANEL_BIN_ARR_PRINT_COUNT;
+					if (needed_len > cache.Length)//入力データがキャッシュよりも長い
+					{
+						int[] n_cache = new int[bias + ConstVals.PANEL_BIN_ARR_PRINT_COUNT];
+						Buffer.BlockCopy(cache, 0, n_cache, 0, cache.Length * sizeof(int));
+						cache = n_cache;//参照の更新
 					}
-					catch (ObjectDisposedException) { return null; }
-					catch (Exception) { throw; }
-					break;
-				default:
-					break;
+					Parallel.For(0, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (i) => cache[bias + i] = ba.GetInt(4 + (4 * i)));
+					PDA = cache;
+				}
+				catch (ObjectDisposedException) { return null; }
+				catch (Exception) { throw; }
+			}
+			else if (ba[2] == ConstVals.BIN_CMD_SOUND_DATA)
+			{
+				if (ba.Length < (ConstVals.SOUND_BIN_ARR_PRINT_COUNT * sizeof(int) + sizeof(int)) * 4) return null;
+				try
+				{
+					int[] cache = SMemLib.SoundA;
+					int ind = ba[3], bias = ind * ConstVals.SOUND_BIN_ARR_PRINT_COUNT, needed_len = bias + ConstVals.SOUND_BIN_ARR_PRINT_COUNT;
+					if (needed_len > cache.Length)//入力データがキャッシュよりも長い
+					{
+						int[] n_cache = new int[bias + ConstVals.SOUND_BIN_ARR_PRINT_COUNT];
+						Buffer.BlockCopy(cache, 0, n_cache, 0, cache.Length * sizeof(int));
+						cache = n_cache;//参照の更新
+					}
+					Parallel.For(0, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => cache[bias + i] = ba.GetInt(4 + (4 * i)));
+					SDA = cache;
+				}
+				catch (ObjectDisposedException) { return null; }
+				catch (Exception) { throw; }
 			}
 
 			return null;

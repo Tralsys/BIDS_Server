@@ -16,19 +16,19 @@
 		/// <summary>FALSEを意味する値</summary>
 		public const byte FALSE_VALUE = 0;
 		/// <summary>Binaryデータコマンドのヘッダ0</summary>
-		public const char BIN_CMD_HEADER_0 = 't';
+		public static readonly char BIN_CMD_HEADER_0 = 't';
 		/// <summary>Binary Data CommandのHeader1</summary>
-		public const char BIN_CMD_HEADER_1 = 'r';
+		public static readonly char BIN_CMD_HEADER_1 = 'R';//20200524: ビッグエンディアン採用につきBINコマンドのヘッダ変更
 		/// <summary>String Data CommandのHeader0</summary>
-		public const char STR_CMD_HEADER_0 = 'T';
+		public static readonly char STR_CMD_HEADER_0 = 'T';
 		/// <summary>String Data CommandのHeader1</summary>
-		public const char STR_CMD_HEADER_1 = 'R';
+		public static readonly char STR_CMD_HEADER_1 = 'R';
 		/// <summary>BDCのデータ識別子(INFO Data)</summary>
-		public const byte BIN_CMD_INFO_DATA = 0x62;
+		public static readonly byte BIN_CMD_INFO_DATA = 0x62;
 		/// <summary>BDCのデータ識別子(Panel Data)</summary>
-		public const byte BIN_CMD_PANEL_DATA = 0x70;
+		public static readonly byte BIN_CMD_PANEL_DATA = 0x70;
 		/// <summary>BDCのデータ識別子(Sound Data)</summary>
-		public const byte BIN_CMD_SOUND_DATA = 0x73;
+		public static readonly byte BIN_CMD_SOUND_DATA = 0x73;
 
 		/// <summary>BDCのInfoDの種類一覧</summary>
 		public enum BIN_CMD_INFOD_TYPES

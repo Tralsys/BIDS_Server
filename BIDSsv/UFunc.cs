@@ -85,9 +85,12 @@ namespace TR.BIDSsv
 		}
 		#endregion
 
-		private static readonly bool isLE = BitConverter.IsLittleEndian;
+		/// <summary>リトルエンディアンでないかどうかを返します(TRUEでBigEndian)</summary>
+		private static readonly bool isLE = !BitConverter.IsLittleEndian;
+
+
 		#region ToBytes
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -97,7 +100,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -107,7 +110,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -117,7 +120,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -127,7 +130,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -137,7 +140,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -147,7 +150,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -157,7 +160,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -167,7 +170,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -177,7 +180,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return ba;
 		}
-		/// <summary>数値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>数値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する数値</param>
 		/// <returns>変換後のbyte配列</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -189,7 +192,7 @@ namespace TR.BIDSsv
 		}
 		#endregion
 		#region Get Value
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -201,7 +204,7 @@ namespace TR.BIDSsv
 			if (isLE) Array.Reverse(ba);
 			return BitConverter.ToInt32(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -214,7 +217,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToSingle(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -227,7 +230,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToDouble(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -240,7 +243,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToBoolean(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -253,7 +256,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToUInt32(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -266,7 +269,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToInt16(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -279,7 +282,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToUInt16(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -295,7 +298,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToInt64(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -311,7 +314,7 @@ namespace TR.BIDSsv
 
 			return BitConverter.ToUInt64(ba, 0);
 		}
-		/// <summary>ビッグエンディアンなbyte配列から値を取り出します.</summary>
+		/// <summary>リトルエンディアンなbyte配列から値を取り出します.</summary>
 		/// <param name="ab">ソースの配列</param>
 		/// <param name="ind">値が入った位置</param>
 		/// <returns>取得した値</returns>
@@ -329,174 +332,174 @@ namespace TR.BIDSsv
 		}
 		#endregion
 		#region GetBytes
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in int arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in uint arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in float arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in double arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in bool arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in short arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in ushort arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in long arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in ulong arg) => ToBytes(arg);
-		/// <summary>指定の値をビッグエンディアンなByte配列に変換します.</summary>
+		/// <summary>指定の値をリトルエンディアンなByte配列に変換します.</summary>
 		/// <param name="arg">変換する値</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static byte[] GetBytes(this in char arg) => ToBytes(arg);
 		#endregion
 		#region To Value
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static int ToInt32(this byte[] ab, int ind = 0) => GetInt(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static float ToSingle(this byte[] ab, int ind = 0) => GetFloat(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static double ToDouble(this byte[] ab, int ind = 0) => GetDouble(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static bool ToBoolean(this byte[] ab, int ind = 0) => GetBool(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static uint ToUInt32(this byte[] ab, int ind = 0) => GetUInt(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static short ToInt16(this byte[] ab, int ind = 0) => GetShort(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static ushort ToUInt16(this byte[] ab, int ind = 0) => GetUShort(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static long ToInt64(this byte[] ab, int ind = 0) => GetLong(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static ulong ToUInt64(this byte[] ab, int ind = 0) => GetULong(ab, ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static char ToChar(this byte[] ab, int ind = 0) => GetChar(ab, ind);
 
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static int ToInt32(IEnumerable<byte> ab, int ind = 0) => GetInt(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static float ToSingle(IEnumerable<byte> ab, int ind = 0) => GetFloat(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static double ToDouble(IEnumerable<byte> ab, int ind = 0) => GetDouble(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static bool ToBoolean(IEnumerable<byte> ab, int ind = 0) => GetBool(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static uint ToUInt32(IEnumerable<byte> ab, int ind = 0) => GetUInt(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static short ToInt16(IEnumerable<byte> ab, int ind = 0) => GetShort(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static ushort ToUInt16(IEnumerable<byte> ab, int ind = 0) => GetUShort(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static long ToInt64(IEnumerable<byte> ab, int ind = 0) => GetLong(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static ulong ToUInt64(IEnumerable<byte> ab, int ind = 0) => GetULong(ab.ToArray(), ind);
-		/// <summary>ビッグエンディアンなbyte配列の指定位置から値を取り出します</summary>
+		/// <summary>リトルエンディアンなbyte配列の指定位置から値を取り出します</summary>
 		/// <param name="ab">byte配列</param>
 		/// <param name="ind">取り出す値が格納された位置</param>
 		/// <returns>変換結果</returns>
