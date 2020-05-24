@@ -11,32 +11,27 @@ namespace TR.BIDSsv
 	{
 		public event EventHandler<UDPGotEvArgs> DataGotEv;
 		public bool IsDebugging { get; set; } = false;
-		public uint MyID { get; } = 0;
 		UdpClient UCW = null;
 		UdpClient UCR = null;
 		IPEndPoint MyIPEndPoint = null;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public udpcom(IPEndPoint Src = null, IPEndPoint Dst = null)
 		{
-			IPAddress myip = IPAddress.Any;
 			if (Src == null || Equals(Src.Address, IPAddress.Any))
 			{
+				MyIPEndPoint = new IPEndPoint(IPAddress.Any, 0);
 				foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
 				{
 					if (ip.AddressFamily == AddressFamily.InterNetwork)//IPv4 only
 					{
-						myip = ip;
+						MyIPEndPoint.Address = ip;
 						break;
 					}
 				}
 			}
-			else myip = Src.Address;
-			byte[] adrs = myip.GetAddressBytes();
-			for (int i = 0; i < adrs.Length; i++)
-				MyID ^= (MyID << 8) + adrs[i];//ID生成
+			else MyIPEndPoint = Src;
 
 			int pt = Src?.Port ?? Common.DefPNum;
-			MyIPEndPoint = new IPEndPoint(myip, 0);
 			UCR = new UdpClient(Src ?? new IPEndPoint(IPAddress.Any, pt));
 			UCW = new UdpClient(MyIPEndPoint);
 			MyIPEndPoint.Port = ((IPEndPoint)UCW.Client.LocalEndPoint).Port;
@@ -55,7 +50,7 @@ namespace TR.BIDSsv
 			{
 				byte[] ba = UCR?.Receive(ref ipEP);
 				if (disposing) return;
-				_ = Task.Run(ReadingMethod);
+				_ = Task.Run(ReadingMethod);//再帰的
 				DataReceived(ba, ipEP);
 			}
 			catch (ObjectDisposedException)
@@ -65,30 +60,28 @@ namespace TR.BIDSsv
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private void DataReceived(in byte[] ba, in IPEndPoint remIPE)
+		private void DataReceived(byte[] ba, in IPEndPoint remIPE)
 		{
-			byte[] rba = new byte[0];
-			if (IsMyDataCheck(ba, out rba))
+			if (Equals(remIPE.Address,MyIPEndPoint.Address))
 			{
 				if (IsDebugging)
-					Console.WriteLine("udpcom class <<<<<<My Data<<<<<< {0} (from {2}) : {1}", remIPE, BitConverter.ToString(ba), ((IPEndPoint)UCW.Client.LocalEndPoint));
+					Console.WriteLine("udpcom class <<<<<<My Data<<<<<< {2} (from {0}) : {1}", remIPE, BitConverter.ToString(ba), ((IPEndPoint)UCR.Client.LocalEndPoint));
 			}
 			else
 			{
 				if (IsDebugging)
-					Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(rba));
+					Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(ba));
 
-				if (rba?.Length > 0)
-					_ = Task.Run(() => DataGotEv?.Invoke(null, new UDPGotEvArgs(rba)));
+				if (ba?.Length > 0)
+					_ = Task.Run(() => DataGotEv?.Invoke(null, new UDPGotEvArgs(ba)));
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public bool DataSend(in byte[] ba)
+		public bool DataSend(byte[] ba)
 		{
 			if (disposing || !(ba?.Length > 0)) return false;
-			byte[] tsba = SetMyID(ba);
-			if (UCW?.Client.Connected == true && tsba?.Length > 0) _ = Task.Run(() => _ = UCW?.Send(tsba, tsba.Length));
+			if (UCW?.Client.Connected == true && ba?.Length > 0) _ = Task.Run(() => _ = UCW?.Send(ba, ba.Length));
 			else
 			{
 				if (IsDebugging)
@@ -100,30 +93,6 @@ namespace TR.BIDSsv
 				Console.WriteLine("udpcom class >>> {0} : {1}", UCW.Client.RemoteEndPoint, BitConverter.ToString(ba));
 
 			return true;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		bool IsMyDataCheck(byte[] ba, out byte[] rba)
-		{
-			rba = new byte[(ba?.Length ?? sizeof(uint)) - sizeof(uint)];
-			if (!(ba?.Length > sizeof(uint))) return true;
-
-			if (MyID == UFunc.GetUInt(ba, 0)) return true;
-
-			Buffer.BlockCopy(ba, sizeof(uint), rba, 0, rba.Length);
-			return false;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		byte[] SetMyID(byte[] ba)
-		{
-			if (!(ba?.Length > 0)) return null;
-			byte[] rba = new byte[ba.Length + sizeof(uint)];
-
-			Buffer.BlockCopy(MyID.GetBytes(), 0, rba, 0, sizeof(uint));
-			Buffer.BlockCopy(ba, 0, rba, sizeof(uint), ba.Length);
-
-			return rba;
 		}
 
 		#region IDisposable Support
@@ -173,6 +142,7 @@ namespace TR.BIDSsv
 
 	internal readonly struct UDPGotEvArgs// : EventArgs
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public UDPGotEvArgs(byte[] ba)
 		{
 			Data = ba;
