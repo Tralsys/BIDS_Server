@@ -4,17 +4,22 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>TR.BIDSsv.udp</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
-		<Version>1.0.1</Version>
+		<Version>1.0.1.1</Version>
     <Authors>Tetsu Otter</Authors>
     <Company>Tech Otter</Company>
     <Product>BIDS Project</Product>
     <Copyright>Copyright 2019 Tetsu Otter</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <SignAssembly>false</SignAssembly>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>It is a communication module using UDP/IP, inherits IBIDSsv interface to use on BIDSsv.</Description>
+    <PackageReleaseNotes># 1.0.1.1
+published to nuget.org</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
