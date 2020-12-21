@@ -233,7 +233,7 @@ namespace TR.BIDSsv
 						cache = n_cache;//参照の更新
 					}
 					Parallel.For(0, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (i) => cache[bias + i] = ba.GetInt(4 + (4 * i)));
-					PDA = cache;
+					SMemLib.WritePanel(cache);
 				}
 				catch (ObjectDisposedException) { return null; }
 				catch (Exception) { throw; }
@@ -252,7 +252,7 @@ namespace TR.BIDSsv
 						cache = n_cache;//参照の更新
 					}
 					Parallel.For(0, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (i) => cache[bias + i] = ba.GetInt(4 + (4 * i)));
-					SDA = cache;
+					SMemLib.WriteSound(cache);
 				}
 				catch (ObjectDisposedException) { return null; }
 				catch (Exception) { throw; }
