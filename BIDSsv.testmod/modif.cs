@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TR;
@@ -144,37 +145,41 @@ namespace BIDSsv.testmod
 			return true;
     }
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void AppendText(string s)
-			=> Task.Run(async () =>
 		{
 			DateTime dt = DateTime.UtcNow;
-			if (NoLogMode || disposing || swr == null || swr_lock == null) return;
-			if (string.IsNullOrWhiteSpace(s)) return;
-			try
+			Task.Run(async () =>
 			{
-				await swr_lock?.WaitAsync();
-				if (IsDisposed || disposedValue) return;
-				await swr?.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
-			}
-			catch (ObjectDisposedException)
-			{
-				Console.WriteLine("{0} : StreamWriter Already Closed ({1})", Name, s);
-				return;
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine("{0}.AppendText({1}) : {2}", Name, s, e);
-				Dispose();
-				Console.WriteLine("{0} : Close this instance.", Name);
-				Common.Remove(this);
-				return;
-			}
-			finally
-			{
-				swr_lock?.Release();
-			}
-		});
+				if (NoLogMode || disposing || swr == null || swr_lock == null) return;
+				if (string.IsNullOrWhiteSpace(s)) return;
+				try
+				{
+					await swr_lock?.WaitAsync();
+					if (IsDisposed || disposedValue) return;
+					await swr?.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
+				}
+				catch (ObjectDisposedException)
+				{
+					Console.WriteLine("{0} : StreamWriter Already Closed ({1})", Name, s);
+					return;
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("{0}.AppendText({1}) : {2}", Name, s, e);
+					Dispose();
+					Console.WriteLine("{0} : Close this instance.", Name);
+					Common.Remove(this);
+					return;
+				}
+				finally
+				{
+					swr_lock?.Release();
+				}
+			});
+		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public bool SendCMD2sv(string cmd)
 		{
 			if (string.IsNullOrWhiteSpace(cmd)) return false;
@@ -197,7 +202,9 @@ namespace BIDSsv.testmod
 		public void OnSoundDChanged(in int[] data) { }
 		#endregion
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Print(in string data) => AppendText("Got : " + data);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Print(in byte[] data)
 		{
 			if (!IsBinaryAllowed) return;
@@ -231,6 +238,7 @@ namespace BIDSsv.testmod
 		private bool disposedValue = false;
 		private bool disposing = false;
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		protected virtual async void Dispose(bool disposing)
 		{
 			disposing = true;
@@ -262,6 +270,7 @@ namespace BIDSsv.testmod
 			IsDisposed = true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Dispose() => Dispose(true);
 		#endregion
 
@@ -269,35 +278,24 @@ namespace BIDSsv.testmod
 
 	internal class CMDSendTimer : IDisposable
 	{
-		readonly int TimeOutNum = 100;
 		TimeSpan IntervalTS = new TimeSpan(0, 0, 0, 0, 10);
-		Task LThread = null;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		internal CMDSendTimer(modif mif, in int interval, string cmd)
 		{
 			if (mif == null) throw new ArgumentNullException();
 			IntervalTS = interval <= 0 ? new TimeSpan(1 - interval) : new TimeSpan(0, 0, 0, 0, interval);
 
-			TimeOutNum += (int)IntervalTS.TotalMilliseconds;
 			bool OnCmpleted = false;
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 			void LoopReader()
 			{
-				if (OnCmpleted || mif?.IsDisposed != false || disposedValue || LThread == null) return;
+				if (OnCmpleted || mif?.IsDisposed != false || disposedValue) return;
 				Task.Delay(IntervalTS).GetAwaiter().OnCompleted(LoopReader);
 				if (mif?.SendCMD2sv(cmd) != true) OnCmpleted = true;
 			}
 
-			LThread = new Task(LoopReader); /*new Task(() =>
-				{
-					while (mif?.IsDisposed != true && !disposedValue && LThread != null)
-					{
-						var ta = Task.Delay(IntervalTS);
-						if (mif?.SendCMD2sv(cmd) != true) return;
-						
-					}
-				});*/
 			try
 			{
-				//LThread.Start();
 				LoopReader();
 			}
 			catch (Exception e)
@@ -311,6 +309,7 @@ namespace BIDSsv.testmod
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposedValue)
@@ -318,17 +317,10 @@ namespace BIDSsv.testmod
 				//if (disposing){}// TODO: マネージ状態を破棄します (マネージ オブジェクト)。
 				
 				disposedValue = true;
-				try
-				{
-					LThread?.Wait(TimeOutNum);
-				}catch(Exception e)
-				{
-					Console.WriteLine("CMDSender.Dispose : {0}", e);
-				}
-				LThread = null;
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Dispose() => Dispose(true);
 		
 		#endregion

@@ -1,195 +1,159 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace TR.BIDSsv
 {
-  static public partial class Common
-  {
-    static public string DataPicker(char DType, int DNum, string ToStringFormatInt = ConstVals.ToStrFormatInt, string ToStringFormatFloat = ConstVals.ToStrFormatFloat)
-    {
-      if (string.IsNullOrWhiteSpace(ToStringFormatInt)) ToStringFormatInt = ConstVals.ToStrFormatInt;
-      if (string.IsNullOrWhiteSpace(ToStringFormatFloat)) ToStringFormatFloat = ConstVals.ToStrFormatFloat;
+	static public partial class Common
+	{
+		/// <summary>指定のデータタイプ/番号のデータを取得します.</summary>
+		/// <param name="DType"></param>
+		/// <param name="DNum"></param>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		static public object DataPicker(in char DType, in int DNum)
+		{
+			switch (DType)
+			{
+				case ConstVals.DTYPE_CONSTD:
+					return BSMD.SpecData.PickData(DType, DNum);
 
-      bool IsFloatVal = false;
-      object o = DataPicker(DType, DNum, out IsFloatVal);
-      if (o == null) return null;
-      if (IsFloatVal)
-      {
-        Type otyp = o.GetType();
-        if (otyp == typeof(float))
-          return ((float)o).ToString(ToStringFormatFloat);
-        if (otyp == typeof(double))
-          return ((double)o).ToString(ToStringFormatFloat);
-      }
+				case ConstVals.DTYPE_DOOR:
+					return BSMD.IsDoorClosed ? 1 : 0;
 
-      return ((int)o).ToString(ToStringFormatInt);
-    }
+				case ConstVals.DTYPE_ELAPD:
+					return BSMD.StateData.PickData(DType, DNum);
 
-    static public object DataPicker(char DType, int DNum, out bool IsFloatVal)
-    {
-      IsFloatVal = new bool();
-      
-      IsFloatVal = false;//init
-      switch (DType)
-      {
-        case ConstVals.DTYPE_CONSTD:
-          return BSMD.SpecData.PickData(DType, DNum, out IsFloatVal);
+				case ConstVals.DTYPE_HANDPOS:
+					return BSMD.HandleData.PickData(DType, DNum);
 
-        case ConstVals.DTYPE_DOOR:
-          return BSMD.IsDoorClosed ? 1 : 0;
+				case ConstVals.DTYPE_PANEL:
+					return DNum >= PD.Length ? 0 : PD.Panels[DNum];
 
-        case ConstVals.DTYPE_ELAPD:
-          return BSMD.StateData.PickData(DType, DNum, out IsFloatVal);
+				case ConstVals.DTYPE_SOUND:
+					return DNum >= SD.Length ? 0 : SD.Sounds[DNum];
 
-        case ConstVals.DTYPE_HANDPOS:
-          return BSMD.HandleData.PickData(DType, DNum, out IsFloatVal);
+				case ConstVals.DTYPE_PANEL_ARR:
+					if (DNum < 0) return ConstVals.PANEL_ARR_PRINT_COUNT;
+					int[] retArrP = new int[ConstVals.PANEL_ARR_PRINT_COUNT];
+					int startPosP = DNum * ConstVals.PANEL_ARR_PRINT_COUNT;
+					if (startPosP >= PD.Length) return retArrP;//送信要素の始まりがSrc配列最後より後
 
-        case ConstVals.DTYPE_PANEL:
-          return DNum >= PD.Length ? 0 : PD.Panels[DNum];
+					Buffer.BlockCopy(PD.Panels, startPosP, retArrP, 0,
+						((startPosP + ConstVals.PANEL_ARR_PRINT_COUNT) > PD.Length ?
+						PD.Length - startPosP : ConstVals.PANEL_ARR_PRINT_COUNT) * sizeof(int));
 
-        case ConstVals.DTYPE_SOUND:
-          return DNum >= SD.Length ? 0 : SD.Sounds[DNum];
-      }
-      return null;
-    }
+					return retArrP;
 
-    /// <summary>
-    /// Returns the data that matches the data specification information.
-    /// </summary>
-    /// <param name="inData">Data Source</param>
-    /// <param name="DType">Data Type specification char</param>
-    /// <param name="DNum">Data Number</param>
-    /// <param name="IsFloatVal">set value that whether the return value is float</param>
-    /// <returns>result value or null</returns>
-    public static object PickData(this in Spec inData, char DType, int DNum, out bool IsFloatVal)
-    {
-      IsFloatVal = new bool();
-      if (DType != ConstVals.DTYPE_CONSTD) return null;
+				case ConstVals.DTYPE_SOUND_ARR:
+					if (DNum < 0) return ConstVals.SOUND_ARR_PRINT_COUNT;
+					int[] retArrS = new int[ConstVals.SOUND_ARR_PRINT_COUNT];
+					int startPosS = DNum * ConstVals.SOUND_ARR_PRINT_COUNT;
+					if (startPosS >= SD.Length) return retArrS;//送信要素の始まりがSrc配列最後より後
 
-      IsFloatVal = false;//SpecData has no floating point number
+					Buffer.BlockCopy(SD.Sounds, startPosS, retArrS, 0,
+						((startPosS + ConstVals.SOUND_ARR_PRINT_COUNT) > SD.Length ?
+						SD.Length - startPosS : ConstVals.SOUND_ARR_PRINT_COUNT) * sizeof(int));
 
-      switch ((ConstVals.DNums.ConstD)DNum)
-      {
-        case ConstVals.DNums.ConstD.ATSCheckPos:
-          return inData.A;
-        case ConstVals.DNums.ConstD.B67_Pos:
-          return inData.J;
-        case ConstVals.DNums.ConstD.Brake_Count:
-          return inData.B;
-        case ConstVals.DNums.ConstD.Car_Count:
-          return inData.C;
-        case ConstVals.DNums.ConstD.Power_Count:
-          return inData.P;
-      }
+					return retArrS;
+			}
+			return null;
+		}
 
-      return null;//default
-    }
-    /// <summary>
-    /// Returns the data that matches the data specification information.
-    /// </summary>
-    /// <param name="inData">Data Source</param>
-    /// <param name="DType">Data Type specification char</param>
-    /// <param name="DNum">Data Number</param>
-    /// <param name="IsFloatVal">set value that whether the return value is float</param>
-    /// <returns>result value or null</returns>
-    public static object PickData(this in State inData, char DType, int DNum, out bool IsFloatVal)
-    {
-      IsFloatVal = new bool();
-      if (DType != ConstVals.DTYPE_ELAPD) return null;
+		/// <summary>
+		/// Returns the data that matches the data specification information.
+		/// </summary>
+		/// <param name="inData">Data Source</param>
+		/// <param name="DType">Data Type specification char</param>
+		/// <param name="DNum">Data Number</param>
+		/// <returns>result value or null</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		public static object PickData(this in Spec inData, in char DType, in int DNum)
+		{
+			if (DType != ConstVals.DTYPE_CONSTD) return null;
 
-      IsFloatVal = false;//initialize
+			return (ConstVals.DNums.ConstD)DNum switch
+			{
+				ConstVals.DNums.ConstD.ATSCheckPos => inData.A,
+				ConstVals.DNums.ConstD.B67_Pos => inData.J,
+				ConstVals.DNums.ConstD.Brake_Count => inData.B,
+				ConstVals.DNums.ConstD.Car_Count => inData.C,
+				ConstVals.DNums.ConstD.Power_Count => inData.P,
+				ConstVals.DNums.ConstD.AllData => inData,
+				_ => null
+			};
+		}
+		/// <summary>
+		/// Returns the data that matches the data specification information.
+		/// </summary>
+		/// <param name="inData">Data Source</param>
+		/// <param name="DType">Data Type specification char</param>
+		/// <param name="DNum">Data Number</param>
+		/// <param name="IsFloatVal">set value that whether the return value is float</param>
+		/// <returns>result value or null</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		public static object PickData(this in State inData, in char DType, in int DNum)
+		{
+			if (DType != ConstVals.DTYPE_ELAPD) return null;
 
-      switch ((ConstVals.DNums.ElapD)DNum)
-      {
-        case ConstVals.DNums.ElapD.BC_Pres:
-          IsFloatVal = true;
-          return inData.BC;
-        case ConstVals.DNums.ElapD.BP_Pres:
-          IsFloatVal = true;
-          return inData.BP;
-        case ConstVals.DNums.ElapD.Current:
-          IsFloatVal = true;
-          return inData.I;
-        case ConstVals.DNums.ElapD.Distance:
-          IsFloatVal = true;
-          return inData.Z;
-        case ConstVals.DNums.ElapD.ER_Pres:
-          IsFloatVal = true;
-          return inData.ER;
-        case ConstVals.DNums.ElapD.MR_Pres:
-          IsFloatVal = true;
-          return inData.MR;
-        case ConstVals.DNums.ElapD.SAP_Pres:
-          IsFloatVal = true;
-          return inData.SAP;
-        case ConstVals.DNums.ElapD.Speed:
-          IsFloatVal = true;
-          return inData.V;
-        case ConstVals.DNums.ElapD.Time:
-          IsFloatVal = false;
-          return inData.T;
-        case ConstVals.DNums.ElapD.Voltage:
-          IsFloatVal = true;
-          return 0.0f;//not implemented
-      }
+			var t = TimeSpan.FromMilliseconds(inData.T);
+			return (ConstVals.DNums.ElapD)DNum switch
+			{
+				ConstVals.DNums.ElapD.BC_Pres => inData.BC,
+				ConstVals.DNums.ElapD.BP_Pres => inData.BP,
+				ConstVals.DNums.ElapD.Current => inData.I,
+				ConstVals.DNums.ElapD.Distance => inData.Z,
+				ConstVals.DNums.ElapD.ER_Pres => inData.ER,
+				ConstVals.DNums.ElapD.MR_Pres => inData.MR,
+				ConstVals.DNums.ElapD.SAP_Pres => inData.SAP,
+				ConstVals.DNums.ElapD.Speed => inData.V,
+				ConstVals.DNums.ElapD.Time => inData.T,
+				ConstVals.DNums.ElapD.Voltage => 0.0f,//not implemented
+				ConstVals.DNums.ElapD.TIME_Hour => t.Hours,
+				ConstVals.DNums.ElapD.TIME_Min => t.Minutes,
+				ConstVals.DNums.ElapD.TIME_MSec => t.Milliseconds,
+				ConstVals.DNums.ElapD.TIME_Sec => t.Seconds,
+				ConstVals.DNums.ElapD.AllData => inData,
+				ConstVals.DNums.ElapD.Time_HMSms => t,
+				ConstVals.DNums.ElapD.Pressures => new float[5] { inData.BC, inData.MR, inData.ER, inData.BP, inData.SAP },
+				_ => null
+			};
+		}
+		/// <summary>
+		/// Returns the data that matches the data specification information.
+		/// </summary>
+		/// <param name="inData">Data Source</param>
+		/// <param name="DType">Data Type specification char</param>
+		/// <param name="DNum">Data Number</param>
+		/// <param name="IsFloatVal">set value that whether the return value is float</param>
+		/// <returns>result value or null</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		public static object PickData(this in OpenD inData, in char DType, in int DNum)
+		{
+			return null;//Not implemented
+		}
+		/// <summary>
+		/// Returns the data that matches the data specification information.
+		/// </summary>
+		/// <param name="inData">Data Source</param>
+		/// <param name="DType">Data Type specification char</param>
+		/// <param name="DNum">Data Number</param>
+		/// <param name="IsFloatVal">set value that whether the return value is float</param>
+		/// <returns>result value or null</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		public static object PickData(this in Hand inData, in char DType, in int DNum)
+		{
+			if (DType != ConstVals.DTYPE_HANDPOS) return null;
 
-      var t = TimeSpan.FromMilliseconds(inData.T);
-      IsFloatVal = false;//time data is always INT value
-      switch ((ConstVals.DNums.ElapD)DNum)
-      {
-        case ConstVals.DNums.ElapD.TIME_Hour:
-          return t.Hours;
-        case ConstVals.DNums.ElapD.TIME_Min:
-          return t.Minutes;
-        case ConstVals.DNums.ElapD.TIME_MSec:
-          return t.Milliseconds;
-        case ConstVals.DNums.ElapD.TIME_Sec:
-          return t.Seconds;
-      }
+			return (ConstVals.DNums.HandPos)DNum switch
+			{
+				ConstVals.DNums.HandPos.Brake => inData.B,
+				ConstVals.DNums.HandPos.ConstSpd => inData.C,
+				ConstVals.DNums.HandPos.Power => inData.P,
+				ConstVals.DNums.HandPos.Reverser => inData.R,
+				ConstVals.DNums.HandPos.AllData => inData,
+				_ => null
+			};
+		}
 
-      return null;//default
-    }
-    /// <summary>
-    /// Returns the data that matches the data specification information.
-    /// </summary>
-    /// <param name="inData">Data Source</param>
-    /// <param name="DType">Data Type specification char</param>
-    /// <param name="DNum">Data Number</param>
-    /// <param name="IsFloatVal">set value that whether the return value is float</param>
-    /// <returns>result value or null</returns>
-    public static object PickData(this in OpenD inData, char DType, int DNum, out bool IsFloatVal)
-    {
-      IsFloatVal = new bool();
-      return null;//Not implemented
-    }
-    /// <summary>
-    /// Returns the data that matches the data specification information.
-    /// </summary>
-    /// <param name="inData">Data Source</param>
-    /// <param name="DType">Data Type specification char</param>
-    /// <param name="DNum">Data Number</param>
-    /// <param name="IsFloatVal">set value that whether the return value is float</param>
-    /// <returns>result value or null</returns>
-    public static object PickData(this in Hand inData, char DType, int DNum, out bool IsFloatVal)
-    {
-      IsFloatVal = new bool();
-      if (DType != ConstVals.DTYPE_HANDPOS) return null;
-
-      IsFloatVal = false;//HandPos is always INT
-
-      switch ((ConstVals.DNums.HandPos)DNum)
-      {
-        case ConstVals.DNums.HandPos.Brake:
-          return inData.B;
-        case ConstVals.DNums.HandPos.ConstSpd:
-          return inData.C;
-        case ConstVals.DNums.HandPos.Power:
-          return inData.P;
-        case ConstVals.DNums.HandPos.Reverser:
-          return inData.R;
-      }
-
-      return null;//default
-    }
-
-  }
+	}
 }

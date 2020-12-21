@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TR.BIDSsv
@@ -12,6 +13,7 @@ namespace TR.BIDSsv
     public string Name { get; private set; } = "serial";
 
     public bool ReConnectWhenTimedOut { get; private set; } = false;
+    public bool AliveCMD { get; private set; } = false;
 
     Serial_DeviceCom sdc = null;
     private bool IsBinaryAllowed = false;
@@ -20,15 +22,12 @@ namespace TR.BIDSsv
     {
       SerialPort SP = new SerialPort();
 
-      SP.ReadBufferSize = 64;
-      SP.WriteBufferSize = 64;
-
       SP.BaudRate = 19200;
       SP.RtsEnable = true;
       SP.DtrEnable = true;
       SP.ReadTimeout = 20;
       SP.WriteTimeout = 500;
-      SP.Encoding = Encoding.Default;
+      SP.Encoding = Encoding.ASCII;
       SP.NewLine = "\n";
       string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
       for (int i = 0; i < sa.Length; i++)
@@ -185,6 +184,9 @@ namespace TR.BIDSsv
               case "WriteTimeout":
                 SP.WriteTimeout = int.Parse(saa[1]);
                 break;
+              case "ALVCHK":
+                AliveCMD = saa[1] == "1";
+                break;
             }
           }catch(Exception e)
           {
@@ -209,12 +211,15 @@ namespace TR.BIDSsv
         Console.WriteLine("{0} : an exception has occured in the init section.\n{1}", Name, e);
         return false;
       }
-
+      sdc.ReConnectWhenTimedOut = ReConnectWhenTimedOut;
+      sdc.IamAliveCMD = AliveCMD;
       return sdc.IsOpen;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private void Sdc_BinaryDataReceived(object sender, byte[] e) => Common.DataSelSend(this, e, sdc.Enc);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     private void Sdc_StringDataReceived(object sender, string e) => Common.DataSelSend(this, e);
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
@@ -239,7 +244,9 @@ namespace TR.BIDSsv
       "  -RTO or ReadTimeout : Set the ReadTimeout time option.  Default:100",
       "  -RTS : Set the RTS (Request to Send) Signal Option.  Default:1  0:Disabled, 1:Enabled",
       "  -StopBits : Set the StopBits Option.  Default:0  If you want More info about this argument, please read the source code.",
-      "  -WTO or WriteTimeOut : Set the WriteTimeout time option  Default:1000"
+      "  -WTO or WriteTimeOut : Set the WriteTimeout time option  Default:1000",
+      "  -ALVCHK : 生存確認のために, 1秒間隔でNULL文字を送出します.  1で有効",
+      "  -RCWTO : 通信がタイムアウトした場合に, 自動再接続機能を使用するかどうかの設定です.  1で有効"
     };
     public void WriteHelp(in string args)
     {
@@ -251,10 +258,12 @@ namespace TR.BIDSsv
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Print(in string data) => sdc?.PrintString(data);
 
     /// <summary>(IsBinaryAllowedがtrueの場合のみ)Binaryデータを送信します.</summary>
     /// <param name="data">送信するデータ</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
     public void Print(in byte[] data)
     {
       if (IsBinaryAllowed) sdc?.PrintBinary(data);
