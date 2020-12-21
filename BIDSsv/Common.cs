@@ -14,68 +14,43 @@ namespace TR.BIDSsv
 		/// <summary>デフォルトのポート番号</summary>
 		static public readonly int DefPNum = 14147;
 
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public BIDSSharedMemoryData BSMD { get => SMemLib.BIDSSMemData; set => SMemLib.Write(value); }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public OpenD OD { get => SMemLib.OpenData; set => SMemLib.Write(value); }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public PanelD PD { get => SMemLib.Panels; set => SMemLib.Write(value); }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public SoundD SD { get => SMemLib.Sounds; set => SMemLib.Write(value); }
 
-		static public BIDSSharedMemoryData BSMD
-		{
-			get => SMemLib.BIDSSMemData;
-			set => SMemLib.Write(in value);
-		}
-		static public OpenD OD
-		{
-			get => SMemLib.OpenData;
-			set => SMemLib.Write(in value);
-		}
-		[Obsolete]
-		static public PanelD PD
-		{
-			get => new PanelD() { Panels = SMemLib.PanelA };
-			set => SMemLib.Write(in value);
-		}
-		static public int[] PDA
-		{
-			get => SMemLib.PanelA;
-			set => SMemLib.WritePanel(value);
-		}
-		[Obsolete]
-		static public SoundD SD
-		{
-			get => new SoundD() { Sounds = SMemLib.SoundA };
-			set => SMemLib.Write(in value);
-		}
-		static public int[] SDA
-		{
-			get => SMemLib.SoundA;
-			set => SMemLib.WriteSound(value);
-		}
+    static public Hands Ctrl_Hand
+    {
+      get => CtrlInput.GetHandD();
+      set => CtrlInput.SetHandD(ref value);
+    }
+    static public bool[] Ctrl_Key
+    {
+      get => CtrlInput.GetIsKeyPushed() ?? new bool[128];
+      set => CtrlInput.SetIsKeyPushed(in value);
+    }
 
-		static public Hands Ctrl_Hand
-		{
-			get => CtrlInput.GetHandD();
-			set => CtrlInput.SetHandD(ref value);
-		}
-		static public bool[] Ctrl_Key
-		{
-			get => CtrlInput.GetIsKeyPushed() ?? new bool[128];
-			set => CtrlInput.SetIsKeyPushed(in value);
-		}
+    static public int PowerNotchNum
+    {
+      get => Ctrl_Hand.P;
+      set => CtrlInput.SetHandD(CtrlInput.HandType.Power, value);
+    }
+    static public int BrakeNotchNum
+    {
+      get => Ctrl_Hand.B;
+      set => CtrlInput.SetHandD(CtrlInput.HandType.Brake, value);
+    }
+    static public int ReverserNum
+    {
+      get => Ctrl_Hand.R;
+      set => CtrlInput.SetHandD(CtrlInput.HandType.Reverser, value);
+    }
 
-		static public int PowerNotchNum
-		{
-			get => Ctrl_Hand.P;
-			set => CtrlInput.SetHandD(CtrlInput.HandType.Power, value);
-		}
-		static public int BrakeNotchNum
-		{
-			get => Ctrl_Hand.B;
-			set => CtrlInput.SetHandD(CtrlInput.HandType.Brake, value);
-		}
-		static public int ReverserNum
-		{
-			get => Ctrl_Hand.R;
-			set => CtrlInput.SetHandD(CtrlInput.HandType.Reverser, value);
-		}
-
-		static private List<IBIDSsv> svlist = new List<IBIDSsv>();
+    static private List<IBIDSsv> svlist = new List<IBIDSsv>();
 
 		static private bool IsStarted = false;
 		static private bool IsDebug = false;
@@ -87,54 +62,50 @@ namespace TR.BIDSsv
 				SMemLib.Begin(NO_SMEM_MODE, NO_Event_Mode);
 				SMemLib.ReadStart(0, Interval);
 
-				BSMDChanged += Common_BSMDChanged;
-				OpenDChanged += Common_OpenDChanged;
-				PanelDChanged += Common_PanelDChanged;
-				SoundDChanged += Common_SoundDChanged;
-				IsStarted = true;
-			}
-		}
+        SMemLib.SMC_BSMDChanged += Common_BSMDChanged;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		static public void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		static public void Remove() => Remove(string.Empty);
-		static public void Remove(string Name)
-		{
-			if (!(svlist?.Count > 0)) return;//null or 要素なしは実行しない
-			
-			for(int i = svlist.Count - 1; i >= 0; i--)//尻尾から順に
-			{
-				if (string.IsNullOrWhiteSpace(Name) || Equals(svlist[i].Name, Name))
-				{
-					try
-					{
-						Remove(svlist[i]);
-					}
-					catch(Exception e)
-					{
-						Console.WriteLine(e);
-					}
-				}
-			}
-		}
-		static public void Remove(in IBIDSsv sv)
-		{
-			if (sv == null || !(svlist?.Count > 0)) return;
-			string name = sv.Name;
-			bool successd = false;
-			try
-			{
-				ASRemove(sv);
-				if (!sv.IsDisposed) sv.Dispose();
-				successd = svlist.Remove(sv);
-			}catch(Exception e)
-			{
-				Console.WriteLine("BIDSsv.Common Remove() Name:{0}\tan exception has occured.\n{1}", name, e);
-			}
-			
-			Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, successd ? "done." : "failed");
-		}
+        IsStarted = true;
+      }
+    }
+    
+    static public void Add<T>(ref T container) where T : IBIDSsv => svlist.Add(container);
+    static public void Remove() => Remove(string.Empty);
+    static public void Remove(string Name)
+    {
+      if (!(svlist?.Count > 0)) return;//null or 要素なしは実行しない
+      
+      for(int i = svlist.Count - 1; i >= 0; i--)//尻尾から順に
+      {
+        if (string.IsNullOrWhiteSpace(Name) || Equals(svlist[i].Name, Name))
+        {
+          try
+          {
+            Remove(svlist[i]);
+          }
+          catch(Exception e)
+          {
+            Console.WriteLine(e);
+          }
+        }
+      }
+    }
+    static public void Remove(in IBIDSsv sv)
+    {
+      if (sv == null || !(svlist?.Count > 0)) return;
+      string name = sv.Name;
+      bool successd = false;
+      try
+      {
+        ASRemove(sv);
+        if (!sv.IsDisposed) sv.Dispose();
+        successd = svlist.Remove(sv);
+      }catch(Exception e)
+      {
+        Console.WriteLine("BIDSsv.Common Remove() Name:{0}\tan exception has occured.\n{1}", name, e);
+      }
+      
+      Console.WriteLine("BIDSsv.Common : {0} Remove {1}", sv.Name, successd ? "done." : "failed");
+    }
 
 		static private void ASRemove(IBIDSsv sv)
 		{

@@ -9,36 +9,28 @@ namespace TR.BIDSsv
 {
 	//AutoSendに関連する実装
 
-	static public partial class Common
-	{
-		/// <summary>BSMD変化時に発火</summary>
-		[Obsolete]
-		static public event EventHandler<SMemLib.BSMDChangedEArgs> BSMDChanged
-		{
-			add => SMemLib.BIDSSMemChanged += value;
-			remove => SMemLib.BIDSSMemChanged -= value;
-		}
-		/// <summary>openD変化時に発火</summary>
-		[Obsolete]
-		static public event EventHandler<SMemLib.OpenDChangedEArgs> OpenDChanged
-		{
-			add => SMemLib.OpenDChanged += value;
-			remove => SMemLib.OpenDChanged -= value;
-		}
-		/// <summary>PanelD変化時に発火</summary>
-		[Obsolete]
-		static public event EventHandler<SMemLib.ArrayDChangedEArgs> PanelDChanged
-		{
-			add => SMemLib.PanelDChanged += value;
-			remove => SMemLib.PanelDChanged -= value;
-		}
-		/// <summary>SoundD変化時に発火</summary>
-		[Obsolete]
-		static public event EventHandler<SMemLib.ArrayDChangedEArgs> SoundDChanged
-		{
-			add => SMemLib.SoundDChanged += value;
-			remove => SMemLib.SoundDChanged -= value;
-		}
+  static public partial class Common
+  {
+    /*static public event EventHandler<SMemLib.BSMDChangedEArgs> BSMDChanged
+    {
+      add => SMemLib.BIDSSMemChanged += value;
+      remove => SMemLib.BIDSSMemChanged -= value;
+    }
+    static public event EventHandler<SMemLib.OpenDChangedEArgs> OpenDChanged
+    {
+      add => SMemLib.OpenDChanged += value;
+      remove => SMemLib.OpenDChanged -= value;
+    }
+    static public event EventHandler<SMemLib.ArrayDChangedEArgs> PanelDChanged
+    {
+      add => SMemLib.PanelDChanged += value;
+      remove => SMemLib.PanelDChanged -= value;
+    }
+    static public event EventHandler<SMemLib.ArrayDChangedEArgs> SoundDChanged
+    {
+      add => SMemLib.SoundDChanged += value;
+      remove => SMemLib.SoundDChanged -= value;
+    }*/
 
 		/// <summary>AutoSendに関する各種定数や設定など</summary>
 		public class AutoSendSetting
@@ -367,47 +359,56 @@ namespace TR.BIDSsv
 							}
 							catch (Exception e) { Console.WriteLine("Common.AutoSend.Common_BSMDChanged : {0}", e); }
 
-							if (string.IsNullOrWhiteSpace(data)) return;
+            TimeSpan ots = TimeSpan.FromMilliseconds(e.OldValue.StateData.T);
+            TimeSpan nts = TimeSpan.FromMilliseconds(e.NewValue.StateData.T);
 
-							TimeSpan ots = TimeSpan.FromMilliseconds(e.OldData.StateData.T);
-							TimeSpan nts = TimeSpan.FromMilliseconds(e.NewData.StateData.T);
+            if (elem.DType switch
+            {
+              ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)elem.DNum switch
+              {
+                ConstVals.DNums.ConstD.AllData => Equals(e.OldValue.SpecData, e.NewValue.SpecData),
+                ConstVals.DNums.ConstD.ATSCheckPos => e.OldValue.SpecData.A == e.NewValue.SpecData.A,
+                ConstVals.DNums.ConstD.B67_Pos => e.OldValue.SpecData.J == e.NewValue.SpecData.J,
+                ConstVals.DNums.ConstD.Brake_Count => e.OldValue.SpecData.B == e.NewValue.SpecData.B,
+                ConstVals.DNums.ConstD.Car_Count => e.OldValue.SpecData.C == e.NewValue.SpecData.C,
+                ConstVals.DNums.ConstD.Power_Count => e.OldValue.SpecData.P == e.NewValue.SpecData.P,
+                _ => null
+              },
 
-							if (elem.DType switch
-							{
-								ConstVals.DTYPE_CONSTD => (ConstVals.DNums.ConstD)elem.DNum switch
-								{
-									ConstVals.DNums.ConstD.AllData => Equals(e.OldData.SpecData, e.NewData.SpecData),
-									ConstVals.DNums.ConstD.ATSCheckPos => e.OldData.SpecData.A == e.NewData.SpecData.A,
-									ConstVals.DNums.ConstD.B67_Pos => e.OldData.SpecData.J == e.NewData.SpecData.J,
-									ConstVals.DNums.ConstD.Brake_Count => e.OldData.SpecData.B == e.NewData.SpecData.B,
-									ConstVals.DNums.ConstD.Car_Count => e.OldData.SpecData.C == e.NewData.SpecData.C,
-									ConstVals.DNums.ConstD.Power_Count => e.OldData.SpecData.P == e.NewData.SpecData.P,
-									_ => null
-								},
+              ConstVals.DTYPE_DOOR => e.OldValue.IsDoorClosed == e.NewValue.IsDoorClosed,
 
-								ConstVals.DTYPE_DOOR => e.OldData.IsDoorClosed == e.NewData.IsDoorClosed,
+              ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)elem.DNum switch
+              {
+                ConstVals.DNums.ElapD.AllData => Equals(e.OldValue.StateData, e.NewValue.StateData),
+                ConstVals.DNums.ElapD.BC_Pres => e.OldValue.StateData.BC == e.NewValue.StateData.BC,
+                ConstVals.DNums.ElapD.BP_Pres => e.OldValue.StateData.BP == e.NewValue.StateData.BP,
+                ConstVals.DNums.ElapD.Current => e.OldValue.StateData.I == e.NewValue.StateData.I,
+                ConstVals.DNums.ElapD.Distance => e.OldValue.StateData.Z == e.NewValue.StateData.Z,
+                ConstVals.DNums.ElapD.ER_Pres => e.OldValue.StateData.ER == e.NewValue.StateData.ER,
+                ConstVals.DNums.ElapD.MR_Pres => e.OldValue.StateData.MR == e.NewValue.StateData.MR,
+                ConstVals.DNums.ElapD.Pressures => UFunc.State_Pressure_IsSame(e.OldValue.StateData, e.NewValue.StateData),
+                ConstVals.DNums.ElapD.SAP_Pres => e.OldValue.StateData.SAP == e.NewValue.StateData.SAP,
+                ConstVals.DNums.ElapD.Speed => e.OldValue.StateData.V == e.NewValue.StateData.V,
+                ConstVals.DNums.ElapD.Time => e.OldValue.StateData.T == e.NewValue.StateData.T,
+                ConstVals.DNums.ElapD.Time_HMSms => e.OldValue.StateData.T == e.NewValue.StateData.T,
+                ConstVals.DNums.ElapD.TIME_Hour => ots.Hours == nts.Hours,
+                ConstVals.DNums.ElapD.TIME_Min => ots.Minutes == nts.Minutes,
+                ConstVals.DNums.ElapD.TIME_MSec => ots.Milliseconds == nts.Milliseconds,
+                ConstVals.DNums.ElapD.TIME_Sec => ots.Seconds == nts.Seconds,
+                ConstVals.DNums.ElapD.Voltage => null,
+                _ => null
+              },
 
-								ConstVals.DTYPE_ELAPD => (ConstVals.DNums.ElapD)elem.DNum switch
-								{
-									ConstVals.DNums.ElapD.AllData => Equals(e.OldData.StateData, e.NewData.StateData),
-									ConstVals.DNums.ElapD.BC_Pres => e.OldData.StateData.BC == e.NewData.StateData.BC,
-									ConstVals.DNums.ElapD.BP_Pres => e.OldData.StateData.BP == e.NewData.StateData.BP,
-									ConstVals.DNums.ElapD.Current => e.OldData.StateData.I == e.NewData.StateData.I,
-									ConstVals.DNums.ElapD.Distance => e.OldData.StateData.Z == e.NewData.StateData.Z,
-									ConstVals.DNums.ElapD.ER_Pres => e.OldData.StateData.ER == e.NewData.StateData.ER,
-									ConstVals.DNums.ElapD.MR_Pres => e.OldData.StateData.MR == e.NewData.StateData.MR,
-									ConstVals.DNums.ElapD.Pressures => UFunc.State_Pressure_IsSame(e.OldData.StateData, e.NewData.StateData),
-									ConstVals.DNums.ElapD.SAP_Pres => e.OldData.StateData.SAP == e.NewData.StateData.SAP,
-									ConstVals.DNums.ElapD.Speed => e.OldData.StateData.V == e.NewData.StateData.V,
-									ConstVals.DNums.ElapD.Time => e.OldData.StateData.T == e.NewData.StateData.T,
-									ConstVals.DNums.ElapD.Time_HMSms => e.OldData.StateData.T == e.NewData.StateData.T,
-									ConstVals.DNums.ElapD.TIME_Hour => ots.Hours == nts.Hours,
-									ConstVals.DNums.ElapD.TIME_Min => ots.Minutes == nts.Minutes,
-									ConstVals.DNums.ElapD.TIME_MSec => ots.Milliseconds == nts.Milliseconds,
-									ConstVals.DNums.ElapD.TIME_Sec => ots.Seconds == nts.Seconds,
-									ConstVals.DNums.ElapD.Voltage => null,
-									_ => null
-								},
+              ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)elem.DNum switch
+              {
+                ConstVals.DNums.HandPos.AllData => Equals(e.OldValue.HandleData, e.NewValue.HandleData),
+                ConstVals.DNums.HandPos.Brake => e.OldValue.HandleData.B == e.NewValue.HandleData.B,
+                ConstVals.DNums.HandPos.ConstSpd => e.OldValue.HandleData.C == e.NewValue.HandleData.C,
+                ConstVals.DNums.HandPos.Power => e.OldValue.HandleData.P == e.NewValue.HandleData.P,
+                ConstVals.DNums.HandPos.Reverser => e.OldValue.HandleData.R == e.NewValue.HandleData.R,
+                ConstVals.DNums.HandPos.SelfB => null,
+                _ => null
+              },
 
 								ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)elem.DNum switch
 								{
