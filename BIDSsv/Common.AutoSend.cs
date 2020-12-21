@@ -240,24 +240,24 @@ namespace TR.BIDSsv
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private static void Common_SoundDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
+		private static void Common_SoundDChanged(object sender, ValueChangedEventArgs<int[]> e)
 		{
 			if (!IsStarted || !(svlist?.Count > 0)) return;
 			_ = Task.Run(() => Parallel.Invoke(
-					() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
+					() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(e.NewValue)),
 					() =>
 					{
 						if (AutoSendSetting.BasicSoundAS)
-							ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i)));
+							ArrDChangedCheck(e.OldValue, e.NewValue, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i)));
 					},
 					() =>
 					{
 						if (!(SDAutoList?.Count > 0)) return;
-						Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+						Parallel.For(0, Math.Max(e.OldValue.Length, e.NewValue.Length), (i) =>
 						{
 							int? Num = null;
-							if (e.OldArray.Length <= i) Num = e.NewArray[i];
-							else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+							if (e.OldValue.Length <= i) Num = e.NewValue[i];
+							else if (e.NewValue.Length > i && e.OldValue[i] != e.NewValue[i]) Num = e.NewValue[i];
 
 							if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
 						});
@@ -265,7 +265,7 @@ namespace TR.BIDSsv
 					() =>
 					{
 						if (!(SDAutoList?.Count > 0)) return;
-						ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
+						ArrDChangedCheck(e.OldValue, e.NewValue, ConstVals.SOUND_ARR_PRINT_COUNT,
 							(_, i) =>
 							{
 								string s = null;
@@ -276,24 +276,24 @@ namespace TR.BIDSsv
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
+		private static void Common_PanelDChanged(object sender, ValueChangedEventArgs<int[]> e)
 		{
 			if (!IsStarted || (svlist?.Count > 0)) return;
 			_ = Task.Run(() => Parallel.Invoke(
-					() => _ = Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray)),
+					() => _ = Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(e.NewValue)),
 					() =>
 					{
 						if (AutoSendSetting.BasicPanelAS)
-							ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicPanel(na, i)));
+							ArrDChangedCheck(e.OldValue, e.NewValue, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicPanel(na, i)));
 					},
 					() =>
 					{
 						if (!(PDAutoList?.Count > 0)) return;
-						_ = Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
+						_ = Parallel.For(0, Math.Max(e.OldValue.Length, e.NewValue.Length), (i) =>
 							{
 								int? Num = null;
-								if (e.OldArray.Length <= i) Num = e.NewArray[i];
-								else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
+								if (e.OldValue.Length <= i) Num = e.NewValue[i];
+								else if (e.NewValue.Length > i && e.OldValue[i] != e.NewValue[i]) Num = e.NewValue[i];
 
 								if (Num != null) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL, i, Num.ToString()), i, ConstVals.DTYPE_PANEL);
 							});
@@ -301,7 +301,7 @@ namespace TR.BIDSsv
 					() =>
 					{
 						if (!(PDAutoList?.Count > 0)) return;
-						ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_ARR_PRINT_COUNT,
+						ArrDChangedCheck(e.OldValue, e.NewValue, ConstVals.PANEL_ARR_PRINT_COUNT,
 							(_, i) =>
 							{
 								string s = null;
@@ -310,38 +310,38 @@ namespace TR.BIDSsv
 					}));
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private static void Common_OpenDChanged(object sender, SMemLib.OpenDChangedEArgs e)
+		private static void Common_OpenDChanged(object sender, ValueChangedEventArgs<OpenD> e)
 		{
 			if (!IsStarted || !(svlist?.Count>0)) return;
 			_ = Task.Run(() => Parallel.Invoke(
 				() =>
 				{
-					if (AutoSendSetting.BasicOBVEAS && !Equals(e.OldData.SelfBPosition, e.NewData.SelfBPosition))
-						ASPtr(AutoSendSetting.BasicHandle(BSMD.HandleData, e.NewData.SelfBPosition));
+					if (AutoSendSetting.BasicOBVEAS && !Equals(e.OldValue.SelfBPosition, e.NewValue.SelfBPosition))
+						ASPtr(AutoSendSetting.BasicHandle(BSMD.HandleData, e.NewValue.SelfBPosition));
 				},
-				() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(in e.NewData))
+				() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnOpenDChanged(e.NewValue))
 				));
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private static void Common_BSMDChanged(object sender, SMemLib.BSMDChangedEArgs e)
+		private static void Common_BSMDChanged(object sender, ValueChangedEventArgs<BIDSSharedMemoryData> e)
 		{
 			if (!IsStarted || !(svlist?.Count > 0)) return;
 			_ = Task.Run(() => Parallel.Invoke(
-					() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(in e.NewData)),
+					() => Parallel.For(0, svlist.Count, (i) => svlist[i].OnBSMDChanged(e.NewValue)),
 					() =>
 					{
-						if (AutoSendSetting.BasicConstAS && !Equals(e.OldData.SpecData, e.NewData.SpecData))
-							ASPtr(AutoSendSetting.BasicConst(e.NewData.SpecData, OD));
+						if (AutoSendSetting.BasicConstAS && !Equals(e.OldValue.SpecData, e.NewValue.SpecData))
+							ASPtr(AutoSendSetting.BasicConst(e.NewValue.SpecData, OD));
 					},
 					() =>
 					{
-						if (AutoSendSetting.BasicCommonAS && (!Equals(e.OldData.StateData, e.NewData.StateData) || e.OldData.IsDoorClosed != e.NewData.IsDoorClosed))
-							ASPtr(AutoSendSetting.BasicCommon(e.NewData.StateData, e.NewData.IsDoorClosed ? ConstVals.TRUE_VALUE : ConstVals.FALSE_VALUE));
+						if (AutoSendSetting.BasicCommonAS && (!Equals(e.OldValue.StateData, e.NewValue.StateData) || e.OldValue.IsDoorClosed != e.NewValue.IsDoorClosed))
+							ASPtr(AutoSendSetting.BasicCommon(e.NewValue.StateData, e.NewValue.IsDoorClosed ? ConstVals.TRUE_VALUE : ConstVals.FALSE_VALUE));
 					},
 					() =>
 					{
-						if (AutoSendSetting.BasicHandleAS && !Equals(e.NewData.HandleData, e.OldData.HandleData))
-							ASPtr(AutoSendSetting.BasicHandle(e.NewData.HandleData, OD.SelfBPosition));
+						if (AutoSendSetting.BasicHandleAS && !Equals(e.NewValue.HandleData, e.OldValue.HandleData))
+							ASPtr(AutoSendSetting.BasicHandle(e.NewValue.HandleData, OD.SelfBPosition));
 					},
 					() =>
 					{
@@ -409,17 +409,6 @@ namespace TR.BIDSsv
                 ConstVals.DNums.HandPos.SelfB => null,
                 _ => null
               },
-
-								ConstVals.DTYPE_HANDPOS => (ConstVals.DNums.HandPos)elem.DNum switch
-								{
-									ConstVals.DNums.HandPos.AllData => Equals(e.OldData.HandleData, e.NewData.HandleData),
-									ConstVals.DNums.HandPos.Brake => e.OldData.HandleData.B == e.NewData.HandleData.B,
-									ConstVals.DNums.HandPos.ConstSpd => e.OldData.HandleData.C == e.NewData.HandleData.C,
-									ConstVals.DNums.HandPos.Power => e.OldData.HandleData.P == e.NewData.HandleData.P,
-									ConstVals.DNums.HandPos.Reverser => e.OldData.HandleData.R == e.NewData.HandleData.R,
-									ConstVals.DNums.HandPos.SelfB => null,
-									_ => null
-								},
 
 								_ => null
 							}
