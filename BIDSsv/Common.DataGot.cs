@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Text;
+
+using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
@@ -341,6 +344,276 @@ namespace TR.BIDSsv
 					default: throw new Exception("TRE3");//記号部不正
 				}
 			}
+		}
+
+		static private void DataGot(in byte[] ba, in char dtyp, in int dnum)
+		{
+			BIDSSharedMemoryData bsmd = BIDSSMemLib.SMemLib.BIDSSMemData;
+			int tmp = 0;
+			switch (dtyp)
+			{
+				case ConstVals.DTYPE_CONSTD:
+					switch (dnum)
+					{
+						case -1:
+							if (ba.Length > 5)
+							{
+								Spec spec;
+								try
+								{
+									int pos = ConstVals.DNUM_POS + 3;
+									bsmd.SpecData.B = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+									bsmd.SpecData.P = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+									bsmd.SpecData.A = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+									bsmd.SpecData.J = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+									bsmd.SpecData.C = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+								}
+								catch (Exception) { throw; }
+							}
+							break;
+						case 0:
+							try
+							{
+								bsmd.SpecData.B = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							}
+							catch (Exception) { throw; }
+							break;
+						case 1:
+							try
+							{
+								bsmd.SpecData.P = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							}
+							catch (Exception) { throw; }
+							break;
+						case 2:
+							try
+							{
+								bsmd.SpecData.A = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							}
+							catch (Exception) { throw; }
+							break;
+						case 3:
+							try
+							{
+								bsmd.SpecData.J = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							}
+							catch (Exception) { throw; }
+							break;
+						case 4:
+							try
+							{
+								bsmd.SpecData.C = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							}
+							catch (Exception) { throw; }
+							break;
+						default: return;
+					}
+					break;
+
+				case ConstVals.DTYPE_ELAPD:
+					switch (dnum)
+					{
+						case -3://Time
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								TimeSpan ts3 = new TimeSpan(0, int.Parse(GSA[1]), int.Parse(GSA[2]), int.Parse(GSA[3]), int.Parse(GSA[4]));
+								bsmd.StateData.T = (int)ts3.TotalMilliseconds;
+							}
+							break;
+						case -2://Pressure
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								int i = 1;
+								bsmd.StateData.BC = float.Parse(GSA[i++]);
+								bsmd.StateData.MR = float.Parse(GSA[i++]);
+								bsmd.StateData.ER = float.Parse(GSA[i++]);
+								bsmd.StateData.BP = float.Parse(GSA[i++]);
+								bsmd.StateData.SAP = float.Parse(GSA[i++]);
+								BSMD = bsmd;
+							}
+							break;
+						case -1://All
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								int i = 1;
+								bsmd.StateData.Z = double.Parse(GSA[i++]);
+								bsmd.StateData.V = float.Parse(GSA[i++]);
+								bsmd.StateData.T = int.Parse(GSA[i++]);
+								bsmd.StateData.BC = float.Parse(GSA[i++]);
+								bsmd.StateData.MR = float.Parse(GSA[i++]);
+								bsmd.StateData.ER = float.Parse(GSA[i++]);
+								bsmd.StateData.BP = float.Parse(GSA[i++]);
+								bsmd.StateData.SAP = float.Parse(GSA[i++]);
+								bsmd.StateData.I = float.Parse(GSA[i++]);
+							}
+							break;
+						case 0:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.Z = double.Parse(GSA[1]);
+							}
+							break;
+						case 1:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.V = float.Parse(GSA[1]);
+							}
+							break;
+						case 2:
+							{
+								bsmd.StateData.T = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							}
+							break;
+						case 3:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.BC = float.Parse(GSA[1]);
+							}
+							break;
+						case 4:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.MR = float.Parse(GSA[1]);
+							}
+							break;
+						case 5:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.ER = float.Parse(GSA[1]);
+							}
+							break;
+						case 6:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.BP = float.Parse(GSA[1]);
+							}
+							break;
+						case 7:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.SAP = float.Parse(GSA[1]);
+							}
+							break;
+						case 8:
+							{
+								string[] GSA = Encoding.Default.GetString(ba).Split(ConstVals.CMD_SEPARATOR);//Byte Arrayから直接は未実装///////////////////////
+								bsmd.StateData.I = float.Parse(GSA[1]);
+							}
+							break;
+						//case 9: return ReturnString + BSMD.StateData.Volt;//予約 電圧
+						case 10://Hour(非対応)
+							break;
+						case 11://Minute(非対応)
+							break;
+						case 12://Second(非対応)
+							break;
+						case 13://MSecond(非対応)
+							break;
+						default: return;
+					}
+					break;
+
+				case ConstVals.DTYPE_HANDPOS:
+					switch (dnum)
+					{
+						case -1:
+							int pos = ConstVals.DNUM_POS + 3;
+							bsmd.HandleData.B = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+							bsmd.HandleData.P = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+							bsmd.HandleData.R = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+							bsmd.HandleData.C = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+							break;
+						case 0:
+							bsmd.HandleData.B = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							break;
+						case 1:
+							bsmd.HandleData.P = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							break;
+						case 2:
+							bsmd.HandleData.R = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							break;
+						case 3:
+							bsmd.HandleData.C = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							break;
+						case 4:
+							OpenD od = SMemLib.OpenData;
+							od.SelfBPosition = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+							SMemLib.Write(od);
+							return;
+						default: break;
+					}
+					break;
+
+				case ConstVals.DTYPE_PANEL:
+					if (0 <= dnum && dnum < SMemLib.PanelA.Length)
+						SMemLib.PanelA[dnum] = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+					return;
+
+				case ConstVals.DTYPE_SOUND:
+					if (0 <= dnum && dnum < SMemLib.SoundA.Length)
+						SMemLib.SoundA[dnum] = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2);
+					return;
+
+				case ConstVals.DTYPE_DOOR:
+					switch (dnum)
+					{
+						case 0:
+							bsmd.IsDoorClosed = GetIntValueFromBA(ba, ConstVals.DNUM_POS + 2) == 1;
+							break;
+						default: return;
+					}
+					break;
+
+				case ConstVals.DTYPE_PANEL_ARR:
+					if (dnum >= 0)
+					{
+						int mx = (dnum + 1) * 32;
+						int[] pda;
+						if (SMemLib.PanelA.Length > mx)
+						{
+							pda = new int[mx];
+							Buffer.BlockCopy(SMemLib.PanelA, 0, pda, 0, SMemLib.PanelA.Length * sizeof(int));
+						}
+						else pda = SMemLib.PanelA;
+
+						int pos = ConstVals.DNUM_POS + 2;
+
+						for (int i = dnum * 32; i < mx; i++)
+							if (i < SMemLib.PanelA.Length)
+							{
+								pda[i] = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+							}
+						SMemLib.WritePanel(pda);
+					}
+					return;
+
+				case ConstVals.DTYPE_SOUND_ARR:
+					if (dnum >= 0)
+					{
+						int mx = (dnum + 1) * 32;
+						int[] pda;
+						if (SMemLib.SoundA.Length > mx)
+						{
+							pda = new int[mx];
+							Buffer.BlockCopy(SMemLib.SoundA, 0, pda, 0, SMemLib.SoundA.Length * sizeof(int));
+						}
+						else pda = SMemLib.SoundA;
+
+						int pos = ConstVals.DNUM_POS + 2;
+
+						for (int i = dnum * 32; i < mx; i++)
+							if (i < SMemLib.SoundA.Length)
+							{
+								pda[i] = GetIntValueFromBA(ba, pos, out tmp); pos += (tmp + 1);
+							}
+						SMemLib.WriteSound(pda);
+					}
+					return;
+
+				default: return;//記号部不正
+			}
+
+			SMemLib.Write(bsmd);
 		}
 	}
 }
