@@ -30,6 +30,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDS.Parser", "BIDS.Parser\BIDS.Parser.csproj", "{28BBA487-6403-4347-B25F-834944E75BC9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDS.Parser.Tests", "BIDS.Parser.Tests\BIDS.Parser.Tests.csproj", "{3C1FFD26-0008-4167-9804-B92A95298DAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDSsv.bvets_id", "BIDSsv.bvets_id\BIDSsv.bvets_id.csproj", "{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -193,6 +194,18 @@ Global
 		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x64.Build.0 = Release|Any CPU
 		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x86.ActiveCfg = Release|Any CPU
 		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x86.Build.0 = Release|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Debug|x64.Build.0 = Debug|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Debug|x86.Build.0 = Debug|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Release|x64.ActiveCfg = Release|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Release|x64.Build.0 = Release|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Release|x86.ActiveCfg = Release|Any CPU
+		{7936ABBA-636C-4C59-94BE-11BE1D01BB7D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
