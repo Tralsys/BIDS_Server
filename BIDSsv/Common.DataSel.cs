@@ -48,14 +48,14 @@ namespace TR.BIDSsv
             case 'D':
               while (ka?.Length > i)
               {
-                CI?.SetIsKeyPushed(ka[i], true);
+                BIDSSMemLib.CtrlInput.SetIsKeyPushed(ka[i], true);
                 i++;
               }
               break;
             case 'U':
               while (ka?.Length > i)
               {
-                CI?.SetIsKeyPushed(ka[i], false);
+                BIDSSMemLib.CtrlInput.SetIsKeyPushed(ka[i], false);
                 i++;
               }
               break;
@@ -150,7 +150,7 @@ namespace TR.BIDSsv
             case "P":
               if (0 <= serk && serk < 128) 
               {
-                CI?.SetIsKeyPushed(serk, true);
+                BIDSSMemLib.CtrlInput.SetIsKeyPushed(serk, true);
                 return ReturnString + "0";
               }
               else
@@ -160,7 +160,7 @@ namespace TR.BIDSsv
             case "R":
               if (0 <= serk && serk < 128) 
               {
-                CI?.SetIsKeyPushed(serk, false);
+                BIDSSMemLib.CtrlInput.SetIsKeyPushed(serk, false);
                 return ReturnString + "0";
               }
               else

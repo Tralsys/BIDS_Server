@@ -13,58 +13,43 @@ namespace TR.BIDSsv
     /// <summary>デフォルトのポート番号</summary>
     static public readonly int DefPNum = 14147;
 
-
-    static public BIDSSharedMemoryData BSMD
-    {
-      get => SML?.BIDSSMemData ?? default;
-      set => SML?.Write(in value);
-    }
-    static public OpenD OD
-    {
-      get => SML?.OpenData ?? default;
-      set => SML?.Write(in value);
-    }
-    static public PanelD PD
-    {
-      get => SML?.Panels ?? default;
-      set => SML?.Write(in value);
-    }
-    static public SoundD SD
-    {
-      get => SML?.Sounds ?? default;
-      set => SML?.Write(in value);
-    }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public BIDSSharedMemoryData BSMD { get => SMemLib.BIDSSMemData; set => SMemLib.Write(value); }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public OpenD OD { get => SMemLib.OpenData; set => SMemLib.Write(value); }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public PanelD PD { get => SMemLib.Panels; set => SMemLib.Write(value); }
+    [Obsolete("SMemLibに直接アクセスしてください")]
+    static public SoundD SD { get => SMemLib.Sounds; set => SMemLib.Write(value); }
 
     static public Hands Ctrl_Hand
     {
-      get => CI?.GetHandD() ?? new Hands();
-      set => CI?.SetHandD(ref value);
+      get => CtrlInput.GetHandD();
+      set => CtrlInput.SetHandD(ref value);
     }
     static public bool[] Ctrl_Key
     {
-      get => CI?.GetIsKeyPushed() ?? new bool[128];
-      set => CI?.SetIsKeyPushed(in value);
+      get => CtrlInput.GetIsKeyPushed() ?? new bool[128];
+      set => CtrlInput.SetIsKeyPushed(in value);
     }
 
     static public int PowerNotchNum
     {
       get => Ctrl_Hand.P;
-      set => CI?.SetHandD(CtrlInput.HandType.Power, value);
+      set => CtrlInput.SetHandD(CtrlInput.HandType.Power, value);
     }
     static public int BrakeNotchNum
     {
       get => Ctrl_Hand.B;
-      set => CI?.SetHandD(CtrlInput.HandType.Brake, value);
+      set => CtrlInput.SetHandD(CtrlInput.HandType.Brake, value);
     }
     static public int ReverserNum
     {
       get => Ctrl_Hand.R;
-      set => CI?.SetHandD(CtrlInput.HandType.Reverser, value);
+      set => CtrlInput.SetHandD(CtrlInput.HandType.Reverser, value);
     }
 
     static private List<IBIDSsv> svlist = new List<IBIDSsv>();
-    static private SMemLib SML = null;
-    static private CtrlInput CI = null;
 
     static private bool IsStarted = false;
     static private bool IsDebug = false;
@@ -82,14 +67,11 @@ namespace TR.BIDSsv
     {
       if (!IsStarted)
       {
-        SML = new SMemLib(0, true, NO_SMEM_MODE, NO_Event_Mode);
-        CI = new CtrlInput();
-        SML?.ReadStart(0, Interval);
+        SMemLib.Begin(NO_SMEM_MODE, NO_Event_Mode);
+        SMemLib.ReadStart(0, Interval);
 
-        BSMDChanged += Common_BSMDChanged;
-        OpenDChanged += Common_OpenDChanged;
-        PanelDChanged += Common_PanelDChanged;
-        SoundDChanged += Common_SoundDChanged;
+        SMemLib.SMC_BSMDChanged += Common_BSMDChanged;
+
         IsStarted = true;
       }
     }
@@ -212,8 +194,7 @@ namespace TR.BIDSsv
     static public void Dispose()
     {
       if (svlist.Count > 0) Parallel.For(0, svlist.Count, (i) => svlist[i].Dispose());
-      SML?.ReadStop();
-      SML?.Dispose();
+      SMemLib.ReadStop();
     }
 
     static private void DataGot(in string GotStr)
@@ -252,9 +233,9 @@ namespace TR.BIDSsv
                     spec.A = int.Parse(GSA[3]);
                     spec.J = int.Parse(GSA[4]);
                     spec.C = int.Parse(GSA[5]);
-                    BIDSSharedMemoryData bsmd = BSMD;
+                    BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                     bsmd.SpecData = spec;
-                    BSMD = bsmd;
+                    SMemLib.Write(bsmd);
                   }
                   catch (Exception) { throw; }
                 }
@@ -262,45 +243,45 @@ namespace TR.BIDSsv
               case 0:
                 try
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.SpecData.B = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 catch (Exception) { throw; }
                 break;
               case 1:
                 try
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.SpecData.P = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 catch (Exception) { throw; }
                 break;
               case 2:
                 try
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.SpecData.A = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 catch (Exception) { throw; }
                 break;
               case 3:
                 try
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.SpecData.J = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 catch (Exception) { throw; }
                 break;
               case 4:
                 try
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.SpecData.C = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 catch (Exception) { throw; }
                 break;
@@ -314,28 +295,28 @@ namespace TR.BIDSsv
                 if (GSA.Length > 4)
                 {
                   TimeSpan ts3 = new TimeSpan(0, int.Parse(GSA[1]), int.Parse(GSA[2]), int.Parse(GSA[3]), int.Parse(GSA[4]));
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.T = (int)ts3.TotalMilliseconds;
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case -2://Pressure
                 if (GSA.Length > 5)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   int i = 1;
                   bsmd.StateData.BC = float.Parse(GSA[i++]);
                   bsmd.StateData.MR = float.Parse(GSA[i++]);
                   bsmd.StateData.ER = float.Parse(GSA[i++]);
                   bsmd.StateData.BP = float.Parse(GSA[i++]);
                   bsmd.StateData.SAP = float.Parse(GSA[i++]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case -1://All
                 if (GSA.Length > 10)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   State st = bsmd.StateData;
                   int i = 1;
                   st.Z = double.Parse(GSA[i++]);
@@ -352,73 +333,73 @@ namespace TR.BIDSsv
               case 0:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.Z = double.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 1:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.V = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 2:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.T = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 3:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.BC = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 4:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.MR = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 5:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.ER = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 6:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.BP = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 7:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.SAP = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 8:
                 if (GSA.Length >= 2)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.StateData.I = float.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               //case 9: return ReturnString + BSMD.StateData.Volt;//予約 電圧
@@ -439,64 +420,64 @@ namespace TR.BIDSsv
               case -1:
                 if (GSA.Length > 4)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.HandleData.B = int.Parse(GSA[1]);
                   bsmd.HandleData.P = int.Parse(GSA[2]);
                   bsmd.HandleData.R = int.Parse(GSA[3]);
                   bsmd.HandleData.C = int.Parse(GSA[4]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 0:
                 if (GSA.Length > 1)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.HandleData.B = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 1:
                 if (GSA.Length > 1)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.HandleData.P = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 2:
                 if (GSA.Length > 1)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.HandleData.R = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 3:
                 if (GSA.Length > 1)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.HandleData.C = int.Parse(GSA[1]);
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               case 4:
                 if (GSA.Length > 1)
                 {
-                  OpenD opd = OD;
+                  OpenD opd = SMemLib.OpenData;
                   opd.SelfBPosition = int.Parse(GSA[1]);
-                  OD = opd;
+                  SMemLib.Write(opd);
                 }
                 break;
               default: break;
             }
             break;
           case "P":
-            if (GSA.Length > 1 && seri >= 0 && seri < PD.Length)
-              PD.Panels[seri] = int.Parse(GSA[1]);
+            if (GSA.Length > 1 && seri >= 0 && seri < SMemLib.PanelA.Length)
+              SMemLib.PanelA[seri] = int.Parse(GSA[1]);
             break;
           case "S":
-            if (GSA.Length > 1 && seri >= 0 && seri < SD.Length)
-              SD.Sounds[seri] = int.Parse(GSA[1]);
+            if (GSA.Length > 1 && seri >= 0 && seri < SMemLib.SoundA.Length)
+              SMemLib.SoundA[seri] = int.Parse(GSA[1]);
             break;
           case "D":
             switch (seri)
@@ -504,9 +485,9 @@ namespace TR.BIDSsv
               case 0:
                 if (GSA.Length > 1)
                 {
-                  BIDSSharedMemoryData bsmd = BSMD;
+                  BIDSSharedMemoryData bsmd = SMemLib.BIDSSMemData;
                   bsmd.IsDoorClosed = GSA[1] == "1";
-                  BSMD = bsmd;
+                  SMemLib.Write(bsmd);
                 }
                 break;
               default: break;
@@ -517,17 +498,16 @@ namespace TR.BIDSsv
             {
               int mx = (seri + 1) * 32;
               int[] pda;
-              if (PD.Length >= mx)
+              if (SMemLib.PanelA.Length >= mx)
               {
                 pda = new int[mx];
-                Array.Copy(PD.Panels, pda, PD.Length);
+                Array.Copy(SMemLib.PanelA, pda, SMemLib.PanelA.Length);
               }
-              else pda = PD.Panels;
+              else pda = SMemLib.PanelA;
 
               for (int i = seri * 32; i < mx; i++)
-                if (i < PD.Length) pda[i] = int.Parse(GSA[(i % 32) + 1]);
-              PanelD pd = new PanelD() { Panels = pda };
-              PD = pd;
+                if (i < SMemLib.PanelA.Length) pda[i] = int.Parse(GSA[(i % 32) + 1]);
+              SMemLib.WritePanel(pda);
             }
             break;
           case "s":
@@ -535,17 +515,16 @@ namespace TR.BIDSsv
             {
               int mx = (seri + 1) * 32;
               int[] sda;
-              if (SD.Length >= mx)
+              if (SMemLib.SoundA.Length >= mx)
               {
                 sda = new int[mx];
-                Array.Copy(SD.Sounds, sda, SD.Length);
+                Array.Copy(SMemLib.SoundA, sda, SMemLib.SoundA.Length);
               }
-              else sda = SD.Sounds;
+              else sda = SMemLib.SoundA;
 
               for (int i = seri * 32; i < mx; i++)
-                if (i < SD.Length) sda[i] = int.Parse(GSA[(i % 32) + 1]);
-              SoundD sd = new SoundD() { Sounds = sda };
-              SD = sd;
+                if (i < SMemLib.SoundA.Length) sda[i] = int.Parse(GSA[(i % 32) + 1]);
+              SMemLib.WriteSound(sda);
             }
             break;
           default: throw new Exception("TRE3");//記号部不正
