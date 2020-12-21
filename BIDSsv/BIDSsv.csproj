@@ -5,7 +5,7 @@
 		<LangVersion>8.0</LangVersion>
     <AssemblyName>TR.BIDSsv</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
-		<Version>1.0.2.1</Version>
+		<Version>1.0.2.2</Version>
     <Authors>Tetsu Otter</Authors>
     <Company>Tech Otter</Company>
     <Product>BIDS Project</Product>
@@ -59,12 +59,11 @@ uploaded to nuget</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IAtsPI" Version="1.0.0" />
+    <PackageReference Include="IAtsPI" Version="1.0.0.1" />
+    <PackageReference Include="TR.BIDSSMemLib.rw" Version="2.0.0-alpha" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.rw\BIDSSMemLib.rw.csproj" />
     <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
   </ItemGroup>
 

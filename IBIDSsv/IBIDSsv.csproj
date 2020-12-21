@@ -55,7 +55,7 @@ uploaded to nuget</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BIDSSMemLib\BIDSSMemLib.structs\BIDSSMemLib.structs.csproj" />
+    <PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
