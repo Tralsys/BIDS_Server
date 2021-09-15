@@ -7,6 +7,7 @@ namespace TR.BIDSsv
 {
   public class Serial : IBIDSsv
   {
+    public bool IsOpen => SP?.IsOpen ?? false;
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
     public bool IsDebug { get => sdc.IsDebugging; set => sdc.IsDebugging = value; }
