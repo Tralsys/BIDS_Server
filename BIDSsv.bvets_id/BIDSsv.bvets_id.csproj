@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BIDSsv.serial\BIDSsv.serial.csproj" />
-    <ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
     <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
   </ItemGroup>
 
