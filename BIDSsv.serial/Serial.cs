@@ -42,14 +42,10 @@ namespace TR.BIDSsv
             switch (saa[0])
             {
               case "B":
-                SP.BaudRate = int.Parse(saa[1]);
-                break;
               case "BaudRate":
                 SP.BaudRate = int.Parse(saa[1]);
                 break;
               case "BS":
-                IsBinaryAllowed = true;
-                break;
               case "BinarySender":
                 IsBinaryAllowed = true;
                 break;
@@ -60,28 +56,6 @@ namespace TR.BIDSsv
                 SP.DtrEnable = saa[1] == "1";
                 break;
               case "E":
-                switch (int.Parse(saa[1]))
-                {
-                  case 0:
-                    SP.Encoding = Encoding.Default;
-                    break;
-                  case 1:
-                    SP.Encoding = Encoding.ASCII;
-                    break;
-                  case 2:
-                    SP.Encoding = Encoding.Unicode;
-                    break;
-                  case 3:
-                    SP.Encoding = Encoding.UTF8;
-                    break;
-                  case 4:
-                    SP.Encoding = Encoding.UTF32;
-                    break;
-                  default:
-                    SP.Encoding = Encoding.Default;
-                    break;
-                }
-                break;
               case "Encoding":
                 switch (int.Parse(saa[1]))
                 {
@@ -109,25 +83,10 @@ namespace TR.BIDSsv
                 SP.Handshake = (Handshake)int.Parse(saa[1]);
                 break;
               case "N":
-                Name = saa[1];
-                break;
               case "Name":
                 Name = saa[1];
                 break;
               case "NL":
-                switch (int.Parse(saa[1]))
-                {
-                  case 1:
-                    SP.NewLine = "\r";
-                    break;
-                  case 2:
-                    SP.NewLine = "\r\n";
-                    break;
-                  default:
-                    SP.NewLine = "\n";
-                    break;
-                }
-                break;
               case "NewLine":
                 switch (int.Parse(saa[1]))
                 {
@@ -143,15 +102,6 @@ namespace TR.BIDSsv
                 }
                 break;
               case "P":
-                try
-                {
-                  SP.PortName = "COM" + int.Parse(saa[1]);
-                }
-                catch (FormatException)
-                {
-                  SP.PortName = saa[1];
-                }
-                break;
               case "Port":
                 try
                 {
@@ -166,8 +116,6 @@ namespace TR.BIDSsv
                 SP.Parity = (Parity)int.Parse(saa[1]);
                 break;
               case "RTO":
-                SP.ReadTimeout = int.Parse(saa[1]);
-                break;
               case "ReadTimeout":
                 SP.ReadTimeout = int.Parse(saa[1]);
                 break;
@@ -181,8 +129,6 @@ namespace TR.BIDSsv
                 SP.StopBits = (StopBits)int.Parse(saa[1]);
                 break;
               case "WTO":
-                SP.WriteTimeout = int.Parse(saa[1]);
-                break;
               case "WriteTimeout":
                 SP.WriteTimeout = int.Parse(saa[1]);
                 break;
