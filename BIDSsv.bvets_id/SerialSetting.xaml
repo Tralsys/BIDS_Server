@@ -1,0 +1,122 @@
+﻿<UserControl
+	x:Class="TR.BIDSsv.SerialSetting"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:local="clr-namespace:TR.BIDSsv"
+	d:DataContext="{d:DesignInstance Type=local:SerialSettingViewModel}"
+	mc:Ignorable="d" 
+	d:DesignHeight="300"
+	d:DesignWidth="400">
+
+	<UserControl.Resources>
+		<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="Grid.Column" Value="0"/>
+			<Setter Property="HorizontalAlignment" Value="Right"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Margin" Value="4"/>
+		</Style>
+
+		<Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+			<Setter Property="Margin" Value="10,4"/>
+			<Setter Property="Padding" Value="8,4"/>
+		</Style>
+	</UserControl.Resources>
+	
+	<Grid Background="White">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="1.5*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="1.5*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="1.5*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<Label
+			Grid.Row="0"
+			Grid.ColumnSpan="2"
+			FontWeight="Bold"
+			FontSize="16"
+			HorizontalAlignment="Left"
+			Content="BIDS__Server on InputDevice IF&#xa;Serial Mod Setting"/>
+
+		<Label
+			Grid.Row="1"
+			Content="Port"/>
+		<ComboBox
+			Grid.Row="1"
+			Grid.Column="1"
+			Margin="10"
+			HorizontalContentAlignment="Left"
+			VerticalContentAlignment="Center"
+			VerticalAlignment="Center"
+			ItemsSource="{Binding AvailablePorts, Mode=OneWay}"
+			SelectedItem="{Binding SelectedPortName}"/>
+
+		<Label
+			Grid.Row="2"
+			Content="BaudRate"/>
+		<StackPanel
+			Background="{x:Null}"
+			VerticalAlignment="Center"
+			Margin="6"
+			Grid.Row="2"
+			Grid.Column="1">
+			<TextBox
+				Margin="{Binding ElementName=BaudRateComboBox, Path=Margin}"
+				Height="{Binding ElementName=BaudRateComboBox, Path=ActualHeight, Mode=OneWay}"
+				Width="{Binding ElementName=BaudRateComboBox, Path=ActualWidth, Mode=OneWay}"
+				Text="{Binding SelectableBaudRate}"/>
+
+			<ComboBox
+				x:Name="BaudRateComboBox"
+				Margin="2"
+				HorizontalContentAlignment="Left"
+				VerticalContentAlignment="Center"
+				ItemsSource="{Binding SelectableBaudRate, Mode=OneWay}"
+				SelectedItem="{Binding SelectedBaudRate}"/>
+		</StackPanel>
+
+		<Label
+			Grid.Row="3"
+			Content="BIDSSMemLib Version"/>
+		<Label
+			Grid.Row="3"
+			Grid.Column="1"
+			HorizontalAlignment="Left"
+			Content="{Binding ConnectedBIDSSMemLibVersion}"/>
+
+		<Label
+			Grid.Row="4"
+			Content="IsSerialConnected"/>
+		<Label
+			Grid.Row="4"
+			Grid.Column="1"
+			HorizontalAlignment="Left"
+			Content="{Binding IsSerialConnected}"/>
+
+		<StackPanel
+			Grid.Row="5"
+			Grid.ColumnSpan="2"
+			VerticalAlignment="Center"
+			HorizontalAlignment="Right"
+			Orientation="Horizontal">
+			<Button
+				Click="Reload_Click"
+				Content="Reload"/>
+
+			<Button
+				Content="Cancel"/>
+
+			<Button
+				IsDefault="True"
+				Content="Set"/>
+		</StackPanel>
+	</Grid>
+</UserControl>
