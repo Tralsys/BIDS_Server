@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BIDSsv.serial\BIDSsv.serial.csproj" />
     <ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
     <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
