@@ -25,10 +25,4 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="SettingWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-  </ItemGroup>
-
 </Project>
