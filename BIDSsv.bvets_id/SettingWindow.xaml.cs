@@ -7,10 +7,10 @@ using System.Windows;
 
 namespace TR.BIDSsv
 {
-  /// <summary>
-  /// SettingWindow.xaml の相互作用ロジック
-  /// </summary>
-  public partial class SettingWindow : Window, IDisposable
+	/// <summary>
+	/// SettingWindow.xaml の相互作用ロジック
+	/// </summary>
+	public partial class SettingWindow : Window, IDisposable
 	{
 		Serial serial = new Serial();
 		SettingWindow_Data sw_d;
