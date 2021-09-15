@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <LangVersion>9.0</LangVersion>
     <UseWPF>true</UseWPF>
     <AssemblyName>TR.BIDSsv.bvets_id</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
@@ -17,7 +18,7 @@
     <Reference Include="Mackoy.IInputDevice">
       <HintPath>C:\Program Files (x86)\mackoy\BveTs5\Mackoy.IInputDevice.DLL</HintPath>
     </Reference>
-		<Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
   <ItemGroup>
