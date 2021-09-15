@@ -34,7 +34,7 @@ namespace TR.BIDSsv
 		public SerialSettingViewModel Target { get; }
 	}
 
-	public class SerialSettingViewModel : INotifyPropertyChanged
+	public class SerialSettingViewModel : INotifyPropertyChanged, IReadOnlySerialSettingViewModel
 	{
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged<T>(ref T target, in T source, [System.Runtime.CompilerServices.CallerMemberName] string callerName = "")
@@ -46,8 +46,8 @@ namespace TR.BIDSsv
 			PropertyChanged?.Invoke(this, new(callerName));
 		}
 
-		private ObservableCollection<string> _AvailablePorts;
-		public ObservableCollection<string> AvailablePorts
+		private ImmutableArray<string> _AvailablePorts;
+		public ImmutableArray<string> AvailablePorts
 		{
 			get => _AvailablePorts;
 			set => OnPropertyChanged(ref _AvailablePorts, value);
@@ -83,7 +83,7 @@ namespace TR.BIDSsv
 
 	public interface IReadOnlySerialSettingViewModel
 	{
-		ObservableCollection<string> AvailablePorts { get; }
+		ImmutableArray<string> AvailablePorts { get; }
 		string SelectedPortName { get; }
 		int SelectedBaudRate { get; }
 		int ConnectedBIDSSMemLibVersion { get; }
