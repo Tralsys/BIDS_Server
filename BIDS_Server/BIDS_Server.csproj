@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>Tetsu Otter</Authors>
     <Company>Tech Otter</Company>
     <Product>BIDS Project</Product>

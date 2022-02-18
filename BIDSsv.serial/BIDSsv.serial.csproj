@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <AssemblyName>TR.BIDSsv.serial</AssemblyName>
     <RootNamespace>TR.BIDSsv</RootNamespace>
 		<Version>1.0.2.1</Version>
