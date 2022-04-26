@@ -14,6 +14,7 @@
     <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

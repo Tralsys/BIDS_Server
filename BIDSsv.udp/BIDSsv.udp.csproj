@@ -20,6 +20,7 @@
     <Description>It is a communication module using UDP/IP, inherits IBIDSsv interface to use on BIDSsv.</Description>
     <PackageReleaseNotes># 1.0.1.1
 published to nuget.org</PackageReleaseNotes>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
