@@ -13,7 +13,7 @@
     <PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Platforms>AnyCPU;x86;x64</Platforms>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
