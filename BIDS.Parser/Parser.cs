@@ -4,6 +4,8 @@ namespace BIDS.Parser;
 
 public static class Parser
 {
+	public static IBIDSCmd From(in string str)
+		=> From(str.AsSpan());
 	public static IBIDSCmd From(in ReadOnlySpan<char> str)
 	{
 		if (str.Length < 4 || str[0] != 'T' || str[1] != 'R')
