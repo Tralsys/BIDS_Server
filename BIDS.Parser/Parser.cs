@@ -1,4 +1,6 @@
-﻿namespace BIDS.Parser;
+﻿using BIDS.Parser.Internals;
+
+namespace BIDS.Parser;
 
 public static class Parser
 {
@@ -158,8 +160,8 @@ public static class Parser
 		if (index > 0)
 		{
 			var tmp = str[(index + 1)..];
-			gotDataInt = GetIntList(tmp);
-			gotDataDouble = GetDoubleList(tmp);
+			gotDataInt = ValueListGetters.GetIntList(tmp);
+			gotDataDouble = ValueListGetters.GetDoubleList(tmp);
 		}
 
 		return ReqNumParser?.Invoke(dataTypeInt) ?? new BIDSCmd() with
@@ -172,54 +174,6 @@ public static class Parser
 		};
 	}
 
-	static List<int> GetIntList(ReadOnlySpan<char> str)
-	{
-		List<int> ret = new();
-
-		while (!str.IsEmpty)
-		{
-			int sepIndex = str.IndexOf('X');
-
-			var numStr = sepIndex < 0 ? str : str[..sepIndex];
-
-			if (int.TryParse(numStr, out var num))
-				_ = ret.Append(num);
-			else
-				_ = ret.Append(0);
-
-			if (sepIndex < 0)
-				break;
-
-			str = str[(sepIndex + 1)..];
-		}
-
-		return ret;
-	}
-
-	static List<double> GetDoubleList(ReadOnlySpan<char> str)
-	{
-		List<double> ret = new();
-
-		while (!str.IsEmpty)
-		{
-			int sepIndex = str.IndexOf('X');
-
-			var numStr = sepIndex < 0 ? str : str[..sepIndex];
-
-			if (double.TryParse(numStr, out var num))
-				_ = ret.Append(num);
-			else
-				_ = ret.Append(0);
-
-			if (sepIndex < 0)
-				break;
-
-			str = str[(sepIndex + 1)..];
-		}
-
-		return ret;
-	}
-
 	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out ReadOnlySpan<char> data, out List<int>? gotData)
 	{
 		data = str;
@@ -230,7 +184,7 @@ public static class Parser
 
 		int index = str.IndexOf('X');
 		if (index > 0)
-			gotData = GetIntList(str[(index + 1)..]);
+			gotData = ValueListGetters.GetIntList(str[(index + 1)..]);
 
 		return null;
 	}
