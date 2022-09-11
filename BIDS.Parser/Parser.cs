@@ -90,17 +90,17 @@ public static class Parser
 
 	static IBIDSCmd ControlReverser(in ReadOnlySpan<char> str)
 	{
-		var err = ValidateAndPickDataInt(str, out var data, out var gotData);
+		var err = ValidateAndPickDataInt(str, out var gotData);
 		if (err is not null)
 			return err;
 
-		ReverserPos pos = data[0] switch
+		ReverserPos pos = str[0] switch
 		{
 			'F' => ReverserPos.Forward,
 			'N' => ReverserPos.Neutral,
 			'B' or 'R' => ReverserPos.Backward,
 
-			_ => int.TryParse(data, out int num) ? num switch
+			_ => int.TryParse(str, out int num) ? num switch
 			{
 				< 0 => ReverserPos.Backward,
 				> 0 => ReverserPos.Forward,
@@ -113,11 +113,11 @@ public static class Parser
 
 	static IBIDSCmd ParseStandardCommandStyle(in ReadOnlySpan<char> str, Identifier type)
 	{
-		var err = ValidateAndPickDataInt(str, out var data, out var gotData);
+		var err = ValidateAndPickDataInt(str, out var gotData);
 		if (err is not null)
 			return err;
 
-		if (!int.TryParse(data, out int pos))
+		if (!int.TryParse(str, out int pos))
 			return new BIDSCmd(ParseError: new(ErrorType.CannotParseToInt));
 
 		return new BIDSCmd(type, RequestNumber: pos, DataInt: gotData);
@@ -125,18 +125,18 @@ public static class Parser
 
 	static IBIDSCmd ControlKey(in ReadOnlySpan<char> str)
 	{
-		var err = ValidateAndPickDataInt(str, out var data, out var gotData);
+		var err = ValidateAndPickDataInt(str, out var gotData);
 		if (err is not null)
 			return err;
 
-		var type = data[0] switch
+		var type = str[0] switch
 		{
 			'R' => DataType.KeyRelease,
 			'P' => DataType.KeyPress,
 			_ => DataType.Unknown,
 		};
 
-		if (!int.TryParse(data[1..], out int pos))
+		if (!int.TryParse(str[1..], out int pos))
 			return new BIDSCmd(ParseError: new(ErrorType.CannotParseToInt));
 
 		KeyType keyType = KeyType.Unknown;
@@ -176,9 +176,8 @@ public static class Parser
 		};
 	}
 
-	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out ReadOnlySpan<char> data, out List<int>? gotData)
+	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out List<int>? gotData)
 	{
-		data = str;
 		gotData = null;
 
 		if (str.Length < 1)
