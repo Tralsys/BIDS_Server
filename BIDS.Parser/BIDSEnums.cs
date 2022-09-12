@@ -132,3 +132,10 @@ public enum DoorStateType
 	Unknown,
 	IsOpen,
 }
+
+public enum KeyControlType
+{
+	Unknown,
+	Pressed,
+	Released,
+}
