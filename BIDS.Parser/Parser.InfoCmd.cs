@@ -17,7 +17,7 @@ public partial class Parser
 {
 	static IBIDSCmd InfoCmd(in ReadOnlySpan<char> str)
 	{
-		if (str.Length < 1)
+		if (str.Length < 2)
 			return new ParseError(ErrorType.NotBIDSCmd);
 
 		int index = str[4..].IndexOf('X');
