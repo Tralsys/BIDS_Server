@@ -44,6 +44,7 @@ public partial class Parser
 			'H' => new BIDSCmd_Info_HandlePosition(Base, GetHandlePosType(dataTypeInt)),
 			'P' => new BIDSCmd_Info_PanelData(Base, dataTypeInt),
 			'S' => new BIDSCmd_Info_SoundData(Base, dataTypeInt),
+			'D' => new BIDSCmd_Info_DoorState(Base, GetDoorStateType(dataTypeInt)),
 
 			_ => Base
 		};
