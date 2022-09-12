@@ -6,8 +6,8 @@ public record BIDSCmd_Info_SpecData(
 	char RawDataType,
 	int RawDataNum,
 	SpecDataType SpecDataType,
-	IReadOnlyList<int> DataInt,
-	IReadOnlyList<double> DataDouble
+	IReadOnlyList<int>? DataInt,
+	IReadOnlyList<double>? DataDouble
 ) : BIDSCmd_Info(RawDataType, RawDataNum, DataInt, DataDouble), IBIDSCmd_Info_SpecData
 {
 	public BIDSCmd_Info_SpecData(BIDSCmd_Info Base, SpecDataType type)
