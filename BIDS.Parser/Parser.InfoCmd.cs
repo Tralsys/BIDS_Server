@@ -20,7 +20,7 @@ public partial class Parser
 		if (str.Length < 2)
 			return new ParseError(ErrorType.NotBIDSCmd);
 
-		int index = str[1..].IndexOf('X');
+		int index = str.IndexOf('X');
 		ReadOnlySpan<char> dataTypeNumStr = index < 0 ? str[1..] : str[1..index];
 
 		if (int.TryParse(dataTypeNumStr, out int dataTypeInt) != true)
@@ -30,7 +30,7 @@ public partial class Parser
 		List<double>? gotDataDouble = null;
 		if (index > 0)
 		{
-			var tmp = str[(index + 2)..];
+			var tmp = str[(index + 1)..];
 			gotDataInt = ValueListGetters.GetIntList(tmp);
 			gotDataDouble = ValueListGetters.GetDoubleList(tmp);
 		}
