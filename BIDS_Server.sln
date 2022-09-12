@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BIDSsv.blankmod", "BIDSsv.b
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDS.Parser", "BIDS.Parser\BIDS.Parser.csproj", "{28BBA487-6403-4347-B25F-834944E75BC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDS.Parser.Tests", "BIDS.Parser.Tests\BIDS.Parser.Tests.csproj", "{3C1FFD26-0008-4167-9804-B92A95298DAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -179,6 +181,18 @@ Global
 		{28BBA487-6403-4347-B25F-834944E75BC9}.Release|x64.Build.0 = Release|Any CPU
 		{28BBA487-6403-4347-B25F-834944E75BC9}.Release|x86.ActiveCfg = Release|Any CPU
 		{28BBA487-6403-4347-B25F-834944E75BC9}.Release|x86.Build.0 = Release|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Debug|x64.Build.0 = Debug|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Debug|x86.Build.0 = Debug|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x64.ActiveCfg = Release|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x64.Build.0 = Release|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x86.ActiveCfg = Release|Any CPU
+		{3C1FFD26-0008-4167-9804-B92A95298DAA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
