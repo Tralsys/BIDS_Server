@@ -13,9 +13,9 @@ public static class ValueListGetters
 			var numStr = sepIndex < 0 ? str : str[..sepIndex];
 
 			if (int.TryParse(numStr, out var num))
-				_ = ret.Append(num);
+				ret.Add(num);
 			else
-				_ = ret.Append(0);
+				ret.Add(0);
 
 			if (sepIndex < 0)
 				break;
