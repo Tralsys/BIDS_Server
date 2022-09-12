@@ -31,7 +31,7 @@ public partial class Parser
 			_ => KeyControlType.Unknown,
 		};
 
-		if (!int.TryParse(nonDataSpan[1..], out int pos))
+		if (((char.IsDigit(nonDataSpan[0]) || nonDataSpan[0] == '-') || !int.TryParse(nonDataSpan[1..], out int pos)) && !int.TryParse(nonDataSpan, out pos))
 			return new ParseError(ErrorType.CannotParseToInt);
 
 		KeyType keyType = KeyType.Unknown;
