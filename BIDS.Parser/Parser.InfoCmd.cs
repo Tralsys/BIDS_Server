@@ -5,8 +5,8 @@ namespace BIDS.Parser;
 public record BIDSCmd_Info(
 	char RawDataType,
 	int RawDataNum,
-	IReadOnlyList<int> DataInt,
-	IReadOnlyList<double> DataDouble
+	IReadOnlyList<int>? DataInt,
+	IReadOnlyList<double>? DataDouble
 ) : IBIDSCmd_Info
 {
 	public virtual string ToCommandStr()
@@ -34,9 +34,6 @@ public partial class Parser
 			gotDataInt = ValueListGetters.GetIntList(tmp);
 			gotDataDouble = ValueListGetters.GetDoubleList(tmp);
 		}
-
-		gotDataInt ??= new();
-		gotDataDouble ??= new();
 
 		BIDSCmd_Info Base = new(dataTypeStr[0], dataTypeInt, gotDataInt, gotDataDouble);
 

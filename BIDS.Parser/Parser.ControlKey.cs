@@ -3,7 +3,8 @@
 public record BIDSCmd_KeyControl(
 	KeyType KeyType,
 	int KeyNumber,
-	KeyControlType ControlType
+	KeyControlType ControlType,
+	IReadOnlyList<int>? DataInt
 	) : IBIDSCmd_KeyControl
 {
 	public string ToCommandStr()
@@ -37,6 +38,6 @@ public partial class Parser
 		if (0 <= pos && pos < 20)
 			keyType = (KeyType)(pos + 1);
 
-		return new BIDSCmd_KeyControl(keyType, pos, type);
+		return new BIDSCmd_KeyControl(keyType, pos, type, gotData);
 	}
 }

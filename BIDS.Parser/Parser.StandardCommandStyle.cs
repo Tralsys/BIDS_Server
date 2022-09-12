@@ -1,7 +1,8 @@
 ﻿namespace BIDS.Parser;
 
 public record BIDSCmd_PowerControl(
-	int Value
+	int Value,
+	IReadOnlyList<int>? DataInt
 	) : IBIDSCmd_StandardStyle
 {
 	public string ToCommandStr()
@@ -9,7 +10,8 @@ public record BIDSCmd_PowerControl(
 }
 
 public record BIDSCmd_BrakeControl(
-	int Value
+	int Value,
+	IReadOnlyList<int>? DataInt
 	) : IBIDSCmd_StandardStyle
 {
 	public string ToCommandStr()
@@ -17,7 +19,8 @@ public record BIDSCmd_BrakeControl(
 }
 
 public record BIDSCmd_OneHandleControl(
-	int Value
+	int Value,
+	IReadOnlyList<int>? DataInt
 	) : IBIDSCmd_StandardStyle
 {
 	public string ToCommandStr()
@@ -37,9 +40,9 @@ public partial class Parser
 
 		return type switch
 		{
-			Identifier.ControlPower => new BIDSCmd_PowerControl(pos),
-			Identifier.ControlBrake => new BIDSCmd_BrakeControl(pos),
-			Identifier.ControlOnehandle => new BIDSCmd_OneHandleControl(pos),
+			Identifier.ControlPower => new BIDSCmd_PowerControl(pos, gotData),
+			Identifier.ControlBrake => new BIDSCmd_BrakeControl(pos, gotData),
+			Identifier.ControlOnehandle => new BIDSCmd_OneHandleControl(pos, gotData),
 			_ => throw new KeyNotFoundException()
 		};
 	}

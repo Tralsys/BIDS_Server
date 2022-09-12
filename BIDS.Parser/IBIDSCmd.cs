@@ -5,33 +5,39 @@ public interface IBIDSCmd
 	string ToCommandStr();
 }
 
-public interface IBIDSCmd_ReverserControl : IBIDSCmd
+public interface IBIDSCmd_HasDataInt : IBIDSCmd
+{
+	IReadOnlyList<int>? DataInt { get; }
+}
+
+public interface IBIDSCmd_HasDataDouble : IBIDSCmd
+{
+	IReadOnlyList<double>? DataDouble { get; }
+}
+
+public interface IBIDSCmd_ReverserControl : IBIDSCmd_HasDataInt
 {
 	ReverserPos ReverserPos { get; }
 	int? Value { get; }
 }
 
-public interface IBIDSCmd_StandardStyle : IBIDSCmd
+public interface IBIDSCmd_StandardStyle : IBIDSCmd_HasDataInt
 {
 	int Value { get; }
 }
 
-public interface IBIDSCmd_KeyControl : IBIDSCmd
+public interface IBIDSCmd_KeyControl : IBIDSCmd_HasDataInt
 {
 	KeyType KeyType { get; }
 	KeyControlType ControlType { get; }
 	int KeyNumber { get; }
 }
 
-public interface IBIDSCmd_Info : IBIDSCmd
+public interface IBIDSCmd_Info : IBIDSCmd_HasDataInt, IBIDSCmd_HasDataDouble
 {
 	char RawDataType { get; }
 
 	int RawDataNum { get; }
-
-	IReadOnlyList<int> DataInt { get; }
-
-	IReadOnlyList<double> DataDouble { get; }
 }
 
 public interface IBIDSCmd_Info_SpecData : IBIDSCmd_Info

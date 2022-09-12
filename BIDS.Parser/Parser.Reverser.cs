@@ -2,7 +2,8 @@
 
 public record BIDSCmd_ReverserControl(
 	ReverserPos ReverserPos,
-	int? Value
+	int? Value,
+	IReadOnlyList<int>? DataInt
 ) : IBIDSCmd_ReverserControl
 {
 	public string ToCommandStr()
@@ -42,7 +43,7 @@ public partial class Parser
 				_ => ReverserPos.Unknown
 			};
 
-		return new BIDSCmd_ReverserControl(pos, isNumber ? num : null);
+		return new BIDSCmd_ReverserControl(pos, isNumber ? num : null, gotData);
 	}
 }
 
