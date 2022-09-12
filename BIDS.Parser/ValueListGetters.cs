@@ -12,6 +12,10 @@ public static class ValueListGetters
 
 			var numStr = sepIndex < 0 ? str : str[..sepIndex];
 
+			int dotIndex = numStr.IndexOf('.');
+			if (dotIndex > 0 && dotIndex == numStr.LastIndexOf('.'))
+				numStr = numStr[..dotIndex];
+
 			if (int.TryParse(numStr, out var num))
 				ret.Add(num);
 			else
