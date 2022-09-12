@@ -31,11 +31,11 @@ public partial class Parser
 {
 	static IBIDSCmd ParseStandardCommandStyle(in ReadOnlySpan<char> str, Identifier type)
 	{
-		var err = ValidateAndPickDataInt(str, out var gotData);
+		var err = ValidateAndPickDataInt(str, out var nonDataSpan, out var gotData);
 		if (err is not null)
 			return err;
 
-		if (!int.TryParse(str, out int pos))
+		if (!int.TryParse(nonDataSpan, out int pos))
 			return new ParseError(ErrorType.CannotParseToInt);
 
 		return type switch

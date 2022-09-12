@@ -33,16 +33,21 @@ public partial class Parser : IParser
 		};
 	}
 
-	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out List<int>? gotData)
+	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out ReadOnlySpan<char> nonDataSpan, out List<int>? gotData)
 	{
 		gotData = null;
+		nonDataSpan = str;
 
 		if (str.Length < 1)
 			return new ParseError(ErrorType.NotBIDSCmd);
 
 		int index = str.IndexOf('X');
 		if (index > 0)
+		{
 			gotData = ValueListGetters.GetIntList(str[(index + 1)..]);
+
+			nonDataSpan = str[..index];
+		}
 
 		return null;
 	}

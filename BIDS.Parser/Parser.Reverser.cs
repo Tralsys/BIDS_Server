@@ -21,11 +21,11 @@ public partial class Parser
 {
 	static IBIDSCmd ControlReverser(in ReadOnlySpan<char> str)
 	{
-		var err = ValidateAndPickDataInt(str, out var gotData);
+		var err = ValidateAndPickDataInt(str, out var nonDataSpan, out var gotData);
 		if (err is not null)
 			return err;
 
-		bool isNumber = int.TryParse(str, out int num);
+		bool isNumber = int.TryParse(nonDataSpan, out int num);
 
 		ReverserPos pos = isNumber
 			? num switch

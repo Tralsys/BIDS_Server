@@ -20,18 +20,18 @@ public partial class Parser
 {
 	static IBIDSCmd ControlKey(in ReadOnlySpan<char> str)
 	{
-		var err = ValidateAndPickDataInt(str, out var gotData);
+		var err = ValidateAndPickDataInt(str, out var nonDataSpan, out var gotData);
 		if (err is not null)
 			return err;
 
-		var type = str[0] switch
+		var type = nonDataSpan[0] switch
 		{
 			'R' => KeyControlType.Released,
 			'P' => KeyControlType.Pressed,
 			_ => KeyControlType.Unknown,
 		};
 
-		if (!int.TryParse(str[1..], out int pos))
+		if (!int.TryParse(nonDataSpan[1..], out int pos))
 			return new ParseError(ErrorType.CannotParseToInt);
 
 		KeyType keyType = KeyType.Unknown;
