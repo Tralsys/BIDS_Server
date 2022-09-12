@@ -4,8 +4,8 @@ public record BIDSCmd_Info_PanelData(
 	char RawDataType,
 	int RawDataNum,
 	IReadOnlyList<int> IndexList,
-	IReadOnlyList<int> DataInt,
-	IReadOnlyList<double> DataDouble
+	IReadOnlyList<int>? DataInt,
+	IReadOnlyList<double>? DataDouble
 ) : BIDSCmd_Info(RawDataType, RawDataNum, DataInt, DataDouble), IBIDSCmd_Info_PanelData
 {
 	public BIDSCmd_Info_PanelData(

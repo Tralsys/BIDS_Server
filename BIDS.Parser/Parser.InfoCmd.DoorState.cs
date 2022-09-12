@@ -6,8 +6,8 @@ public record BIDSCmd_Info_DoorState(
 	char RawDataType,
 	int RawDataNum,
 	DoorStateType DoorStateType,
-	IReadOnlyList<int> DataInt,
-	IReadOnlyList<double> DataDouble
+	IReadOnlyList<int>? DataInt,
+	IReadOnlyList<double>? DataDouble
 ) : BIDSCmd_Info(RawDataType, RawDataNum, DataInt, DataDouble), IBIDSCmd_Info_DoorState
 {
 	public BIDSCmd_Info_DoorState(BIDSCmd_Info Base, DoorStateType type)

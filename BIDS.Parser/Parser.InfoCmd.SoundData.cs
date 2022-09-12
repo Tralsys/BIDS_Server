@@ -4,8 +4,8 @@ public record BIDSCmd_Info_SoundData(
 	char RawDataType,
 	int RawDataNum,
 	IReadOnlyList<int> IndexList,
-	IReadOnlyList<int> DataInt,
-	IReadOnlyList<double> DataDouble
+	IReadOnlyList<int>? DataInt,
+	IReadOnlyList<double>? DataDouble
 ) : BIDSCmd_Info(RawDataType, RawDataNum, DataInt, DataDouble), IBIDSCmd_Info_SoundData
 {
 	public BIDSCmd_Info_SoundData(

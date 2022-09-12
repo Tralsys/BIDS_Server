@@ -6,8 +6,8 @@ public record BIDSCmd_Info_StateData(
 	char RawDataType,
 	int RawDataNum,
 	StateDataType StateDataType,
-	IReadOnlyList<int> DataInt,
-	IReadOnlyList<double> DataDouble
+	IReadOnlyList<int>? DataInt,
+	IReadOnlyList<double>? DataDouble
 ) : BIDSCmd_Info(RawDataType, RawDataNum, DataInt, DataDouble), IBIDSCmd_Info_StateData
 {
 	public BIDSCmd_Info_StateData(BIDSCmd_Info Base, StateDataType type)
