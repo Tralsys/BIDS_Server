@@ -20,10 +20,10 @@ public partial class Parser
 		if (str.Length < 2)
 			return new ParseError(ErrorType.NotBIDSCmd);
 
-		int index = str[4..].IndexOf('X');
-		ReadOnlySpan<char> dataTypeStr = index < 0 ? str[4..] : str[4..index];
+		int index = str[1..].IndexOf('X');
+		ReadOnlySpan<char> dataTypeNumStr = index < 0 ? str[1..] : str[1..index];
 
-		if (int.TryParse(dataTypeStr, out int dataTypeInt) != true)
+		if (int.TryParse(dataTypeNumStr, out int dataTypeInt) != true)
 			return new ParseError(ErrorType.CannotParseToInt);
 
 		List<int>? gotDataInt = null;
@@ -35,7 +35,7 @@ public partial class Parser
 			gotDataDouble = ValueListGetters.GetDoubleList(tmp);
 		}
 
-		BIDSCmd_Info Base = new(dataTypeStr[0], dataTypeInt, gotDataInt, gotDataDouble);
+		BIDSCmd_Info Base = new(str[0], dataTypeInt, gotDataInt, gotDataDouble);
 
 		return str[0] switch
 		{
