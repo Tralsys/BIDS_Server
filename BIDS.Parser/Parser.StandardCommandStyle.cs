@@ -27,6 +27,24 @@ public record BIDSCmd_OneHandleControl(
 		=> $"TRB{Value}";
 }
 
+public record BIDSCmd_VersionCheck(
+	int Value,
+	IReadOnlyList<int>? DataInt
+	) : IBIDSCmd_StandardStyle
+{
+	public string ToCommandStr()
+		=> $"TRV{Value}";
+}
+
+public record BIDSCmd_ErrorReport(
+	int Value,
+	IReadOnlyList<int>? DataInt
+	) : IBIDSCmd_StandardStyle
+{
+	public string ToCommandStr()
+		=> $"TRE{Value}";
+}
+
 public partial class Parser
 {
 	static IBIDSCmd ParseStandardCommandStyle(in ReadOnlySpan<char> str, Identifier type)
@@ -43,6 +61,8 @@ public partial class Parser
 			Identifier.ControlPower => new BIDSCmd_PowerControl(pos, gotData),
 			Identifier.ControlBrake => new BIDSCmd_BrakeControl(pos, gotData),
 			Identifier.ControlOnehandle => new BIDSCmd_OneHandleControl(pos, gotData),
+			Identifier.Version => new BIDSCmd_VersionCheck(pos, gotData),
+			Identifier.Error => new BIDSCmd_ErrorReport(pos, gotData),
 			_ => throw new KeyNotFoundException()
 		};
 	}
