@@ -4,6 +4,8 @@ namespace BIDS.Parser;
 
 public partial class Parser : IParser
 {
+	public int Version => 100;
+
 	public static Parser Default { get; } = new();
 
 	public IBIDSCmd From(string str)
