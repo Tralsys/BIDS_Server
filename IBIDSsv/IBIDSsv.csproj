@@ -13,12 +13,13 @@
     <PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Platforms>AnyCPU;x86;x64</Platforms>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes># 1.0.2.1
 uploaded to nuget</PackageReleaseNotes>
     <Description>This library defines the interfaces that must be inherited by the library that provides inter-machine data sharing capabilities for use on BIDSsv.</Description>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

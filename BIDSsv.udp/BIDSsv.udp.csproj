@@ -14,12 +14,13 @@
     <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <SignAssembly>false</SignAssembly>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Platforms>AnyCPU;x86;x64</Platforms>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>It is a communication module using UDP/IP, inherits IBIDSsv interface to use on BIDSsv.</Description>
     <PackageReleaseNotes># 1.0.1.1
 published to nuget.org</PackageReleaseNotes>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

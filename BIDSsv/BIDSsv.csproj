@@ -14,7 +14,7 @@
     <PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Platforms>AnyCPU;x86;x64</Platforms>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes># 1.0.2.1
