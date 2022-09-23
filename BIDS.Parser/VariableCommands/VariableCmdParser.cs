@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace BIDS.Parser.VariableCommands;
 
 public interface IValiableCmdResult
@@ -41,13 +43,48 @@ public class VariableCmdParser
 		};
 	}
 
-	private VariableStructure ParseDataTypeRegisterCommand(ReadOnlySpan<byte> bytes)
+	internal static VariableStructure ParseDataTypeRegisterCommand(ReadOnlySpan<byte> bytes)
 	{
+		if (bytes.Length < 9)
+			throw new ArgumentException("`bytes` length must be more than 9 (dataType{4} _ elemDataType{4} _ elemName{1..})");
+
 		// 前から順々にデータ構造を記録
 		List<VariableStructure.IDataRecord> records = new();
 
 		// 初期段階では、カスタムデータを構造に含めることはサポートしない
 
-		return null;
+		int cmdDataType = BitConverter.ToInt32(bytes[..4]);
+		bytes = bytes[4..];
+
+		while (bytes.Length > 5)
+		{
+			VariableDataType dataType = (VariableDataType)BitConverter.ToInt32(bytes[..4]);
+			bytes = bytes[4..];
+
+			VariableDataType? arrayElemDataType = null;
+			if (dataType == VariableDataType.Array)
+			{
+				arrayElemDataType = (VariableDataType)BitConverter.ToInt32(bytes[0..4]);
+				bytes = bytes[4..];
+			}
+
+			int dataNameLen = 0;
+			while (dataNameLen < bytes.Length && bytes[dataNameLen] != 0)
+				dataNameLen++;
+
+			string dataName = Encoding.UTF8.GetString(bytes[..dataNameLen]);
+
+			if (arrayElemDataType is VariableDataType elemDataType)
+				records.Add(new VariableStructure.ArrayStructure(elemDataType, dataName));
+			else
+				records.Add(new VariableStructure.DataRecord(dataType, dataName));
+
+			// NULL文字分進めてチェックする
+			if (bytes.Length <= (dataNameLen + 1))
+				break;
+			bytes = bytes[(dataNameLen + 1)..];
+		}
+
+		return new VariableStructure(cmdDataType, records);
 	}
 }
