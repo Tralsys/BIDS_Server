@@ -32,7 +32,7 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 	/// <summary>この構造を用いて、指定のバイト配列を解析する</summary>
 	/// <param name="bytes">受け取ったデータ</param>
 	/// <returns>解析結果</returns>
-	public ValiableStructurePayload With(ReadOnlySpan<byte> bytes)
+	public VariableStructurePayload With(ReadOnlySpan<byte> bytes)
 	{
 		return null;
 	}

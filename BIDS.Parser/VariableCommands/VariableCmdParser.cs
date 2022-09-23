@@ -5,23 +5,23 @@ public interface IValiableCmdResult
 	int DataTypeId { get; }
 }
 
-public class ValiableStructurePayload : Dictionary<string, ValiableStructure.IDataRecord>, IValiableCmdResult
+public class VariableStructurePayload : Dictionary<string, VariableStructure.IDataRecord>, IValiableCmdResult
 {
 	public int DataTypeId { get; }
 
-	public ValiableStructurePayload(int dataTypeId)
+	public VariableStructurePayload(int dataTypeId)
 	{
 		DataTypeId = dataTypeId;
 	}
 }
 
-public record ValiableCmdKeyNotFound(int DataTypeId) : IValiableCmdResult;
+public record VariableCmdKeyNotFound(int DataTypeId) : IValiableCmdResult;
 
 public record ValiableCmdError();
 
 public class VariableCmdParser
 {
-	Dictionary<int, ValiableStructure> DataTypeDict { get; } = new();
+	Dictionary<int, VariableStructure> DataTypeDict { get; } = new();
 
 	public IValiableCmdResult From(ReadOnlySpan<byte> gotData)
 	{
@@ -35,16 +35,16 @@ public class VariableCmdParser
 			// DataType Register
 			0 => ParseDataTypeRegisterCommand(gotData[4..]),
 
-			_ => DataTypeDict.TryGetValue(dataId, out ValiableStructure? structure)
+			_ => DataTypeDict.TryGetValue(dataId, out VariableStructure? structure)
 				? structure.With(gotData)
-				: new ValiableCmdKeyNotFound(dataId)
+				: new VariableCmdKeyNotFound(dataId)
 		};
 	}
 
-	private ValiableStructure ParseDataTypeRegisterCommand(ReadOnlySpan<byte> bytes)
+	private VariableStructure ParseDataTypeRegisterCommand(ReadOnlySpan<byte> bytes)
 	{
 		// 前から順々にデータ構造を記録
-		List<ValiableStructure.IDataRecord> records = new();
+		List<VariableStructure.IDataRecord> records = new();
 
 		// 初期段階では、カスタムデータを構造に含めることはサポートしない
 
