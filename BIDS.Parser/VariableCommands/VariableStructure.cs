@@ -6,10 +6,12 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 	{
 		VariableDataType Type { get; }
 
+		string Name { get; }
+
 		public IDataRecord With(ref ReadOnlySpan<byte> bytes);
 	}
 
-	public record DataRecord(VariableDataType Type) : IDataRecord
+	public record DataRecord(VariableDataType Type, string Name) : IDataRecord
 	{
 		public IDataRecord With(ref ReadOnlySpan<byte> bytes)
 		{
@@ -17,7 +19,7 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 		}
 	}
 
-	public record ArrayStructure(VariableDataType ElemType) : IDataRecord
+	public record ArrayStructure(VariableDataType ElemType, string Name) : IDataRecord
 	{
 		VariableDataType IDataRecord.Type => VariableDataType.Array;
 
