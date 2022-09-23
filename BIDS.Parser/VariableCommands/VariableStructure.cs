@@ -1,6 +1,6 @@
 namespace BIDS.Parser.VariableCommands;
 
-public record ValiableStructure(int DataTypeId, IReadOnlyList<ValiableStructure.DataRecord> Records) : IValiableCmdResult
+public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.DataRecord> Records) : IValiableCmdResult
 {
 	public interface IDataRecord
 	{
