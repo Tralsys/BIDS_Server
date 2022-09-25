@@ -58,9 +58,11 @@ public class VariableCmdParser
 
 		while (bytes.Length > 5)
 		{
+			// 各フィールドのデータ型番号を取得する
 			VariableDataType dataType = (VariableDataType)BitConverter.ToInt32(bytes[..4]);
 			bytes = bytes[4..];
 
+			// 配列の場合は、配列の型に関する情報が次に記録されている。
 			VariableDataType? arrayElemDataType = null;
 			if (dataType == VariableDataType.Array)
 			{
@@ -68,6 +70,8 @@ public class VariableCmdParser
 				bytes = bytes[4..];
 			}
 
+			// 変数名(フィールド名/データ名)を取得する。
+			// NULL文字に到達するか、あるいはSpanを全て読み切ったら終了
 			int dataNameLen = 0;
 			while (dataNameLen < bytes.Length && bytes[dataNameLen] != 0)
 				dataNameLen++;
