@@ -11,21 +11,33 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 		public IDataRecord With(ref ReadOnlySpan<byte> bytes);
 	}
 
-	public record DataRecord(VariableDataType Type, string Name) : IDataRecord
+	public record DataRecord(VariableDataType Type, string Name, object? Value = null) : IDataRecord
 	{
 		public IDataRecord With(ref ReadOnlySpan<byte> bytes)
 		{
-			return null;
+			return this with
+			{
+				Value = this.Type.GetValueAndMoveNext(ref bytes)
+			};
 		}
 	}
 
-	public record ArrayStructure(VariableDataType ElemType, string Name) : IDataRecord
+	public record ArrayStructure(VariableDataType ElemType, string Name, object?[]? ValueArray = null) : IDataRecord
 	{
 		VariableDataType IDataRecord.Type => VariableDataType.Array;
 
 		public IDataRecord With(ref ReadOnlySpan<byte> bytes)
 		{
-			return null;
+			int arrayLength = Utils.GetInt32AndMove(ref bytes);
+
+			object?[] array = new object?[arrayLength];
+			for (int i = 0; i < arrayLength; i++)
+				array[i] = this.ElemType.GetValueAndMoveNext(ref bytes);
+
+			return this with
+			{
+				ValueArray = array
+			};
 		}
 	}
 
@@ -34,6 +46,15 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 	/// <returns>解析結果</returns>
 	public VariableStructurePayload With(ReadOnlySpan<byte> bytes)
 	{
-		return null;
+		VariableStructurePayload payload = new(this.DataTypeId);
+
+		foreach (var recordInfo in this.Records)
+		{
+			IDataRecord data = recordInfo.With(ref bytes);
+
+			payload.Add(recordInfo.Name, data);
+		}
+
+		return payload;
 	}
 };
