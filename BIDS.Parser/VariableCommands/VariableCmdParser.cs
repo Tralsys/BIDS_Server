@@ -55,7 +55,7 @@ public class VariableCmdParser
 
 		int cmdDataType = Utils.GetInt32AndMove(ref bytes);
 
-		while (bytes.Length > 5)
+		while (bytes.Length >= 5)
 		{
 			// 各フィールドのデータ型番号を取得する
 			VariableDataType dataType = (VariableDataType)Utils.GetInt32AndMove(ref bytes);
