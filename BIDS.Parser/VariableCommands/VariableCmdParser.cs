@@ -30,12 +30,12 @@ public class VariableCmdParser
 		if (gotData.Length < 4)
 			throw new InvalidDataException("Not a Valiable Command (length < 4)");
 
-		int dataId = BitConverter.ToInt32(gotData[0..4]);
+		int dataId = Utils.GetInt32AndMove(ref gotData);
 
 		return dataId switch
 		{
 			// DataType Register
-			0 => ParseDataTypeRegisterCommand(gotData[4..]),
+			0 => ParseDataTypeRegisterCommand(gotData),
 
 			_ => DataTypeDict.TryGetValue(dataId, out VariableStructure? structure)
 				? structure.With(gotData)
@@ -53,22 +53,17 @@ public class VariableCmdParser
 
 		// 初期段階では、カスタムデータを構造に含めることはサポートしない
 
-		int cmdDataType = BitConverter.ToInt32(bytes[..4]);
-		bytes = bytes[4..];
+		int cmdDataType = Utils.GetInt32AndMove(ref bytes);
 
 		while (bytes.Length > 5)
 		{
 			// 各フィールドのデータ型番号を取得する
-			VariableDataType dataType = (VariableDataType)BitConverter.ToInt32(bytes[..4]);
-			bytes = bytes[4..];
+			VariableDataType dataType = (VariableDataType)Utils.GetInt32AndMove(ref bytes);
 
 			// 配列の場合は、配列の型に関する情報が次に記録されている。
-			VariableDataType? arrayElemDataType = null;
-			if (dataType == VariableDataType.Array)
-			{
-				arrayElemDataType = (VariableDataType)BitConverter.ToInt32(bytes[0..4]);
-				bytes = bytes[4..];
-			}
+			VariableDataType? arrayElemDataType = dataType == VariableDataType.Array
+				? arrayElemDataType = (VariableDataType)Utils.GetInt32AndMove(ref bytes)
+				: null;
 
 			// 変数名(フィールド名/データ名)を取得する。
 			// NULL文字に到達するか、あるいはSpanを全て読み切ったら終了
