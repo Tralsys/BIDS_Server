@@ -134,6 +134,39 @@ public class ParseDataTypeRegisterCommandTests
 	}
 
 	[Test]
+	public void SingleArrayFieldTest()
+	{
+		byte[] arr = new byte[]
+		{
+			0,
+			0,
+			0,
+			0,
+
+			17,
+			0,
+			0,
+			0,
+
+			3,
+			0,
+			0,
+			0,
+
+			(byte)'a',
+			(byte)'\0',
+		};
+
+		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
+
+		Assert.That(actual.Records.Count, Is.EqualTo(1));
+
+		Assert.That(actual.Records[0], Is.EqualTo(
+			new VariableStructure.ArrayStructure(VariableDataType.Int32, "a", null))
+		);
+	}
+
+	[Test]
 	public void EmptyFieldNameTest()
 	{
 		byte[] arr =
@@ -187,6 +220,9 @@ public class ParseDataTypeRegisterCommandTests
 			.Concat(getBytes(8, "h"))
 			.Concat(getBytes(9, "i"))
 
+			.Concat(new byte[] { 17, 0, 0, 0 })
+			.Concat(getBytes(12, "array"))
+
 			.Concat(getBytes(12, "j"))
 			.Concat(getBytes(13, "k"))
 			.Concat(getBytes(14, "l"))
@@ -207,6 +243,8 @@ public class ParseDataTypeRegisterCommandTests
 			new VariableStructure.DataRecord(VariableDataType.UInt16, "g", null),
 			new VariableStructure.DataRecord(VariableDataType.UInt32, "h", null),
 			new VariableStructure.DataRecord(VariableDataType.UInt64, "i", null),
+
+			new VariableStructure.ArrayStructure(VariableDataType.Float16, "array", null),
 
 			new VariableStructure.DataRecord(VariableDataType.Float16, "j", null),
 			new VariableStructure.DataRecord(VariableDataType.Float32, "k", null),
