@@ -1,4 +1,6 @@
-namespace BIDS.Parser.VariableCommands;
+using System.Collections.Generic;
+
+namespace BIDS.Parser.Variable;
 
 public class VariableStructurePayload : Dictionary<string, VariableStructure.IDataRecord>, IVariableCmdResult
 {

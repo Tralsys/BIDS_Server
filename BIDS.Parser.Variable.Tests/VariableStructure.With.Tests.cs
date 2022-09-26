@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 
-using BIDS.Parser.VariableCommands;
+using BIDS.Parser.Variable;
 
 using NUnit.Framework;
 
-namespace BIDS.Parser.Tests.VariableCommands;
+namespace BIDS.Parser.Variable.Tests;
 
 public class VariableStructureTests
 {

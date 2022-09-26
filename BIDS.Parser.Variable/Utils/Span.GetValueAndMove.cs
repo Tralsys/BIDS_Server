@@ -1,4 +1,6 @@
-namespace BIDS.Parser;
+using System;
+
+namespace BIDS.Parser.Variable;
 
 public static partial class Utils
 {
