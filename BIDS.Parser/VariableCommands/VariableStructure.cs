@@ -8,7 +8,7 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 
 		string Name { get; }
 
-		public IDataRecord With(ref ReadOnlySpan<byte> bytes);
+		IDataRecord With(ref ReadOnlySpan<byte> bytes);
 	}
 
 	public record DataRecord(VariableDataType Type, string Name, object? Value = null) : IDataRecord
