@@ -2,12 +2,12 @@ using System.Text;
 
 namespace BIDS.Parser.VariableCommands;
 
-public interface IValiableCmdResult
+public interface IVariableCmdResult
 {
 	int DataTypeId { get; }
 }
 
-public record VariableCmdKeyNotFound(int DataTypeId) : IValiableCmdResult;
+public record VariableCmdKeyNotFound(int DataTypeId) : IVariableCmdResult;
 
 public record ValiableCmdError();
 
@@ -15,7 +15,7 @@ public class VariableCmdParser
 {
 	Dictionary<int, VariableStructure> DataTypeDict { get; } = new();
 
-	public IValiableCmdResult From(ReadOnlySpan<byte> gotData)
+	public IVariableCmdResult From(ReadOnlySpan<byte> gotData)
 	{
 		if (gotData.Length < 4)
 			throw new InvalidDataException("Not a Valiable Command (length < 4)");
