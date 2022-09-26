@@ -1,5 +1,5 @@
 using System;
-
+using System.Linq;
 using BIDS.Parser.VariableCommands;
 
 using NUnit.Framework;
@@ -158,5 +158,61 @@ public class ParseDataTypeRegisterCommandTests
 		Assert.That(actual.Records[0], Is.EqualTo(
 			new VariableStructure.DataRecord(VariableDataType.Boolean, "", null))
 		);
+	}
+
+	[Test]
+	public void MultiFieldTest()
+	{
+		static byte[] getBytes(int type, string name)
+			=> BitConverter.GetBytes(type).Concat(System.Text.Encoding.UTF8.GetBytes(name)).Append((byte)0x00).ToArray();
+
+		byte[] arr =
+		{
+			0,
+			0,
+			0,
+			0,
+		};
+
+		arr = arr
+			.Concat(getBytes(0, "a"))
+
+			.Concat(getBytes(1, "b"))
+			.Concat(getBytes(2, "c"))
+			.Concat(getBytes(3, "d"))
+			.Concat(getBytes(4, "e"))
+
+			.Concat(getBytes(6, "f"))
+			.Concat(getBytes(7, "g"))
+			.Concat(getBytes(8, "h"))
+			.Concat(getBytes(9, "i"))
+
+			.Concat(getBytes(12, "j"))
+			.Concat(getBytes(13, "k"))
+			.Concat(getBytes(14, "l"))
+			.ToArray();
+
+		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
+
+		VariableStructure.IDataRecord[] expected = new VariableStructure.IDataRecord[]
+		{
+			new VariableStructure.DataRecord(VariableDataType.Boolean, "a", null),
+
+			new VariableStructure.DataRecord(VariableDataType.Int8, "b", null),
+			new VariableStructure.DataRecord(VariableDataType.Int16, "c", null),
+			new VariableStructure.DataRecord(VariableDataType.Int32, "d", null),
+			new VariableStructure.DataRecord(VariableDataType.Int64, "e", null),
+
+			new VariableStructure.DataRecord(VariableDataType.UInt8, "f", null),
+			new VariableStructure.DataRecord(VariableDataType.UInt16, "g", null),
+			new VariableStructure.DataRecord(VariableDataType.UInt32, "h", null),
+			new VariableStructure.DataRecord(VariableDataType.UInt64, "i", null),
+
+			new VariableStructure.DataRecord(VariableDataType.Float16, "j", null),
+			new VariableStructure.DataRecord(VariableDataType.Float32, "k", null),
+			new VariableStructure.DataRecord(VariableDataType.Float64, "l", null),
+		};
+
+		Assert.That(actual.Records, Is.EquivalentTo(expected));
 	}
 }
