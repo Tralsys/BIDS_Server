@@ -7,16 +7,6 @@ public interface IValiableCmdResult
 	int DataTypeId { get; }
 }
 
-public class VariableStructurePayload : Dictionary<string, VariableStructure.IDataRecord>, IValiableCmdResult
-{
-	public int DataTypeId { get; }
-
-	public VariableStructurePayload(int dataTypeId)
-	{
-		DataTypeId = dataTypeId;
-	}
-}
-
 public record VariableCmdKeyNotFound(int DataTypeId) : IValiableCmdResult;
 
 public record ValiableCmdError();
