@@ -1,6 +1,6 @@
-using BIDS.Parser.VariableCommands;
+using System;
 
-namespace BIDS.Parser;
+namespace BIDS.Parser.Variable;
 
 public static partial class Utils
 {

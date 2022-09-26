@@ -1,4 +1,4 @@
-namespace BIDS.Parser.VariableCommands;
+namespace BIDS.Parser.Variable;
 
 public enum VariableDataType
 {

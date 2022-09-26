@@ -1,4 +1,8 @@
-namespace BIDS.Parser.VariableCommands;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace BIDS.Parser.Variable;
 
 public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.IDataRecord> Records) : IVariableCmdResult
 {

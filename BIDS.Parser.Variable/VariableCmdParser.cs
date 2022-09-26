@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
-namespace BIDS.Parser.VariableCommands;
+namespace BIDS.Parser.Variable;
 
 public interface IVariableCmdResult
 {
