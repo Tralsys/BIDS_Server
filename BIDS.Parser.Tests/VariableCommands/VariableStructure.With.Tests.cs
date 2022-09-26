@@ -46,4 +46,49 @@ public class VariableStructureTests
 		Assert.That(actual.TryGetValue(name, out var actualRecord), Is.True);
 		Assert.That(actualRecord, Is.EqualTo(new VariableStructure.DataRecord(type, name, expected)));
 	}
+
+	[Test]
+	public void SingleArrayTest()
+	{
+		VariableDataType type = VariableDataType.Int8;
+		string name = "array";
+		VariableStructure structure = new(0, new List<VariableStructure.IDataRecord>()
+		{
+			new VariableStructure.ArrayStructure(type, name, null)
+		});
+
+		byte[] bytes = new byte[]
+		{
+			4,
+			0,
+			0,
+			0,
+
+			1,
+			2,
+			0xFF,
+			0xFE
+		};
+
+		sbyte[] expected = new sbyte[]
+		{
+			1,
+			2,
+			-1,
+			-2
+		};
+
+		VariableStructurePayload actual = structure.With(bytes.AsSpan());
+
+		Assert.That(actual.TryGetValue(name, out var actualRecord), Is.True);
+		if (actualRecord is not VariableStructure.ArrayStructure actualArrayRecord)
+		{
+			Assert.Fail("actualRecord was not ArrayStructure");
+			return;
+		}
+
+		Assert.That(actualArrayRecord.ElemType, Is.EqualTo(type));
+		Assert.That(actualArrayRecord.Name, Is.EqualTo(name));
+		Assert.That(actualArrayRecord.ValueArray, Is.EquivalentTo(expected));
+	}
 }
