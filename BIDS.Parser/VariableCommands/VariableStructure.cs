@@ -9,6 +9,10 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 		string Name { get; }
 
 		IDataRecord With(ref ReadOnlySpan<byte> bytes);
+
+		IEnumerable<byte> GetStructureBytes();
+
+		IEnumerable<byte> GetBytes();
 	}
 
 	public record DataRecord(VariableDataType Type, string Name, object? Value = null) : IDataRecord
@@ -20,6 +24,12 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 				Value = this.Type.GetValueAndMoveNext(ref bytes)
 			};
 		}
+
+		public IEnumerable<byte> GetStructureBytes()
+			=> BitConverter.GetBytes((int)this.Type).Concat(System.Text.Encoding.UTF8.GetBytes(this.Name)).Append((byte)0);
+
+		public IEnumerable<byte> GetBytes()
+			=> this.Type.GetBytes(this.Value);
 	}
 
 	public record ArrayStructure(VariableDataType ElemType, string Name, object?[]? ValueArray = null) : IDataRecord
@@ -39,6 +49,22 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 				ValueArray = array
 			};
 		}
+
+		public IEnumerable<byte> GetStructureBytes()
+			=> BitConverter.GetBytes((int)VariableDataType.Array)
+					.Concat(BitConverter.GetBytes((int)this.ElemType))
+					.Concat(System.Text.Encoding.UTF8.GetBytes(this.Name)).Append((byte)0);
+
+		public IEnumerable<byte> GetBytes()
+		{
+			IEnumerable<byte> arr = BitConverter.GetBytes(this.ValueArray?.Length ?? 0);
+
+			if (this.ValueArray is not null)
+				foreach (var v in this.ValueArray)
+					arr = arr.Concat(this.ElemType.GetBytes(v));
+
+			return arr;
+		}
 	}
 
 	/// <summary>この構造を用いて、指定のバイト配列を解析する</summary>
@@ -56,5 +82,15 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 		}
 
 		return payload;
+	}
+
+	public IEnumerable<byte> GetStructureBytes()
+	{
+		IEnumerable<byte> bytes = BitConverter.GetBytes(this.DataTypeId);
+
+		foreach (var v in this.Records)
+			bytes = bytes.Concat(v.GetStructureBytes());
+
+		return bytes;
 	}
 };
