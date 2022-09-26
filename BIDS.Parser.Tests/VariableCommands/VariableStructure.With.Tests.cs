@@ -91,4 +91,61 @@ public class VariableStructureTests
 		Assert.That(actualArrayRecord.Name, Is.EqualTo(name));
 		Assert.That(actualArrayRecord.ValueArray, Is.EquivalentTo(expected));
 	}
+
+	[Test]
+	public void MultiRecordTest()
+	{
+		VariableStructure structure = new(0, new List<VariableStructure.IDataRecord>()
+		{
+			new VariableStructure.DataRecord(VariableDataType.Boolean, "Bool", null),
+			new VariableStructure.ArrayStructure(VariableDataType.UInt8, "Array", null),
+			new VariableStructure.DataRecord(VariableDataType.Int32, "Int32", null),
+		});
+
+		byte[] bytes = new byte[]
+		{
+			// Boolean = true
+			1,
+
+			// Array (Length=4, Elem={1, 2, 255, 254})
+			4,
+			0,
+			0,
+			0,
+
+			1,
+			2,
+			0xFF,
+			0xFE,
+
+			// Int32 = -2
+			0xFE,
+			0xFF,
+			0xFF,
+			0xFF,
+		};
+
+		byte[] expected_array = new byte[]
+		{
+			1,
+			2,
+			255,
+			254
+		};
+
+		VariableStructurePayload actual = structure.With(bytes.AsSpan());
+
+		Assert.That(actual, Has.Count.EqualTo(3));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(actual["Bool"], Is.EqualTo(new VariableStructure.DataRecord(VariableDataType.Boolean, "Bool", true)));
+			Assert.That(actual["Int32"], Is.EqualTo(new VariableStructure.DataRecord(VariableDataType.Int32, "Int32", -2)));
+
+			if (actual["Array"] is not VariableStructure.ArrayStructure arrayStructure)
+				Assert.Fail("dataName='Array' was not VariableStructure.ArrayStructure");
+			else
+				Assert.That(arrayStructure.ValueArray, Is.EquivalentTo(expected_array));
+		});
+	}
 }
