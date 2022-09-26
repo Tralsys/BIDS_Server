@@ -93,4 +93,14 @@ public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.
 
 		return bytes;
 	}
+
+	public IEnumerable<byte> GetBytes()
+	{
+		IEnumerable<byte> bytes = BitConverter.GetBytes(this.DataTypeId);
+
+		foreach (var v in this.Records)
+			bytes = bytes.Concat(v.GetBytes());
+
+		return bytes;
+	}
 };
