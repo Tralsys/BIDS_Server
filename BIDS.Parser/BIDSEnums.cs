@@ -130,7 +130,7 @@ public enum HandlePosType
 public enum DoorStateType
 {
 	Unknown,
-	IsOpen,
+	IsClosed,
 }
 
 public enum KeyControlType
