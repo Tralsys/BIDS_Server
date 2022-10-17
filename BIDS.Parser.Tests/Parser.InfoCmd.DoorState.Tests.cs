@@ -9,7 +9,7 @@ namespace BIDS.Parser.Tests;
 public class Parser_InfoCmd_DoorState_Tests
 {
 	// Valid Cases
-	[TestCase("TRID0", 0, DoorStateType.IsOpen)]
+	[TestCase("TRID0", 0, DoorStateType.IsClosed)]
 	[TestCase("TRID1", 1, DoorStateType.Unknown)]
 	[TestCase("TRID-1", -1, DoorStateType.Unknown)]
 	public void RequestTests(string inputCmd, int expectedRawDataNum, DoorStateType expectedDataType)
@@ -27,8 +27,8 @@ public class Parser_InfoCmd_DoorState_Tests
 
 	// Valid Cases
 	[TestCase("TRID-1X1X2X3", -1, DoorStateType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
-	[TestCase("TRID0X1X2X3", 0, DoorStateType.IsOpen, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
-	[TestCase("TRID0X1.2X2.3X3.4", 0, DoorStateType.IsOpen, new int[] { 1, 2, 3 }, new double[] { 1.2, 2.3, 3.4 })]
+	[TestCase("TRID0X1X2X3", 0, DoorStateType.IsClosed, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
+	[TestCase("TRID0X1.2X2.3X3.4", 0, DoorStateType.IsClosed, new int[] { 1, 2, 3 }, new double[] { 1.2, 2.3, 3.4 })]
 	public void ResponseTests(string inputCmd, int expectedRawDataNum, DoorStateType expectedDataType, int[] expectDataInt, double[] expectDataDouble)
 	{
 		BIDSCmd_Info_DoorState expected = new(
