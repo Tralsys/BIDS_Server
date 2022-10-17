@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>TR.BIDSsv.serial</AssemblyName>
-    <RootNamespace>TR.BIDSsv</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<AssemblyName>TR.BIDSsv.serial</AssemblyName>
+		<RootNamespace>TR.BIDSsv</RootNamespace>
 		<Version>1.0.2.1</Version>
-    <Authors>Tetsu Otter</Authors>
-    <Company>Tech Otter</Company>
-    <Product>BIDS Project</Product>
-    <Copyright>Copyright 2019 Tetsu Otter</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Platforms>AnyCPU;x86;x64</Platforms>
-    <Configurations>Release;Debug</Configurations>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
-    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
-  </ItemGroup>
+		<Authors>Tetsu Otter</Authors>
+		<Company>Tech Otter</Company>
+		<Product>BIDS Project</Product>
+		<Copyright>Copyright 2019 Tetsu Otter</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://technotter.com/bids</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<Configurations>Release;Debug</Configurations>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
+		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
+	</ItemGroup>
 </Project>

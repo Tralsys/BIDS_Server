@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
 		<LangVersion>preview</LangVersion>
-    <AssemblyName>TR.BIDSsv</AssemblyName>
-    <RootNamespace>TR.BIDSsv</RootNamespace>
+		<AssemblyName>TR.BIDSsv</AssemblyName>
+		<RootNamespace>TR.BIDSsv</RootNamespace>
 		<Version>1.0.4</Version>
-    <Authors>Tetsu Otter</Authors>
-    <Company>Tech Otter</Company>
-    <Product>BIDS Project</Product>
-    <Copyright>Copyright 2020 Tetsu Otter</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Platforms>AnyCPU;x86;x64</Platforms>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes># 1.0.2.1
+		<Authors>Tetsu Otter</Authors>
+		<Company>Tech Otter</Company>
+		<Product>BIDS Project</Product>
+		<Copyright>Copyright 2020 Tetsu Otter</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageReleaseNotes># 1.0.2.1
 uploaded to nuget</PackageReleaseNotes>
-    <Description>It is a library that implements the basic functions of BIDS_Server.  It operates BIDSSMemLib, manages IBIDSsv-compliant libraries, and provides some functions to share the data.</Description>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="IAtsPI" Version="1.0.0.2" />
-    <PackageReference Include="TR.BIDSSMemLib.rw" Version="2.1.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
-  </ItemGroup>
+		<Description>It is a library that implements the basic functions of BIDS_Server.  It operates BIDSSMemLib, manages IBIDSsv-compliant libraries, and provides some functions to share the data.</Description>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="IAtsPI" Version="1.0.0.2" />
+		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.1.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
+	</ItemGroup>
 </Project>

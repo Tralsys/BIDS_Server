@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>TR.IBIDSsv</AssemblyName>
-    <RootNamespace>TR</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<AssemblyName>TR.IBIDSsv</AssemblyName>
+		<RootNamespace>TR</RootNamespace>
 		<Version>1.0.2.1</Version>
-    <Authors>Tetsu Otter</Authors>
-    <Company>Tech Otter</Company>
-    <Product>BIDS Project</Product>
-    <Copyright>Copyright 2020 Tetsu Otter</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Platforms>AnyCPU;x86;x64</Platforms>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes># 1.0.2.1
+		<Authors>Tetsu Otter</Authors>
+		<Company>Tech Otter</Company>
+		<Product>BIDS Project</Product>
+		<Copyright>Copyright 2020 Tetsu Otter</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageReleaseNotes># 1.0.2.1
 uploaded to nuget</PackageReleaseNotes>
-    <Description>This library defines the interfaces that must be inherited by the library that provides inter-machine data sharing capabilities for use on BIDSsv.</Description>
-    <Configurations>Release;Debug</Configurations>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
-  </ItemGroup>
+		<Description>This library defines the interfaces that must be inherited by the library that provides inter-machine data sharing capabilities for use on BIDSsv.</Description>
+		<Configurations>Release;Debug</Configurations>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
+	</ItemGroup>
 </Project>
