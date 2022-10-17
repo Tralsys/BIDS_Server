@@ -33,6 +33,11 @@ public partial class Parser
 			11 => StateDataType.Time_Minute,
 			12 => StateDataType.Time_Second,
 			13 => StateDataType.Time_MilliSecond,
+
+			-1 => StateDataType.AllData,
+			-2 => StateDataType.PressureList,
+			-3 => StateDataType.TimeInString,
+
 			_ => StateDataType.Unknown,
 		};
 }

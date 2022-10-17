@@ -92,6 +92,7 @@ public enum KeyType
 public enum SpecDataType
 {
 	Unknown,
+	AllData,
 	Power,
 	Brake,
 	ATSCheck,
@@ -102,6 +103,9 @@ public enum SpecDataType
 public enum StateDataType
 {
 	Unknown,
+	AllData,
+	PressureList,
+	TimeInString,
 	Location,
 	Speed,
 	CurrentTime,
@@ -121,10 +125,12 @@ public enum StateDataType
 public enum HandlePosType
 {
 	Unknown,
+	AllData,
 	Brake,
 	Power,
 	Reverser,
 	ConstSpeed,
+	SelfBrake,
 }
 
 public enum DoorStateType

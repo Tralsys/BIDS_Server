@@ -14,8 +14,9 @@ public class Parser_InfoCmd_SpecData_Tests
 	[TestCase("TRIC2", 2, SpecDataType.ATSCheck)]
 	[TestCase("TRIC3", 3, SpecDataType.B67)]
 	[TestCase("TRIC4", 4, SpecDataType.CarCount)]
+	[TestCase("TRIC-1", -1, SpecDataType.AllData)]
 	[TestCase("TRIC5", 5, SpecDataType.Unknown)]
-	[TestCase("TRIC-1", -1, SpecDataType.Unknown)]
+	[TestCase("TRIC-2", -2, SpecDataType.Unknown)]
 	public void RequestTests(string inputCmd, int expectedRawDataNum, SpecDataType expectedDataType)
 	{
 		BIDSCmd_Info_SpecData expected = new(
@@ -30,7 +31,7 @@ public class Parser_InfoCmd_SpecData_Tests
 	}
 
 	// Valid Cases
-	[TestCase("TRIC-1X1X2X3", -1, SpecDataType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
+	[TestCase("TRIC-2X1X2X3", -2, SpecDataType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
 	[TestCase("TRIC0X1X2X3", 0, SpecDataType.Brake, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
 	[TestCase("TRIC0X1.2X2.3X3.4", 0, SpecDataType.Brake, new int[] { 1, 2, 3 }, new double[] { 1.2, 2.3, 3.4 })]
 	public void ResponseTests(string inputCmd, int expectedRawDataNum, SpecDataType expectedDataType, int[] expectDataInt, double[] expectDataDouble)
