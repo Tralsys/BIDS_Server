@@ -28,5 +28,6 @@ uploaded to nuget</PackageReleaseNotes>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
+		<ProjectReference Include="..\BIDS.Parser\BIDS.Parser.csproj" />
 	</ItemGroup>
 </Project>
