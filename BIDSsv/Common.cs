@@ -188,7 +188,7 @@ namespace TR.BIDSsv
 		static public void Dispose()
 		{
 			if (svlist.Count > 0) Parallel.For(0, svlist.Count, (i) => svlist[i].Dispose());
-			SMemLib.ReadStop();
+			StaticSMemLib.ReadStop();
 		}
 
 
