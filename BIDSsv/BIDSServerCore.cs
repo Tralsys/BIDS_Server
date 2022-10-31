@@ -68,4 +68,28 @@ public partial class BIDSServerCore
 			if (isEmptyName || v.Name == instanceName)
 				v.IsDebug = isDebug;
 	}
+
+	public bool PrintCommand(string Name, string Command)
+	{
+		if (string.IsNullOrEmpty(Command) || ServerParserDic.Count <= 0)
+			return false;
+
+		foreach (var v in ServerParserDic.Keys)
+		{
+			if (v.Name != Name)
+				continue;
+
+			try
+			{
+				v.Print(Command);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
