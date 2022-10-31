@@ -9,13 +9,16 @@ using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
-  class TCPsv : IBIDSsv
+  class TCPsv : IBIDSsv, IBIDSsv.IManager
   {
+    public event EventHandler<ControlModEventArgs>? AddMod;
+    public event EventHandler<ControlModEventArgs>? RemoveMod;
+
     public event EventHandler<DataGotEventArgs>? DataGot;
     public event EventHandler? Disposed;
 
     //Wait Port : 14147
-    int PortNum = Common.DefPNum;
+    int PortNum = ConstVals.DefPNum;
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
 
@@ -124,7 +127,7 @@ namespace TR.BIDSsv
       TL = new TcpListener(IPAddress.Any, PortNum);
       TL.Start();
       Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, ((IPEndPoint)TL.LocalEndpoint).Port);
-      TD = PortNum != Common.DefPNum ? new Task(ReadDoing) : new Task(ConnectDoing);
+      TD = PortNum != ConstVals.DefPNum ? new Task(ReadDoing) : new Task(ConnectDoing);
 
       TD.Start();
       return true;
@@ -184,7 +187,7 @@ namespace TR.BIDSsv
             int pn = tcp.Connect(Enc, vnum, WTO, RTO);
             Print("TRV" + vnum.ToString() + "PN" + pn.ToString() + "\n");
             tcp.Name = "tcp" + pn.ToString();
-            Common.Add(ref tcp);
+            AddMod?.Invoke(this, new(tcp));
           }
           catch (Exception e)
           {

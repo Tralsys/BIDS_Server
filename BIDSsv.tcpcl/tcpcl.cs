@@ -21,7 +21,7 @@ namespace BIDSsv.tcpcl
     public string Name { get; private set; } = "tcpcl";
     public bool IsDebug { get; set; } = false;
 
-    int PortNum = Common.DefPNum;
+    int PortNum = ConstVals.DefPNum;
 
     TcpClient TC = null;
     NetworkStream NS = null;
@@ -147,7 +147,7 @@ namespace BIDSsv.tcpcl
         NS.WriteTimeout = WTO;
 
         //Reconnect Process
-        if (rie.Port == Common.DefPNum)
+        if (rie.Port == ConstVals.DefPNum)
         {
           Console.WriteLine("{0} : Reconnect Process Start.", Name);
           try
@@ -200,7 +200,7 @@ namespace BIDSsv.tcpcl
         Console.WriteLine(Name + " : TcpClient Open Failed");
         Console.WriteLine(e);
 
-        Common.Remove(Name);
+        Dispose();
         return;
       }
 

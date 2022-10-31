@@ -31,7 +31,7 @@ namespace TR.BIDSsv
 			}
 			else MyIPEndPoint = Src;
 
-			int pt = Src?.Port ?? Common.DefPNum;
+			int pt = Src?.Port ?? ConstVals.DefPNum;
 			UCR = new UdpClient(Src ?? new IPEndPoint(IPAddress.Any, pt));
 			UCW = new UdpClient(MyIPEndPoint);
 			MyIPEndPoint.Port = ((IPEndPoint)UCW.Client.LocalEndPoint).Port;

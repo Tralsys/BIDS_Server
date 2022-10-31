@@ -25,6 +25,16 @@ namespace TR
 		}
 	}
 
+	public class ControlModEventArgs : EventArgs
+	{
+		public IBIDSsv Instance { get; }
+
+		public ControlModEventArgs(IBIDSsv sv)
+		{
+			Instance = sv;
+		}
+	}
+
 	public interface IBIDSsv : IDisposable
 	{
 		event EventHandler<DataGotEventArgs>? DataGot;
@@ -44,5 +54,11 @@ namespace TR
 		void OnSoundDChanged(in int[] data);
 
 		void WriteHelp(in string args);
+
+		public interface IManager : IBIDSsv
+		{
+			event EventHandler<ControlModEventArgs>? AddMod;
+			event EventHandler<ControlModEventArgs>? RemoveMod;
+		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
+using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
@@ -30,8 +31,8 @@ namespace TR.BIDSsv
 			string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
 			IPAddress rip = IPAddress.Broadcast;
 			IPAddress lip = IPAddress.Any;
-			ushort rport = (ushort)Common.DefPNum;
-			ushort lport = (ushort)Common.DefPNum;
+			ushort rport = (ushort)ConstVals.DefPNum;
+			ushort lport = (ushort)ConstVals.DefPNum;
 			for (int i = 0; i < sa.Length; i++)
 			{
 				string[] saa = sa[i].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -154,8 +155,8 @@ namespace TR.BIDSsv
 			"  -N or -Name : Set the Instance Name.  Default:\"udp\"  If you don't set this option, this program maybe cause some bugs.",
 			"  -RIP or -RemoteIP : Set the IP Address to communicate with.  If you don't set this option, this program starts broadcast communication.",
 			"  -LIP or -LocalIP : Set the IP Address to send from.",
-			"  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)",
-			"  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)"
+			"  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"" + ConstVals.DefPNum.ToString() + "\" (default port)",
+			"  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"" + ConstVals.DefPNum.ToString() + "\" (default port)"
 		};
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void WriteHelp(in string args)

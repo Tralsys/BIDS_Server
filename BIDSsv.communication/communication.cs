@@ -98,7 +98,7 @@ namespace TR.BIDSsv
 			catch (ObjectDisposedException)
 			{
 				Console.WriteLine("{0} (ReceivedDoing) : This connection is already closed.", Name);
-				Common.Remove(this);
+				Dispose();
 				return;
 			}
 
@@ -124,7 +124,14 @@ namespace TR.BIDSsv
 		public void OnBSMDChanged(in BIDSSharedMemoryData data)
 		{
 			if (!IsWriteable) return;
-			UC?.Send(Common.CommunicationBAGet(Common.BSMDtoComStr(data, data.StateData.T - oldT), PDA, SDA), Common.ComStrSize + (Common.PSArrSize * 2));
+			UC?.Send(
+				CommunicationDllConverter.CommunicationBAGet(
+					CommunicationDllConverter.BSMDtoComStr(data, data.StateData.T - oldT),
+					PDA,
+					SDA),
+				CommunicationDllConverter.ComStrSize + (CommunicationDllConverter.PSArrSize * 2)
+			);
+
 			oldT = data.StateData.T;
 		}
 
