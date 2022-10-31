@@ -9,7 +9,15 @@ namespace TR;
 
 public partial class BIDSServerCore
 {
-	static public BIDSServerCore Default { get; }
+	static BIDSServerCore? _Default = null;
+	static public BIDSServerCore Default
+	{
+		get
+		{
+			_Default ??= new();
+			return _Default;
+		}
+	}
 
 	public readonly int Version = 202;
 	private bool disposedValue;
