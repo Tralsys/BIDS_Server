@@ -60,7 +60,7 @@ namespace TR.BIDSsv
 		public int MaxServiceBrakeNNum;
 	}
 
-	static public partial class Common
+	static public class CommunicationDllConverter
 	{
 		/// <summary>Communication.dllで使用されているデータフォーマットのヘッダ</summary>
 		public const UInt32 CommunicationStructHeader = 0xfefef0f0;
