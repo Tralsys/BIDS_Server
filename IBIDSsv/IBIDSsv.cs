@@ -9,12 +9,26 @@ namespace TR
 		public int? Power;
 		public int? Brake;
 	}
+
 	public class KeyCtrlEvArgs : EventArgs
 	{
 		public bool?[] KeyState;
 	}
+
+	public class DataGotEventArgs : EventArgs
+	{
+		public byte[] Bytes { get; }
+
+		public DataGotEventArgs(byte[] bytes)
+		{
+			Bytes = bytes;
+		}
+	}
+
 	public interface IBIDSsv : IDisposable
 	{
+		event EventHandler<DataGotEventArgs>? DataGot;
+
 		bool IsDisposed { get; }
 		int Version { get; set; }
 		string Name { get; }
@@ -28,6 +42,5 @@ namespace TR
 		void OnSoundDChanged(in int[] data);
 
 		void WriteHelp(in string args);
-
 	}
 }
