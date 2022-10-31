@@ -8,6 +8,8 @@ namespace TR.BIDSsv
 {
 	public class communication : IBIDSsv
 	{
+		public event EventHandler<DataGotEventArgs>? DataGot;
+
 		const int DefPNum = 9032;
 		public bool IsDisposed { get; private set; } = false;
 		private int PortNum = DefPNum;
@@ -77,12 +79,15 @@ namespace TR.BIDSsv
 		SocketException sexc;
 		private void ReceivedDoing(IAsyncResult ar)
 		{
-			UdpClient uc = (UdpClient)ar.AsyncState;
-			IPEndPoint ipep = null;
-			byte[] rba = new byte[] { 0x00 };
+			if (ar.AsyncState is not UdpClient uc)
+				return;
+
 			try
 			{
-				rba = uc?.EndReceive(ar, ref ipep);
+				IPEndPoint? ipep = null;
+				byte[] rba = uc.EndReceive(ar, ref ipep);
+
+				DataGot?.Invoke(this, new(rba));
 			}
 			catch (SocketException e)
 			{
@@ -96,21 +101,7 @@ namespace TR.BIDSsv
 				return;
 			}
 
-			if (rba.Length == (Common.ComStrSize + (Common.PSArrSize * 2)) && BitConverter.ToUInt32(rba, 0) == Common.CommunicationStructHeader)
-			{
-				int[] pda = new int[256];
-				int[] sda = new int[256];
-				var bsmd = Common.CommunicationBAGot(rba, out pda, out sda).ComStrtoBSMD();
-				Common.BSMD = bsmd;
-				Common.PD = new PanelD() { Panels = pda };
-				Common.SD = new SoundD() { Sounds = sda };
-			}
-			else
-			{
-				Common.DataSelect(this, rba, Encoding.Default);
-			}
-
-			uc?.BeginReceive(ReceivedDoing, uc);
+			uc.BeginReceive(ReceivedDoing, uc);
 		}
 
 		protected virtual void Dispose(bool tf)

@@ -11,6 +11,8 @@ namespace BIDSsv.testmod
 {
 	public class modif : IBIDSsv
 	{
+		public event EventHandler<DataGotEventArgs>? DataGot;
+
 		public bool IsDisposed { get; private set; }
 		public int Version { get; set; } = ModVersion;
 		private const int ModVersion = 202;
@@ -186,7 +188,9 @@ namespace BIDSsv.testmod
 			try
 			{
 				AppendText("Send : "+ cmd);
-				Common.DataSelSend(this, cmd);
+
+				DataGot?.Invoke(this, new(Encoding.Default.GetBytes(cmd)));
+
 				return true;
 			}catch(Exception e)
 			{

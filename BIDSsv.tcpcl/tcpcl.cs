@@ -13,6 +13,8 @@ namespace BIDSsv.tcpcl
 {
   class TCPcl : IBIDSsv
   {
+    public event EventHandler<DataGotEventArgs>? DataGot;
+
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
     public string Name { get; private set; } = "tcpcl";
@@ -212,8 +214,8 @@ namespace BIDSsv.tcpcl
       {
         if (TC?.Connected != true) continue;
         if (NS?.CanRead != true) continue;
-        byte[] ba = Common.DataSelect(this, await ReadByte(), Enc);
-        if (ba?.Length > 0) Print(ba);
+
+        DataGot?.Invoke(this, new(await ReadByte()));
       }
       NS?.Close();
       TC?.Close();

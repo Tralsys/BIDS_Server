@@ -2,11 +2,14 @@
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
 using System.Text;
+using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
   public class Serial : IBIDSsv
   {
+    public event EventHandler<DataGotEventArgs>? DataGot;
+
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
     public bool IsDebug { get => sdc.IsDebugging; set => sdc.IsDebugging = value; }
@@ -217,10 +220,10 @@ namespace TR.BIDSsv
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-    private void Sdc_BinaryDataReceived(object sender, byte[] e) => Common.DataSelSend(this, e, sdc.Enc);
+    private void Sdc_BinaryDataReceived(object? sender, byte[] e) => DataGot?.Invoke(this, new(e));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-    private void Sdc_StringDataReceived(object sender, string e) => Common.DataSelSend(this, e);
+    private void Sdc_StringDataReceived(object? sender, string e) => DataGot?.Invoke(this, new(sdc.Enc.GetBytes(e)));
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
     public void OnOpenDChanged(in OpenD data) { }

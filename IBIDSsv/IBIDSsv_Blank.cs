@@ -7,6 +7,8 @@ namespace TR
 {
 	public abstract class IBIDSsv_Blank : IBIDSsv
 	{
+		public event EventHandler<DataGotEventArgs>? DataGot;
+
 		public bool IsDisposed { get; protected set; }
 		public int Version { get; set; }
 		public string Name { get; protected set; }

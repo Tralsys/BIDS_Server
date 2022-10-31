@@ -7,6 +7,8 @@ namespace TR.BIDSsv
 {
 	public class udp : IBIDSsv
 	{
+		public event EventHandler<DataGotEventArgs>? DataGot;
+
 		public bool IsDisposed { get => disposedValue; }
 		public int Version { get; set; } = 202;
 		public string Name { get; private set; } = "udp";
@@ -122,7 +124,8 @@ namespace TR.BIDSsv
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void Udpc_DataGotEv(object sender, UDPGotEvArgs e)
 		{
-			if (e.DataLen > 0) Common.DataSelSend(this, e.Data, Enc);
+			if (e.DataLen > 0)
+				DataGot?.Invoke(this, new(e.Data));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.

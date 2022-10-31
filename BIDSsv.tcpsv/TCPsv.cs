@@ -11,6 +11,8 @@ namespace TR.BIDSsv
 {
   class TCPsv : IBIDSsv
   {
+    public event EventHandler<DataGotEventArgs>? DataGot;
+
     //Wait Port : 14147
     int PortNum = Common.DefPNum;
     public bool IsDisposed { get; private set; } = false;
@@ -223,8 +225,7 @@ namespace TR.BIDSsv
         if (TC?.Connected != true) continue;
         if (!IsLooping) continue;
 
-        byte[] ba = Common.DataSelect(this, await ReadByte(), Enc);
-        if (ba?.Length > 0) Print(ba);
+        DataGot?.Invoke(this, new(await ReadByte()));
       }
       NS?.Close();
       TC?.Close();
