@@ -15,7 +15,7 @@ namespace TR.BIDSsv
 		/// <param name="newobj"></param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
+		public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString() ?? string.Empty;
 		/// <summary>Byte Arrayに対し, BIDS規格のヘッダを記録します.</summary>
 		/// <param name="ba">対象の配列</param>
 		/// <param name="ba_2">コマンドタイプ</param>

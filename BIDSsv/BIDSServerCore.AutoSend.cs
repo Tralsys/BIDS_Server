@@ -17,7 +17,7 @@ public partial class BIDSServerCore
 
 	Dictionary<IBIDSCmd_Info, List<IBIDSsv>> ASList { get; } = new();
 
-	private void SMem_SMC_BSMDChanged(object sender, ValueChangedEventArgs<BIDSSharedMemoryData> e)
+	private void SMem_SMC_BSMDChanged(object? sender, ValueChangedEventArgs<BIDSSharedMemoryData> e)
 	{
 		if (ServerParserDic.Count <= 0)
 			return;

@@ -46,7 +46,7 @@ namespace TR.BIDSsv
 		/// <param name="separator">設定同士を隔てるセパレーター</param>
 		/// <returns>成功したかどうか</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		static public bool LoadFromSArr(string[] sa, string separator)
+		static public bool LoadFromSArr(string[]? sa, string separator)
 		{
 			if (sa != null && sa.Length != 0 && string.IsNullOrEmpty(separator)) return false;
 
@@ -101,12 +101,12 @@ namespace TR.BIDSsv
 		/// <param name="Num">Button番号</param>
 		/// <returns>Buttonの役割</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		static public int[] GetBtJobNum(int Num) => GetBtJobNum((uint)Num);
+		static public int[]? GetBtJobNum(int Num) => GetBtJobNum((uint)Num);
 		/// <summary>Buttonの役割を取得</summary>
 		/// <param name="Num">Button番号</param>
 		/// <returns>Buttonの役割</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		static public int[] GetBtJobNum(uint Num)
+		static public int[]? GetBtJobNum(uint Num)
 		{
 			if (!(BtnAssignList?.Count > 0)) return null;
 			List<int> jbl = new List<int>();

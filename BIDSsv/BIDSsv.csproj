@@ -5,6 +5,7 @@
 		<LangVersion>preview</LangVersion>
 		<AssemblyName>TR.BIDSsv</AssemblyName>
 		<RootNamespace>TR.BIDSsv</RootNamespace>
+		<Nullable>enable</Nullable>
 		<Version>1.0.4</Version>
 		<Authors>Tetsu Otter</Authors>
 		<Company>Tech Otter</Company>

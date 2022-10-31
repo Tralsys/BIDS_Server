@@ -81,7 +81,11 @@ namespace TR.BIDSsv
 
 			IntPtr ip = Marshal.AllocHGlobal(ComStrSize);
 			Marshal.Copy(ba, 0, ip, ComStrSize);
-			var cs = (CommunicationStruct)Marshal.PtrToStructure(ip, typeof(CommunicationStruct));
+			if (Marshal.PtrToStructure(ip, typeof(CommunicationStruct)) is not CommunicationStruct cs)
+			{
+				Marshal.FreeHGlobal(ip);
+				return default;
+			}
 			Marshal.FreeHGlobal(ip);
 
 			ip = Marshal.AllocHGlobal(PSArrSize);
