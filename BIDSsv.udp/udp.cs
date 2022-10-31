@@ -25,7 +25,7 @@ namespace TR.BIDSsv
 		}
 		private bool isDbg = false;
 		Encoding Enc = Encoding.Default;
-		udpcom udpc = null;
+		udpcom? udpc = null;
 		public bool Connect(in string args)
 		{
 			string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
@@ -124,7 +124,7 @@ namespace TR.BIDSsv
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private void Udpc_DataGotEv(object sender, UDPGotEvArgs e)
+		private void Udpc_DataGotEv(object? sender, UDPGotEvArgs e)
 		{
 			if (e.DataLen > 0)
 				DataGot?.Invoke(this, new(e.Data));
@@ -146,7 +146,7 @@ namespace TR.BIDSsv
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public void Print(in byte[] data) => udpc.DataSend(data);
+		public void Print(in byte[] data) => udpc?.DataSend(data);
 
 		readonly string[] ArgInfo = new string[]
 		{

@@ -12,7 +12,7 @@ namespace TR
 
 	public class KeyCtrlEvArgs : EventArgs
 	{
-		public bool?[] KeyState;
+		public bool?[]? KeyState;
 	}
 
 	public class DataGotEventArgs : EventArgs

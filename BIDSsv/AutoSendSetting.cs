@@ -84,7 +84,7 @@ public class AutoSendSetting
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 	static public byte[] BasicBVE5(object o)
 	{
-		return null;
+		return Array.Empty<byte>();
 	}
 	/// <summary>openBVE</summary>
 	/// <param name="o"></param>

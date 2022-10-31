@@ -13,13 +13,21 @@ namespace TR.BIDSsv
 
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
-    public bool IsDebug { get => sdc.IsDebugging; set => sdc.IsDebugging = value; }
+    public bool IsDebug
+    {
+      get => sdc?.IsDebugging ?? false;
+      set
+      {
+        if (sdc is not null)
+          sdc.IsDebugging = value;
+      }
+    }
     public string Name { get; private set; } = "serial";
 
     public bool ReConnectWhenTimedOut { get; private set; } = false;
     public bool AliveCMD { get; private set; } = false;
 
-    Serial_DeviceCom sdc = null;
+    Serial_DeviceCom? sdc = null;
     private bool IsBinaryAllowed = false;
 
     public bool Connect(in string args)
@@ -224,7 +232,7 @@ namespace TR.BIDSsv
     private void Sdc_BinaryDataReceived(object? sender, byte[] e) => DataGot?.Invoke(this, new(e));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-    private void Sdc_StringDataReceived(object? sender, string e) => DataGot?.Invoke(this, new(sdc.Enc.GetBytes(e)));
+    private void Sdc_StringDataReceived(object? sender, string e) => DataGot?.Invoke(this, new((sdc?.Enc ?? Encoding.Default).GetBytes(e)));
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
     public void OnOpenDChanged(in OpenD data) { }

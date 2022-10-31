@@ -25,10 +25,10 @@ namespace TR.BIDSsv
     public string Name { get; private set; } = "tcpsv";
     public bool IsDebug { get; set; } = false;
 
-    TcpListener TL = null;
-    TcpClient TC = null;
-    NetworkStream NS = null;
-    Task TD = null;
+    TcpListener? TL = null;
+    TcpClient? TC = null;
+    NetworkStream? NS = null;
+    Task? TD = null;
 
     Encoding Enc = Encoding.Default;
     bool IsLooping = true;
@@ -140,8 +140,11 @@ namespace TR.BIDSsv
       Version = vnum;
       TL = new TcpListener(IPAddress.Any, 0);
       TL?.Start();
-      PortNum = ((IPEndPoint)TL.LocalEndpoint).Port;
-      Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, PortNum);
+
+      IPEndPoint? ep = TL?.LocalEndpoint as IPEndPoint;
+
+      PortNum = ep?.Port ?? ConstVals.DefPNum;
+      Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ep?.Address, PortNum);
 
       TD = new Task(ReadDoing);
 
@@ -169,8 +172,11 @@ namespace TR.BIDSsv
         {
           TC = TL?.AcceptTcpClient();
           NS = TC?.GetStream();
-          NS.ReadTimeout = RTO;
-          NS.WriteTimeout = WTO;
+          if (NS is not null)
+          {
+            NS.ReadTimeout = RTO;
+            NS.WriteTimeout = WTO;
+          }
         }
         catch (Exception e)
         {
@@ -210,8 +216,9 @@ namespace TR.BIDSsv
     {
       try
       {
-        TC = TL.AcceptTcpClient();
-        Console.WriteLine(Name + " : " + "Connected => Addr:{0}, Port:{1}", ((IPEndPoint)TC.Client.RemoteEndPoint).Address, ((IPEndPoint)TC.Client.RemoteEndPoint).Port);
+        TC = TL?.AcceptTcpClient();
+        IPEndPoint? rep = TC?.Client.RemoteEndPoint as IPEndPoint;
+        Console.WriteLine(Name + " : " + "Connected => Addr:{0}, Port:{1}", rep?.Address, rep?.Port);
         NS = TC?.GetStream();
       }
       catch (Exception e)
@@ -253,7 +260,7 @@ namespace TR.BIDSsv
       {
         Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
       }
-      if (!IsLooping) return null;
+      if (!IsLooping) return Array.Empty<byte>();
       byte[] b = new byte[1];
       int nsreadr = 0;
 
@@ -269,7 +276,7 @@ namespace TR.BIDSsv
       {
         if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
         else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-        return null;
+        return Array.Empty<byte>();
       }
       return RBytesL.ToArray();
     }

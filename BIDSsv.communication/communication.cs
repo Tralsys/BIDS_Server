@@ -15,12 +15,12 @@ namespace TR.BIDSsv
 		public bool IsDisposed { get; private set; } = false;
 		private int PortNum = DefPNum;
 		private int RemotePNum = DefPNum;
-		IPAddress Addr = IPAddress.Any;
+		IPAddress? Addr = IPAddress.Any;
 		public int Version { get; set; } = 100;
 		public string Name { get; private set; } = "communication";
 		public bool IsDebug { get; set; } = false;
 		bool IsWriteable = false;
-		UdpClient UC = null;
+		UdpClient? UC = null;
 
 		public bool Connect(in string args)
 		{
@@ -66,7 +66,7 @@ namespace TR.BIDSsv
 			try
 			{
 				UC = new UdpClient(new IPEndPoint(IPAddress.Any, PortNum));
-				if (Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
+				if (Addr is not null && Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
 			}
 			catch (Exception e)
 			{
@@ -77,7 +77,7 @@ namespace TR.BIDSsv
 			return true;
 		}
 
-		SocketException sexc;
+		SocketException? sexc = null;
 		private void ReceivedDoing(IAsyncResult ar)
 		{
 			if (ar.AsyncState is not UdpClient uc)
@@ -92,7 +92,7 @@ namespace TR.BIDSsv
 			}
 			catch (SocketException e)
 			{
-				if (!Equals(sexc.ErrorCode, e.ErrorCode)) Console.WriteLine("{0} : Receieve Error({2}) => {1}", Name, e, e.ErrorCode);
+				if (!Equals(sexc?.ErrorCode, e.ErrorCode)) Console.WriteLine("{0} : Receieve Error({2}) => {1}", Name, e, e.ErrorCode);
 				sexc = e;
 			}
 			catch (ObjectDisposedException)

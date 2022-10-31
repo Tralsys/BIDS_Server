@@ -21,9 +21,9 @@ namespace BIDSsv.testmod
 		private const int ModVersion = 202;
 		public string Name { get; private set; } = "BsvTest";
 
-		private string LogFileName;
-		SemaphoreSlim swr_lock = new SemaphoreSlim(1);//ref : https://www.atmarkit.co.jp/ait/articles/1411/18/news135.html
-		private StreamWriter swr = null;
+		private string LogFileName = string.Empty;
+		SemaphoreSlim? swr_lock = new SemaphoreSlim(1);//ref : https://www.atmarkit.co.jp/ait/articles/1411/18/news135.html
+		private StreamWriter? swr = null;
 		public bool IsDebug { get; set; }
 
 		const int DefaultInterval = 10;
@@ -124,7 +124,8 @@ namespace BIDSsv.testmod
 										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
 										break;
 									}
-									CMDSendTimer cst = null;
+
+									CMDSendTimer cst;
 									try
 									{
 										cst = new CMDSendTimer(this, interval, saa[1]);
@@ -132,7 +133,6 @@ namespace BIDSsv.testmod
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
 										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
-										cst?.Dispose();
 										break;
 									}
 									CSTL.Add(cst);
@@ -160,9 +160,9 @@ namespace BIDSsv.testmod
 				if (string.IsNullOrWhiteSpace(s)) return;
 				try
 				{
-					await swr_lock?.WaitAsync();
+					await swr_lock.WaitAsync();
 					if (IsDisposed || disposedValue) return;
-					await swr?.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
+					await swr.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
 				}
 				catch (ObjectDisposedException)
 				{
@@ -259,18 +259,19 @@ namespace BIDSsv.testmod
 							CSTL[i]?.Dispose();
 					try
 					{
-						await swr_lock.WaitAsync();
+						if (swr_lock is not null)
+							await swr_lock.WaitAsync();
 						//await swr?.FlushAsync();
 						swr?.Close();
 						swr?.Dispose();
 					}
 					finally
 					{
-						swr_lock.Release();
+						swr_lock?.Release();
 					}
 				}
 				swr = null;
-				swr_lock.Dispose();
+				swr_lock?.Dispose();
 				swr_lock = null;
 				disposedValue = true;
 				Disposed?.Invoke(this, new());

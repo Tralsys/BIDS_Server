@@ -13,7 +13,7 @@ namespace TR.BIDSsv
 		private readonly List<char> DTypes;//外部からの操作はメソッドを通して. 初期化は最初だけ.
 
 		/// <summary>リストの操作権を管理します.</summary>
-		ReaderWriterLockSlim LLock = null;
+		ReaderWriterLockSlim LLock;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public ASList()
 		{

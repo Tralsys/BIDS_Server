@@ -23,9 +23,9 @@ namespace BIDSsv.tcpcl
 
     int PortNum = ConstVals.DefPNum;
 
-    TcpClient TC = null;
-    NetworkStream NS = null;
-    Task TD = null;
+    TcpClient? TC = null;
+    NetworkStream? NS = null;
+    Task? TD = null;
     string SvAddr = "127.0.0.1";
     Encoding Enc = Encoding.Default;
     bool IsLooping = true;
@@ -139,15 +139,18 @@ namespace BIDSsv.tcpcl
       try
       {
         TC = new TcpClient(SvAddr, PortNum);
-        IPEndPoint rie = (IPEndPoint)TC.Client.RemoteEndPoint;
-        IPEndPoint lie = (IPEndPoint)TC.Client.LocalEndPoint;
-        Console.WriteLine("{0} : Connected to Addr:{1} Port:{2}, from Addr:{3} Port:{4}", Name, rie.Address, rie.Port, lie.Address, lie.Port);
+        IPEndPoint? rie = TC.Client.RemoteEndPoint as IPEndPoint;
+        IPEndPoint? lie = TC.Client.LocalEndPoint as IPEndPoint;
+        Console.WriteLine("{0} : Connected to Addr:{1} Port:{2}, from Addr:{3} Port:{4}", Name, rie?.Address, rie?.Port, lie?.Address, lie?.Port);
         NS = TC?.GetStream();
-        NS.ReadTimeout = RTO;
-        NS.WriteTimeout = WTO;
+        if (NS is not null)
+        {
+          NS.ReadTimeout = RTO;
+          NS.WriteTimeout = WTO;
+        }
 
         //Reconnect Process
-        if (rie.Port == ConstVals.DefPNum)
+        if (rie?.Port == ConstVals.DefPNum)
         {
           Console.WriteLine("{0} : Reconnect Process Start.", Name);
           try
@@ -177,16 +180,19 @@ namespace BIDSsv.tcpcl
                     TC?.Close();
                     TC?.Dispose();
                     TC = new TcpClient(SvAddr, PortNum);
-                    NS = TC?.GetStream();
-                    NS.ReadTimeout = RTO;
-                    NS.WriteTimeout = WTO;
+                    NS = TC.GetStream();
+                    if (NS is not null)
+                    {
+                      NS.ReadTimeout = RTO;
+                      NS.WriteTimeout = WTO;
+                    }
                   }
                 }
               }
             }
-            IPEndPoint rier = (IPEndPoint)TC.Client.RemoteEndPoint;
-            IPEndPoint lier = (IPEndPoint)TC.Client.LocalEndPoint;
-            Console.WriteLine("{0} : Reconnect Success to Addr={1} Port={2}, from Addr={3} Port={4}", Name, rier.Address, rier.Port, lier.Address, lier.Port);
+            IPEndPoint? rier = TC?.Client.RemoteEndPoint as IPEndPoint;
+            IPEndPoint? lier = TC?.Client.LocalEndPoint as IPEndPoint;
+            Console.WriteLine("{0} : Reconnect Success to Addr={1} Port={2}, from Addr={3} Port={4}", Name, rier?.Address, rier?.Port, lier?.Address, lier?.Port);
           }
           catch (Exception e)
           {
@@ -274,7 +280,7 @@ namespace BIDSsv.tcpcl
       {
         Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
       }
-      if (!IsLooping) return null;
+      if (!IsLooping) return Array.Empty<byte>();
       byte[] b = new byte[1];
       int nsreadr = 0;
 
@@ -290,7 +296,7 @@ namespace BIDSsv.tcpcl
       {
         if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
         else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-        return null;
+        return Array.Empty<byte>();
       }
       return RBytesL.ToArray();
     }

@@ -19,15 +19,15 @@ namespace TR.BIDSsv
 		/// <summary>デバッグ用出力を有効にするかどうか</summary>
 		public bool IsDebugging { get; set; }
 
-		public event EventHandler<string> StringDataReceived;
-		public event EventHandler<byte[]> BinaryDataReceived;
+		public event EventHandler<string>? StringDataReceived;
+		public event EventHandler<byte[]>? BinaryDataReceived;
 
 		public Encoding Enc { get => serial?.Encoding ?? Encoding.ASCII; }
 
 		public bool ReConnectWhenTimedOut { get; set; } = false;
 		/// <summary>1秒の間隔をあけて, 生存報告をNULL文字送出にて行う.</summary>
 		public bool IamAliveCMD { get; set; } = false;
-		private Task AliveCMDTask = null;
+		private Task? AliveCMDTask = null;
 		private readonly TimeSpan AliveCMDTimeSpan = new TimeSpan(0, 0, 1);
 		private readonly TimeSpan ReConnectTimeSpan = new TimeSpan(0, 0, 0, 0, 100);
 
@@ -38,7 +38,7 @@ namespace TR.BIDSsv
 
 		string ReadBuf = string.Empty;
 		/// <summary>使用するSerial IF</summary>
-		SerialPort serial = null;
+		SerialPort serial;
 		#endregion
 
 		/// <summary>インスタンスを初期化します.</summary>
@@ -129,7 +129,7 @@ namespace TR.BIDSsv
 			{
 
 				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
-				string[] sa = null;
+				string[] sa;
 				try
 				{
 					sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -137,8 +137,10 @@ namespace TR.BIDSsv
 				catch (Exception ex)
 				{
 					Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
+					return;
 				}
-				if (!(sa?.Length > 0)) return;//要素なし
+				if (sa.Length <= 0)
+					return;//要素なし
 
 				int sa_len = sa.Length;
 				if (gotData.EndsWith("\n") || gotData.EndsWith("\r")) ReadBuf = string.Empty;

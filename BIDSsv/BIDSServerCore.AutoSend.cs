@@ -97,8 +97,9 @@ public partial class BIDSServerCore
 
 			if (isUpdated)
 			{
-				string cmd = kvp.Key.GenerateCommand(e.NewValue);
-				kvp.Value.ForEach(v => v.Print(cmd));
+				string? cmd = kvp.Key.GenerateCommand(e.NewValue);
+				if (!string.IsNullOrEmpty(cmd))
+					kvp.Value.ForEach(v => v.Print(cmd));
 			}
 		});
 	}

@@ -555,7 +555,7 @@ namespace TR.BIDSsv
 		/// <param name="separator"></param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
+		public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string? data = null, in char separator = ConstVals.CMD_SEPARATOR)
 		{
 			StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity).Append(ConstVals.CMD_HEADER).Append(CMDType).Append(DType).Append(DNum);
 			if (data != null)

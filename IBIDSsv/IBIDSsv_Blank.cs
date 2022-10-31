@@ -12,7 +12,7 @@ namespace TR
 
 		public bool IsDisposed { get; protected set; }
 		public int Version { get; set; }
-		public string Name { get; protected set; }
+		public string Name { get; protected set; } = string.Empty;
 		public bool IsDebug { get; set; }
 
 		public abstract bool Connect(in string args);

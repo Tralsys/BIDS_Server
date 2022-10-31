@@ -50,6 +50,9 @@ namespace TR.BIDSsv
 		{
 			if (sa != null && sa.Length != 0 && string.IsNullOrEmpty(separator)) return false;
 
+			if (sa is null)
+				return false;
+
 			List<BtnAssign> ba = new List<BtnAssign>();
 			string s = string.Empty;
 			string[] ssa;
