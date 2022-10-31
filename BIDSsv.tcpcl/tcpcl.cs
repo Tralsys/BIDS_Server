@@ -14,6 +14,7 @@ namespace BIDSsv.tcpcl
   class TCPcl : IBIDSsv
   {
     public event EventHandler<DataGotEventArgs>? DataGot;
+    public event EventHandler? Disposed;
 
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
@@ -228,6 +229,7 @@ namespace BIDSsv.tcpcl
       NS?.Dispose();
       TC?.Dispose();
       IsDisposed = true;
+      Disposed?.Invoke(this, new());
     }
 
     public void OnBSMDChanged(in BIDSSharedMemoryData data) { }

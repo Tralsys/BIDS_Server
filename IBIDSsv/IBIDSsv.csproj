@@ -4,6 +4,7 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<AssemblyName>TR.IBIDSsv</AssemblyName>
 		<RootNamespace>TR</RootNamespace>
+		<LangVersion>10</LangVersion>
 		<Nullable>enable</Nullable>
 		<Version>1.0.2.1</Version>
 		<Authors>Tetsu Otter</Authors>

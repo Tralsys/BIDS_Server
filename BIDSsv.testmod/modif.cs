@@ -12,6 +12,7 @@ namespace BIDSsv.testmod
 	public class modif : IBIDSsv
 	{
 		public event EventHandler<DataGotEventArgs>? DataGot;
+		public event EventHandler? Disposed;
 
 		public bool IsDisposed { get; private set; }
 		public int Version { get; set; } = ModVersion;
@@ -270,6 +271,7 @@ namespace BIDSsv.testmod
 				swr_lock.Dispose();
 				swr_lock = null;
 				disposedValue = true;
+				Disposed?.Invoke(this, new());
 			}
 			IsDisposed = true;
 		}

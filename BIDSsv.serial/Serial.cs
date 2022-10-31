@@ -9,6 +9,7 @@ namespace TR.BIDSsv
   public class Serial : IBIDSsv
   {
     public event EventHandler<DataGotEventArgs>? DataGot;
+    public event EventHandler? Disposed;
 
     public bool IsDisposed { get; private set; } = false;
     public int Version { get; set; } = 202;
@@ -291,6 +292,8 @@ namespace TR.BIDSsv
         sdc?.Dispose();
 
         disposedValue = true;
+
+        Disposed?.Invoke(this, new());
       }
     }
 

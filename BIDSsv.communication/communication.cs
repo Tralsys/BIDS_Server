@@ -9,6 +9,7 @@ namespace TR.BIDSsv
 	public class communication : IBIDSsv
 	{
 		public event EventHandler<DataGotEventArgs>? DataGot;
+		public event EventHandler? Disposed;
 
 		const int DefPNum = 9032;
 		public bool IsDisposed { get; private set; } = false;
@@ -109,6 +110,7 @@ namespace TR.BIDSsv
 			if (!tf) UC?.Close();
 			UC?.Dispose();
 			IsDisposed = true;
+			Disposed?.Invoke(this, new());
 		}
 		public void Dispose()
 		{

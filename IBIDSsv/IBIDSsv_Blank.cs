@@ -8,6 +8,7 @@ namespace TR
 	public abstract class IBIDSsv_Blank : IBIDSsv
 	{
 		public event EventHandler<DataGotEventArgs>? DataGot;
+		public event EventHandler? Disposed;
 
 		public bool IsDisposed { get; protected set; }
 		public int Version { get; set; }
@@ -36,6 +37,7 @@ namespace TR
 		protected virtual void Dispose(bool disposing)
 		{
 			disposedValue = true;
+			Disposed?.Invoke(this, new());
 		}
 
 		public void Dispose() => Dispose(true);

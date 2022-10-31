@@ -12,6 +12,7 @@ namespace TR.BIDSsv
   class TCPsv : IBIDSsv
   {
     public event EventHandler<DataGotEventArgs>? DataGot;
+    public event EventHandler? Disposed;
 
     //Wait Port : 14147
     int PortNum = Common.DefPNum;
@@ -152,6 +153,7 @@ namespace TR.BIDSsv
       TC?.Dispose();
       TL?.Stop();
       IsDisposed = true;
+      Disposed?.Invoke(this, new());
     }
 
     async void ConnectDoing()

@@ -8,6 +8,7 @@ namespace TR.BIDSsv
 	public class udp : IBIDSsv
 	{
 		public event EventHandler<DataGotEventArgs>? DataGot;
+		public event EventHandler? Disposed;
 
 		public bool IsDisposed { get => disposedValue; }
 		public int Version { get; set; } = 202;
@@ -190,6 +191,7 @@ namespace TR.BIDSsv
 				// TODO: 大きなフィールドを null に設定します。
 				udpc?.Dispose();
 				disposedValue = true;
+				Disposed?.Invoke(this, new());
 			}
 		}
 

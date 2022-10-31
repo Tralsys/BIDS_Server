@@ -29,6 +29,8 @@ namespace TR
 	{
 		event EventHandler<DataGotEventArgs>? DataGot;
 
+		event EventHandler? Disposed;
+
 		bool IsDisposed { get; }
 		int Version { get; set; }
 		string Name { get; }
