@@ -247,8 +247,8 @@ namespace TR.BIDSsv
 
 
     List<byte> RBytesLRec = new List<byte>();
-    async Task<string> Read() =>  Enc.GetString(await ReadByte()).Replace("\n", string.Empty);
-    
+    async Task<string> Read() => Enc.GetString(await ReadByte()).Replace("\n", string.Empty);
+
     async Task<byte[]> ReadByte()
     {
       List<byte> RBytesL = RBytesLRec;
@@ -303,7 +303,7 @@ namespace TR.BIDSsv
     public void Print(in byte[] data)
     {
       if (TC?.Connected != true || NS?.CanWrite != true) return;
-      
+
       if (data?.Length > 0) NS?.Write(data, 0, data.Length);
     }
 

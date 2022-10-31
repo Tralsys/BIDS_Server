@@ -27,14 +27,14 @@ namespace BIDSsv.testmod
 		public bool IsDebug { get; set; }
 
 		const int DefaultInterval = 10;
-    bool IsBinaryAllowed = false;
+		bool IsBinaryAllowed = false;
 		bool IsLoading = false;
 		bool NoLogMode = false;
 
 		List<CMDSendTimer> CSTL = new List<CMDSendTimer>();
 
-    public bool Connect(in string args)
-    {
+		public bool Connect(in string args)
+		{
 			if (IsLoading) return true;
 			IsLoading = true;
 
@@ -50,21 +50,21 @@ namespace BIDSsv.testmod
 				swr.AutoFlush = true;
 				AppendText(string.Format("BIDSsv Test Mod version:{0}\tname:{1}", ModVersion, Name));
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				Console.WriteLine("{0}.Connect : {1}", Name, e);
 				return false;
 			}
 
-      for (int i = 0; i < sa.Length; i++)
-      {
-        string[] saa = sa[i].Split(':');
-        if (saa.Length > 0)
-        {
-          try
-          {
-            switch (saa[0])
-            {
+			for (int i = 0; i < sa.Length; i++)
+			{
+				string[] saa = sa[i].Split(':');
+				if (saa.Length > 0)
+				{
+					try
+					{
+						switch (saa[0])
+						{
 							case "ASALL":
 								AppendText(string.Format("sa[{0}]:{1} => ASALL", i, sa[i]));
 								AppendText("ASALL Start");
@@ -90,7 +90,7 @@ namespace BIDSsv.testmod
 								#endregion
 								AppendText("ASALL Complete");
 								break;
-              case "ONCE":
+							case "ONCE":
 								if (saa.Length < 2)
 								{
 									AppendText(string.Format("Too Less Args to do ONCE : sa[{0}]", i));
@@ -102,7 +102,7 @@ namespace BIDSsv.testmod
 									AppendText(string.Format("sa[{0}]:{1} => ONCE do \"{2}\"", i, sa[i], saa[1]));
 									SendCMD2sv(saa[1]);
 								}
-                break;
+								break;
 							case "BAREC":
 								AppendText(string.Format("sa[{0}]:{1} => BAREC", i, sa[i]));
 								IsBinaryAllowed = true;
@@ -118,7 +118,8 @@ namespace BIDSsv.testmod
 									try
 									{
 										interval = UFunc.String2INT(saa[0].Substring(1)) ?? DefaultInterval;
-									}catch(Exception e)
+									}
+									catch (Exception e)
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
 										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
@@ -129,7 +130,8 @@ namespace BIDSsv.testmod
 									try
 									{
 										cst = new CMDSendTimer(this, interval, saa[1]);
-									}catch(Exception e)
+									}
+									catch (Exception e)
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
 										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
@@ -138,17 +140,17 @@ namespace BIDSsv.testmod
 									CSTL.Add(cst);
 								}
 								break;
-            }
-          }
-          catch (Exception e)
-          {
-            Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
-            continue;
-          }
-        }
-      }
+						}
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
+						continue;
+					}
+				}
+			}
 			return true;
-    }
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void AppendText(string s)
@@ -174,7 +176,6 @@ namespace BIDSsv.testmod
 					Console.WriteLine("{0}.AppendText({1}) : {2}", Name, s, e);
 					Dispose();
 					Console.WriteLine("{0} : Close this instance.", Name);
-					Common.Remove(this);
 					return;
 				}
 				finally
@@ -190,12 +191,13 @@ namespace BIDSsv.testmod
 			if (string.IsNullOrWhiteSpace(cmd)) return false;
 			try
 			{
-				AppendText("Send : "+ cmd);
+				AppendText("Send : " + cmd);
 
 				DataGot?.Invoke(this, new(Encoding.Default.GetBytes(cmd)));
 
 				return true;
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("{0}.SendCMD2sv({1}) : {2}", Name, cmd, e);
 				return false;
@@ -324,14 +326,14 @@ namespace BIDSsv.testmod
 			if (!disposedValue)
 			{
 				//if (disposing){}// TODO: マネージ状態を破棄します (マネージ オブジェクト)。
-				
+
 				disposedValue = true;
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Dispose() => Dispose(true);
-		
+
 		#endregion
 	}
 }

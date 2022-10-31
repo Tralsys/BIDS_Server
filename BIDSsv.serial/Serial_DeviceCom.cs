@@ -56,7 +56,8 @@ namespace TR.BIDSsv
 				{
 					serial.Open();
 				}
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom intialize : Serial Port Open Error=>{0}", e);
 				return;
@@ -67,7 +68,8 @@ namespace TR.BIDSsv
 				byte[] NULL_BA = new byte[1] { 0x00 };
 				AliveCMDTask = new Task(async () =>
 					{
-						while (!disposingValue) {
+						while (!disposingValue)
+						{
 							lock (Locker)
 							{
 								try
@@ -86,7 +88,7 @@ namespace TR.BIDSsv
 										Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
 									}
 								}
-								catch(Exception e)
+								catch (Exception e)
 								{
 									Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
 									return;
@@ -120,12 +122,13 @@ namespace TR.BIDSsv
 						if (ReConnectWhenTimedOut) ReConnect();
 					}
 				}
-			}catch(Exception ex)
+			}
+			catch (Exception ex)
 			{
 				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived ReadExisting : {0}", ex);
 			}
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
-			Task.Run( async() =>
+			Task.Run(async () =>
 			{
 
 				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
@@ -221,7 +224,8 @@ namespace TR.BIDSsv
 					}
 				}
 				return true;
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom.PrintString({0}) : {1}", s, e);
 				return false;
@@ -241,7 +245,8 @@ namespace TR.BIDSsv
 			try
 			{
 				return PrintString(BINARY_DATA_HEADER + Convert.ToBase64String(ba, offset ?? 0, length ?? ba.Length, Base64FormattingOptions.None));//PrintString側でデバッグ用出力を実施
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom.PrintBinary() : {0}", e);
 				return false;

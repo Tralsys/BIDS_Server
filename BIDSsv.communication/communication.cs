@@ -70,7 +70,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : {1}", Name, e);
+				Console.WriteLine($"{Name} : {e}");
 				return false;
 			}
 			UC?.BeginReceive(ReceivedDoing, UC);
@@ -92,7 +92,7 @@ namespace TR.BIDSsv
 			}
 			catch (SocketException e)
 			{
-				if (!Equals(sexc?.ErrorCode, e.ErrorCode)) Console.WriteLine("{0} : Receieve Error({2}) => {1}", Name, e, e.ErrorCode);
+				if (!Equals(sexc?.ErrorCode, e.ErrorCode)) Console.WriteLine($"{Name} : Receieve Error({e.ErrorCode}) => {e}");
 				sexc = e;
 			}
 			catch (ObjectDisposedException)
@@ -158,7 +158,7 @@ namespace TR.BIDSsv
 		public void Print(in byte[] data)
 		{
 			if (IsWriteable && UC != null && data?.Length > 0)
-				UC.Send(data, data.Length); 
+				UC.Send(data, data.Length);
 		}
 
 		readonly string[] ArgInfo = new string[]

@@ -200,7 +200,8 @@ namespace TR.BIDSsv
                 AliveCMD = saa[1] == "1";
                 break;
             }
-          }catch(Exception e)
+          }
+          catch (Exception e)
           {
             Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
             continue;
@@ -218,7 +219,7 @@ namespace TR.BIDSsv
 
 
       }
-      catch(Exception e)
+      catch (Exception e)
       {
         Console.WriteLine("{0} : an exception has occured in the init section.\n{1}", Name, e);
         return false;

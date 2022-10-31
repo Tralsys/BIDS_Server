@@ -14,7 +14,8 @@ namespace TR.BIDSsv
 		public bool IsDisposed { get => disposedValue; }
 		public int Version { get; set; } = 202;
 		public string Name { get; private set; } = "udp";
-		public bool IsDebug {
+		public bool IsDebug
+		{
 			get => isDbg;
 			set
 			{
@@ -140,7 +141,7 @@ namespace TR.BIDSsv
 			{
 				Print(Enc.GetBytes(data + "\n"));
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				Console.WriteLine("{0} : {1}", Name, e);
 			}
