@@ -6,4 +6,7 @@ public interface IParser
 
 	IBIDSCmd From(string str);
 	IBIDSCmd From(ReadOnlySpan<char> str);
+
+	IBIDSCmd From(byte[] bytes) => From(bytes.AsSpan());
+	IBIDSCmd From(ReadOnlySpan<byte> bytes);
 }

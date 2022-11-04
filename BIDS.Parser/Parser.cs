@@ -35,6 +35,16 @@ public partial class Parser : IParser
 		};
 	}
 
+	public IBIDSCmd From(ReadOnlySpan<byte> bytes)
+	{
+		if (bytes.Length >= 4 && (char)bytes[0] == 'T' && (char)bytes[1] == 'R')
+			return From(System.Text.Encoding.ASCII.GetChars(bytes).AsSpan());
+		else
+		{
+			return new ParseError(ErrorType.NotBIDSCmd);
+		}
+	}
+
 	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out ReadOnlySpan<char> nonDataSpan, out List<int>? gotData)
 	{
 		gotData = null;
