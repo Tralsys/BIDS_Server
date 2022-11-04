@@ -40,7 +40,38 @@ public partial class BIDSServerCore
 	}
 
 	public bool AddMod(in IBIDSsv sv)
-		=> _ServerParserDic.TryAdd(sv, new Parser());
+	{
+		bool isSuccess = _ServerParserDic.TryAdd(sv, new Parser());
+
+		if (isSuccess)
+		{
+			sv.Disposed += Mod_Disposed;
+
+			if (sv is IBIDSsv.IManager manager)
+			{
+				manager.AddMod += Manager_AddMod;
+				manager.RemoveMod += Manager_RemoveMod;
+			}
+		}
+
+		return isSuccess;
+	}
+
+	private void Manager_RemoveMod(object? sender, ControlModEventArgs e)
+	{
+		RemoveMod(e.Instance);
+	}
+
+	private void Manager_AddMod(object? sender, ControlModEventArgs e)
+	{
+		AddMod(e.Instance);
+	}
+
+	private void Mod_Disposed(object? sender, EventArgs e)
+	{
+		if (sender is IBIDSsv sv)
+			RemoveMod(sv);
+	}
 
 	public bool RemoveMod(string instanceName)
 	{
@@ -55,6 +86,16 @@ public partial class BIDSServerCore
 
 	public bool RemoveMod(in IBIDSsv sv)
 	{
+		// イベントのunsubscribeは、subscribeしていなくても失敗しない。
+		sv.Disposed -= Mod_Disposed;
+
+		if (sv is IBIDSsv.IManager manager)
+		{
+			manager.AddMod -= Manager_AddMod;
+			manager.RemoveMod -= Manager_RemoveMod;
+		}
+
+		// 正常に実装されていれば、MOD側で2回Disposeされることは無い。
 		sv.Dispose();
 
 		return _ServerParserDic.Remove(sv);
