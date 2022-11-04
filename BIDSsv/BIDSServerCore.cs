@@ -45,6 +45,7 @@ public partial class BIDSServerCore
 
 		if (isSuccess)
 		{
+			sv.DataGot += Mod_DataGot;
 			sv.Disposed += Mod_Disposed;
 
 			if (sv is IBIDSsv.IManager manager)
@@ -88,6 +89,7 @@ public partial class BIDSServerCore
 	{
 		// イベントのunsubscribeは、subscribeしていなくても失敗しない。
 		sv.Disposed -= Mod_Disposed;
+		sv.DataGot -= Mod_DataGot;
 
 		if (sv is IBIDSsv.IManager manager)
 		{
