@@ -47,7 +47,7 @@ public record BIDSCmd_ErrorReport(
 
 public partial class Parser
 {
-	static IBIDSCmd ParseStandardCommandStyle(in ReadOnlySpan<char> str, Identifier type)
+	static IStringBIDSCmd ParseStandardCommandStyle(in ReadOnlySpan<char> str, Identifier type)
 	{
 		var err = ValidateAndPickDataInt(str, out var nonDataSpan, out var gotData);
 		if (err is not null)

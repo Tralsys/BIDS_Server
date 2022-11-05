@@ -15,7 +15,7 @@ public record BIDSCmd_Info(
 
 public partial class Parser
 {
-	static IBIDSCmd InfoCmd(in ReadOnlySpan<char> str)
+	static IStringBIDSCmd InfoCmd(in ReadOnlySpan<char> str)
 	{
 		if (str.Length < 2)
 			return new ParseError(ErrorType.NotBIDSCmd);

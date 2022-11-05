@@ -12,7 +12,7 @@ public static class BIDSCmdGenerator
 {
 	public const char SeparatorChar = 'X';
 	public static string? GenerateCommand(
-		this IBIDSCmd cmd,
+		this IStringBIDSCmd cmd,
 		in BIDSSharedMemoryData? bsmd = null,
 		in int[]? panel = null,
 		in int[]? sound = null

@@ -19,7 +19,7 @@ public record BIDSCmd_ReverserControl(
 
 public partial class Parser
 {
-	static IBIDSCmd ControlReverser(in ReadOnlySpan<char> str)
+	static IStringBIDSCmd ControlReverser(in ReadOnlySpan<char> str)
 	{
 		var err = ValidateAndPickDataInt(str, out var nonDataSpan, out var gotData);
 		if (err is not null)

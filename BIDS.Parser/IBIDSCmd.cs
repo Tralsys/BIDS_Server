@@ -2,15 +2,19 @@
 
 public interface IBIDSCmd
 {
+}
+
+public interface IStringBIDSCmd : IBIDSCmd
+{
 	string ToCommandStr();
 }
 
-public interface IBIDSCmd_HasDataInt : IBIDSCmd
+public interface IBIDSCmd_HasDataInt : IStringBIDSCmd
 {
 	IReadOnlyList<int>? DataInt { get; }
 }
 
-public interface IBIDSCmd_HasDataDouble : IBIDSCmd
+public interface IBIDSCmd_HasDataDouble : IStringBIDSCmd
 {
 	IReadOnlyList<double>? DataDouble { get; }
 }

@@ -6,7 +6,7 @@ namespace TR.BIDSsv;
 
 public static class OnControlCmdGot
 {
-	public static string? HandleRequest(in ISMemLib _, in IBIDSCmd cmd, in int VersionNum)
+	public static string? HandleRequest(in ISMemLib _, in IStringBIDSCmd cmd, in int VersionNum)
 		=> cmd switch
 		{
 			IBIDSCmd_KeyControl v => HandleRequest(_, v),

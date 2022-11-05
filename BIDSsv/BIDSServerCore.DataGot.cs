@@ -27,7 +27,7 @@ public partial class BIDSServerCore
 
 	private byte[]? OnDataGot(IBIDSCmd cmd)
 	{
-		string? returnCmd;
+		string? returnCmd = null;
 
 		if (cmd is IBIDSCmd_Info infoCmd)
 		{
@@ -35,7 +35,7 @@ public partial class BIDSServerCore
 				&& (infoCmd.DataDouble is null || infoCmd.DataDouble.Count <= 0))
 			{
 				// データリクエスト型
-				returnCmd = cmd.GenerateCommand(SMem.BIDSSMemData, SMem.PanelA, SMem.SoundA);
+				returnCmd = infoCmd.GenerateCommand(SMem.BIDSSMemData, SMem.PanelA, SMem.SoundA);
 			}
 			else
 			{
@@ -51,7 +51,8 @@ public partial class BIDSServerCore
 			if (cmd is IBIDSCmd_HasDataInt v && v.DataInt?.Count > 0)
 				return null;
 
-			returnCmd = OnControlCmdGot.HandleRequest(SMem, cmd, Version);
+			if (cmd is IStringBIDSCmd scmd)
+				returnCmd = OnControlCmdGot.HandleRequest(SMem, scmd, Version);
 		}
 		else
 		{
