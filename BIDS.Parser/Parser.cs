@@ -38,7 +38,13 @@ public partial class Parser : IParser
 	public IBIDSCmd From(ReadOnlySpan<byte> bytes)
 	{
 		if (bytes.Length >= 4 && (char)bytes[0] == 'T' && (char)bytes[1] == 'R')
-			return From(System.Text.Encoding.ASCII.GetChars(bytes).AsSpan());
+		{
+			char[] str = new char[bytes.Length];
+
+			System.Text.Encoding.ASCII.GetChars(bytes, str.AsSpan());
+
+			return From(str.AsSpan());
+		}
 		else
 		{
 			return new ParseError(ErrorType.NotBIDSCmd);
