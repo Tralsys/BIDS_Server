@@ -63,6 +63,7 @@ public static class OnControlCmdGot
 
 	public static string? HandleRequest(in ISMemLib _, in BIDSCmd_ErrorReport cmd)
 	{
+		return null;
 	}
 
 	public static string? HandleRequest(in ISMemLib _, in BIDSCmd_OneHandleControl cmd)
