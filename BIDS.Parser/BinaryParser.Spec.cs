@@ -7,7 +7,7 @@ public record BIDSBinaryData_Spec(
 	short ATSCheckPos,
 	short B67Pos,
 	short CarCount,
-	short SelfBrakePos
+	short SelfBrake
 ) : IBIDSBinaryData.ISpec
 {
 	const int CONTENT_LENGTH = 16;
@@ -52,7 +52,7 @@ public record BIDSBinaryData_Spec(
 			.CopyTo(bytes[10..]);
 		BitConverter.GetBytes(CarCount)
 			.CopyTo(bytes[12..]);
-		BitConverter.GetBytes(SelfBrakePos)
+		BitConverter.GetBytes(SelfBrake)
 			.CopyTo(bytes[14..]);
 
 		return true;

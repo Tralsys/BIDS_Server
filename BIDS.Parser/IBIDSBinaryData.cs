@@ -53,7 +53,7 @@ public interface IBIDSBinaryData : IBIDSCmd
 		short ATSCheckPos { get; }
 		short B67Pos { get; }
 		short CarCount { get; }
-		short SelfBrakePos { get; }
+		short SelfBrake { get; }
 	}
 
 	public interface IState : IBIDSBinaryData
