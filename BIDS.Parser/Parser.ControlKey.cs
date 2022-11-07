@@ -18,7 +18,7 @@ public record BIDSCmd_KeyControl(
 
 public partial class Parser
 {
-	static IBIDSCmd ControlKey(in ReadOnlySpan<char> str)
+	static IStringBIDSCmd ControlKey(in ReadOnlySpan<char> str)
 	{
 		var err = ValidateAndPickDataInt(str, out var nonDataSpan, out var gotData);
 		if (err is not null)

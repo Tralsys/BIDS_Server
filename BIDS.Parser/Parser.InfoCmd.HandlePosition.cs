@@ -23,6 +23,9 @@ public partial class Parser
 			1 => HandlePosType.Power,
 			2 => HandlePosType.Reverser,
 			3 => HandlePosType.ConstSpeed,
+
+			-1 => HandlePosType.AllData,
+
 			_ => HandlePosType.Unknown,
 		};
 }

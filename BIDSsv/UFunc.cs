@@ -15,7 +15,7 @@ namespace TR.BIDSsv
 		/// <param name="newobj"></param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString();
+		public static string Comp(in object oldobj, in object newobj) => Equals(oldobj, newobj) ? string.Empty : newobj.ToString() ?? string.Empty;
 		/// <summary>Byte Arrayに対し, BIDS規格のヘッダを記録します.</summary>
 		/// <param name="ba">対象の配列</param>
 		/// <param name="ba_2">コマンドタイプ</param>
@@ -555,7 +555,7 @@ namespace TR.BIDSsv
 		/// <param name="separator"></param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string data = null, in char separator = ConstVals.CMD_SEPARATOR)
+		public static string BIDSCMDMaker(in char CMDType, in char DType, in int DNum, in string? data = null, in char separator = ConstVals.CMD_SEPARATOR)
 		{
 			StringBuilder sb = new StringBuilder(ConstVals.StringBuilder_Capacity).Append(ConstVals.CMD_HEADER).Append(CMDType).Append(DType).Append(DNum);
 			if (data != null)

@@ -8,7 +8,7 @@ public enum ErrorType
 	CannotParseToInt,
 }
 
-public record ParseError(ErrorType ErrorType) : IBIDSCmd
+public record ParseError(ErrorType ErrorType) : IStringBIDSCmd
 {
 	public string ToCommandStr()
 		=> throw new NotImplementedException();

@@ -8,16 +8,19 @@ namespace TR.BIDSsv
 {
 	public class communication : IBIDSsv
 	{
+		public event EventHandler<DataGotEventArgs>? DataGot;
+		public event EventHandler? Disposed;
+
 		const int DefPNum = 9032;
 		public bool IsDisposed { get; private set; } = false;
 		private int PortNum = DefPNum;
 		private int RemotePNum = DefPNum;
-		IPAddress Addr = IPAddress.Any;
+		IPAddress? Addr = IPAddress.Any;
 		public int Version { get; set; } = 100;
 		public string Name { get; private set; } = "communication";
 		public bool IsDebug { get; set; } = false;
 		bool IsWriteable = false;
-		UdpClient UC = null;
+		UdpClient? UC = null;
 
 		public bool Connect(in string args)
 		{
@@ -63,54 +66,43 @@ namespace TR.BIDSsv
 			try
 			{
 				UC = new UdpClient(new IPEndPoint(IPAddress.Any, PortNum));
-				if (Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
+				if (Addr is not null && Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : {1}", Name, e);
+				Console.WriteLine($"{Name} : {e}");
 				return false;
 			}
 			UC?.BeginReceive(ReceivedDoing, UC);
 			return true;
 		}
 
-		SocketException sexc;
+		SocketException? sexc = null;
 		private void ReceivedDoing(IAsyncResult ar)
 		{
-			UdpClient uc = (UdpClient)ar.AsyncState;
-			IPEndPoint ipep = null;
-			byte[] rba = new byte[] { 0x00 };
+			if (ar.AsyncState is not UdpClient uc)
+				return;
+
 			try
 			{
-				rba = uc?.EndReceive(ar, ref ipep);
+				IPEndPoint? ipep = null;
+				byte[] rba = uc.EndReceive(ar, ref ipep);
+
+				DataGot?.Invoke(this, new(rba));
 			}
 			catch (SocketException e)
 			{
-				if (!Equals(sexc.ErrorCode, e.ErrorCode)) Console.WriteLine("{0} : Receieve Error({2}) => {1}", Name, e, e.ErrorCode);
+				if (!Equals(sexc?.ErrorCode, e.ErrorCode)) Console.WriteLine($"{Name} : Receieve Error({e.ErrorCode}) => {e}");
 				sexc = e;
 			}
 			catch (ObjectDisposedException)
 			{
 				Console.WriteLine("{0} (ReceivedDoing) : This connection is already closed.", Name);
-				Common.Remove(this);
+				Dispose();
 				return;
 			}
 
-			if (rba.Length == (Common.ComStrSize + (Common.PSArrSize * 2)) && BitConverter.ToUInt32(rba, 0) == Common.CommunicationStructHeader)
-			{
-				int[] pda = new int[256];
-				int[] sda = new int[256];
-				var bsmd = Common.CommunicationBAGot(rba, out pda, out sda).ComStrtoBSMD();
-				Common.BSMD = bsmd;
-				Common.PD = new PanelD() { Panels = pda };
-				Common.SD = new SoundD() { Sounds = sda };
-			}
-			else
-			{
-				Common.DataSelect(this, rba, Encoding.Default);
-			}
-
-			uc?.BeginReceive(ReceivedDoing, uc);
+			uc.BeginReceive(ReceivedDoing, uc);
 		}
 
 		protected virtual void Dispose(bool tf)
@@ -118,6 +110,7 @@ namespace TR.BIDSsv
 			if (!tf) UC?.Close();
 			UC?.Dispose();
 			IsDisposed = true;
+			Disposed?.Invoke(this, new());
 		}
 		public void Dispose()
 		{
@@ -131,7 +124,14 @@ namespace TR.BIDSsv
 		public void OnBSMDChanged(in BIDSSharedMemoryData data)
 		{
 			if (!IsWriteable) return;
-			UC?.Send(Common.CommunicationBAGet(Common.BSMDtoComStr(data, data.StateData.T - oldT), PDA, SDA), Common.ComStrSize + (Common.PSArrSize * 2));
+			UC?.Send(
+				CommunicationDllConverter.CommunicationBAGet(
+					CommunicationDllConverter.BSMDtoComStr(data, data.StateData.T - oldT),
+					PDA,
+					SDA),
+				CommunicationDllConverter.ComStrSize + (CommunicationDllConverter.PSArrSize * 2)
+			);
+
 			oldT = data.StateData.T;
 		}
 
@@ -158,7 +158,7 @@ namespace TR.BIDSsv
 		public void Print(in byte[] data)
 		{
 			if (IsWriteable && UC != null && data?.Length > 0)
-				UC.Send(data, data.Length); 
+				UC.Send(data, data.Length);
 		}
 
 		readonly string[] ArgInfo = new string[]

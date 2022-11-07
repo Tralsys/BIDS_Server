@@ -19,7 +19,7 @@ public partial class Parser
 	static DoorStateType GetDoorStateType(int dataTypeInt)
 		=> dataTypeInt switch
 		{
-			0 => DoorStateType.IsOpen,
+			0 => DoorStateType.IsClosed,
 			_ => DoorStateType.Unknown,
 		};
 }

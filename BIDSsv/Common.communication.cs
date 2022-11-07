@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using TR.BIDSSMemLib;
+
 namespace TR.BIDSsv
 {
 	/// <summary>Communication.dllで使用されているデータ構造</summary>
@@ -58,7 +60,7 @@ namespace TR.BIDSsv
 		public int MaxServiceBrakeNNum;
 	}
 
-	static public partial class Common
+	static public class CommunicationDllConverter
 	{
 		/// <summary>Communication.dllで使用されているデータフォーマットのヘッダ</summary>
 		public const UInt32 CommunicationStructHeader = 0xfefef0f0;
@@ -80,7 +82,11 @@ namespace TR.BIDSsv
 
 			IntPtr ip = Marshal.AllocHGlobal(ComStrSize);
 			Marshal.Copy(ba, 0, ip, ComStrSize);
-			var cs = (CommunicationStruct)Marshal.PtrToStructure(ip, typeof(CommunicationStruct));
+			if (Marshal.PtrToStructure(ip, typeof(CommunicationStruct)) is not CommunicationStruct cs)
+			{
+				Marshal.FreeHGlobal(ip);
+				return default;
+			}
 			Marshal.FreeHGlobal(ip);
 
 			ip = Marshal.AllocHGlobal(PSArrSize);

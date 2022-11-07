@@ -2,15 +2,20 @@
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
+using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
 {
 	public class udp : IBIDSsv
 	{
+		public event EventHandler<DataGotEventArgs>? DataGot;
+		public event EventHandler? Disposed;
+
 		public bool IsDisposed { get => disposedValue; }
 		public int Version { get; set; } = 202;
 		public string Name { get; private set; } = "udp";
-		public bool IsDebug {
+		public bool IsDebug
+		{
 			get => isDbg;
 			set
 			{
@@ -21,14 +26,14 @@ namespace TR.BIDSsv
 		}
 		private bool isDbg = false;
 		Encoding Enc = Encoding.Default;
-		udpcom udpc = null;
+		udpcom? udpc = null;
 		public bool Connect(in string args)
 		{
 			string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
 			IPAddress rip = IPAddress.Broadcast;
 			IPAddress lip = IPAddress.Any;
-			ushort rport = (ushort)Common.DefPNum;
-			ushort lport = (ushort)Common.DefPNum;
+			ushort rport = (ushort)ConstVals.DefPNum;
+			ushort lport = (ushort)ConstVals.DefPNum;
 			for (int i = 0; i < sa.Length; i++)
 			{
 				string[] saa = sa[i].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -120,9 +125,10 @@ namespace TR.BIDSsv
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		private void Udpc_DataGotEv(object sender, UDPGotEvArgs e)
+		private void Udpc_DataGotEv(object? sender, UDPGotEvArgs e)
 		{
-			if (e.DataLen > 0) Common.DataSelSend(this, e.Data, Enc);
+			if (e.DataLen > 0)
+				DataGot?.Invoke(this, new(e.Data));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -135,13 +141,13 @@ namespace TR.BIDSsv
 			{
 				Print(Enc.GetBytes(data + "\n"));
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				Console.WriteLine("{0} : {1}", Name, e);
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public void Print(in byte[] data) => udpc.DataSend(data);
+		public void Print(in byte[] data) => udpc?.DataSend(data);
 
 		readonly string[] ArgInfo = new string[]
 		{
@@ -150,8 +156,8 @@ namespace TR.BIDSsv
 			"  -N or -Name : Set the Instance Name.  Default:\"udp\"  If you don't set this option, this program maybe cause some bugs.",
 			"  -RIP or -RemoteIP : Set the IP Address to communicate with.  If you don't set this option, this program starts broadcast communication.",
 			"  -LIP or -LocalIP : Set the IP Address to send from.",
-			"  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)",
-			"  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"" + Common.DefPNum.ToString() + "\" (default port)"
+			"  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"" + ConstVals.DefPNum.ToString() + "\" (default port)",
+			"  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"" + ConstVals.DefPNum.ToString() + "\" (default port)"
 		};
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void WriteHelp(in string args)
@@ -187,6 +193,7 @@ namespace TR.BIDSsv
 				// TODO: 大きなフィールドを null に設定します。
 				udpc?.Dispose();
 				disposedValue = true;
+				Disposed?.Invoke(this, new());
 			}
 		}
 

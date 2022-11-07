@@ -6,6 +6,8 @@ namespace BIDSsv.swif
 {
   public class Bsvif : IBIDSsv
   {
+    public event EventHandler<DataGotEventArgs>? DataGot;
+
     public int Version => 202;
 
     public string Name => "swif";

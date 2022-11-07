@@ -19,15 +19,15 @@ namespace TR.BIDSsv
 		/// <summary>デバッグ用出力を有効にするかどうか</summary>
 		public bool IsDebugging { get; set; }
 
-		public event EventHandler<string> StringDataReceived;
-		public event EventHandler<byte[]> BinaryDataReceived;
+		public event EventHandler<string>? StringDataReceived;
+		public event EventHandler<byte[]>? BinaryDataReceived;
 
 		public Encoding Enc { get => serial?.Encoding ?? Encoding.ASCII; }
 
 		public bool ReConnectWhenTimedOut { get; set; } = false;
 		/// <summary>1秒の間隔をあけて, 生存報告をNULL文字送出にて行う.</summary>
 		public bool IamAliveCMD { get; set; } = false;
-		private Task AliveCMDTask = null;
+		private Task? AliveCMDTask = null;
 		private readonly TimeSpan AliveCMDTimeSpan = new TimeSpan(0, 0, 1);
 		private readonly TimeSpan ReConnectTimeSpan = new TimeSpan(0, 0, 0, 0, 100);
 
@@ -38,7 +38,7 @@ namespace TR.BIDSsv
 
 		string ReadBuf = string.Empty;
 		/// <summary>使用するSerial IF</summary>
-		SerialPort serial = null;
+		SerialPort serial;
 		#endregion
 
 		/// <summary>インスタンスを初期化します.</summary>
@@ -56,7 +56,8 @@ namespace TR.BIDSsv
 				{
 					serial.Open();
 				}
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom intialize : Serial Port Open Error=>{0}", e);
 				return;
@@ -67,7 +68,8 @@ namespace TR.BIDSsv
 				byte[] NULL_BA = new byte[1] { 0x00 };
 				AliveCMDTask = new Task(async () =>
 					{
-						while (!disposingValue) {
+						while (!disposingValue)
+						{
 							lock (Locker)
 							{
 								try
@@ -86,7 +88,7 @@ namespace TR.BIDSsv
 										Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
 									}
 								}
-								catch(Exception e)
+								catch (Exception e)
 								{
 									Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
 									return;
@@ -120,16 +122,17 @@ namespace TR.BIDSsv
 						if (ReConnectWhenTimedOut) ReConnect();
 					}
 				}
-			}catch(Exception ex)
+			}
+			catch (Exception ex)
 			{
 				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived ReadExisting : {0}", ex);
 			}
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
-			Task.Run( async() =>
+			Task.Run(async () =>
 			{
 
 				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
-				string[] sa = null;
+				string[] sa;
 				try
 				{
 					sa = (ReadBuf + gotData).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -137,8 +140,10 @@ namespace TR.BIDSsv
 				catch (Exception ex)
 				{
 					Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
+					return;
 				}
-				if (!(sa?.Length > 0)) return;//要素なし
+				if (sa.Length <= 0)
+					return;//要素なし
 
 				int sa_len = sa.Length;
 				if (gotData.EndsWith("\n") || gotData.EndsWith("\r")) ReadBuf = string.Empty;
@@ -219,7 +224,8 @@ namespace TR.BIDSsv
 					}
 				}
 				return true;
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom.PrintString({0}) : {1}", s, e);
 				return false;
@@ -239,7 +245,8 @@ namespace TR.BIDSsv
 			try
 			{
 				return PrintString(BINARY_DATA_HEADER + Convert.ToBase64String(ba, offset ?? 0, length ?? ba.Length, Base64FormattingOptions.None));//PrintString側でデバッグ用出力を実施
-			}catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				Console.WriteLine("Serial_DeviceCom.PrintBinary() : {0}", e);
 				return false;

@@ -24,6 +24,9 @@ public partial class Parser
 			2 => SpecDataType.ATSCheck,
 			3 => SpecDataType.B67,
 			4 => SpecDataType.CarCount,
+
+			-1 => SpecDataType.AllData,
+
 			_ => SpecDataType.Unknown,
 		};
 }

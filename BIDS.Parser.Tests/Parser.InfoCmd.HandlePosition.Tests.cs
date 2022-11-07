@@ -13,8 +13,9 @@ public class Parser_InfoCmd_HandlePosition_Tests
 	[TestCase("TRIH1", 1, HandlePosType.Power)]
 	[TestCase("TRIH2", 2, HandlePosType.Reverser)]
 	[TestCase("TRIH3", 3, HandlePosType.ConstSpeed)]
+	[TestCase("TRIH-1", -1, HandlePosType.AllData)]
 	[TestCase("TRIH4", 4, HandlePosType.Unknown)]
-	[TestCase("TRIH-1", -1, HandlePosType.Unknown)]
+	[TestCase("TRIH-2", -2, HandlePosType.Unknown)]
 	public void RequestTests(string inputCmd, int expectedRawDataNum, HandlePosType expectedDataType)
 	{
 		BIDSCmd_Info_HandlePosition expected = new(
@@ -29,7 +30,7 @@ public class Parser_InfoCmd_HandlePosition_Tests
 	}
 
 	// Valid Cases
-	[TestCase("TRIH-1X1X2X3", -1, HandlePosType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
+	[TestCase("TRIH-2X1X2X3", -2, HandlePosType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
 	[TestCase("TRIH0X1X2X3", 0, HandlePosType.Brake, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
 	[TestCase("TRIH0X1.2X2.3X3.4", 0, HandlePosType.Brake, new int[] { 1, 2, 3 }, new double[] { 1.2, 2.3, 3.4 })]
 	public void ResponseTests(string inputCmd, int expectedRawDataNum, HandlePosType expectedDataType, int[] expectDataInt, double[] expectDataDouble)

@@ -8,9 +8,11 @@ public partial class Parser : IParser
 
 	public static Parser Default { get; } = new();
 
-	public IBIDSCmd From(string str)
+	BinaryParser BinaryParser { get; } = new();
+
+	public IStringBIDSCmd From(string str)
 		=> From(str.AsSpan());
-	public IBIDSCmd From(ReadOnlySpan<char> str)
+	public IStringBIDSCmd From(ReadOnlySpan<char> str)
 	{
 		if (str.Length < 4 || str[0] != 'T' || str[1] != 'R')
 			return new ParseError(ErrorType.NotBIDSCmd);
@@ -35,7 +37,23 @@ public partial class Parser : IParser
 		};
 	}
 
-	static IBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out ReadOnlySpan<char> nonDataSpan, out List<int>? gotData)
+	public IBIDSCmd From(ReadOnlySpan<byte> bytes)
+	{
+		if (bytes.Length >= 4 && (char)bytes[0] == 'T' && (char)bytes[1] == 'R')
+		{
+			char[] str = new char[bytes.Length];
+
+			System.Text.Encoding.ASCII.GetChars(bytes, str.AsSpan());
+
+			return From(str.AsSpan());
+		}
+		else
+		{
+			return BinaryParser.From(bytes);
+		}
+	}
+
+	static IStringBIDSCmd? ValidateAndPickDataInt(in ReadOnlySpan<char> str, out ReadOnlySpan<char> nonDataSpan, out List<int>? gotData)
 	{
 		gotData = null;
 		nonDataSpan = str;

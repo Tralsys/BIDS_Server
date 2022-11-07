@@ -7,7 +7,7 @@ namespace TR.BIDSsv
 		public override bool Connect(in string args)
 		{
 			Name = "BlankMOD" + DateTime.UtcNow.ToString("hhmmssff");
-			Console.WriteLine("BlankMOD Name:{0}", Name);
+			Console.WriteLine($"BlankMOD Name:{Name}");
 			return true;
 		}
 

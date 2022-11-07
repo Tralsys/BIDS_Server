@@ -9,13 +9,13 @@ namespace TR.BIDSsv
 {
 	internal class udpcom : IDisposable
 	{
-		public event EventHandler<UDPGotEvArgs> DataGotEv;
+		public event EventHandler<UDPGotEvArgs>? DataGotEv;
 		public bool IsDebugging { get; set; } = false;
-		UdpClient UCW = null;
-		UdpClient UCR = null;
-		IPEndPoint MyIPEndPoint = null;
+		UdpClient? UCW = null;
+		UdpClient? UCR = null;
+		IPEndPoint? MyIPEndPoint = null;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public udpcom(IPEndPoint Src = null, IPEndPoint Dst = null)
+		public udpcom(IPEndPoint? Src = null, IPEndPoint? Dst = null)
 		{
 			if (Src == null || Equals(Src.Address, IPAddress.Any))
 			{
@@ -31,10 +31,11 @@ namespace TR.BIDSsv
 			}
 			else MyIPEndPoint = Src;
 
-			int pt = Src?.Port ?? Common.DefPNum;
+			int pt = Src?.Port ?? ConstVals.DefPNum;
 			UCR = new UdpClient(Src ?? new IPEndPoint(IPAddress.Any, pt));
 			UCW = new UdpClient(MyIPEndPoint);
-			MyIPEndPoint.Port = ((IPEndPoint)UCW.Client.LocalEndPoint).Port;
+			IPEndPoint? lep = UCW.Client.LocalEndPoint as IPEndPoint;
+			MyIPEndPoint.Port = lep?.Port ?? ConstVals.DefPNum;
 
 			UCR.EnableBroadcast = UCW.EnableBroadcast = true;
 
@@ -48,7 +49,7 @@ namespace TR.BIDSsv
 			IPEndPoint ipEP = new IPEndPoint(IPAddress.Any, 0);
 			try
 			{
-				byte[] ba = UCR?.Receive(ref ipEP);
+				byte[] ba = UCR?.Receive(ref ipEP) ?? Array.Empty<byte>();
 				if (disposing) return;
 				_ = Task.Run(ReadingMethod);//再帰的
 				DataReceived(ba, ipEP);
@@ -62,10 +63,10 @@ namespace TR.BIDSsv
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void DataReceived(byte[] ba, in IPEndPoint remIPE)
 		{
-			if (Equals(remIPE.Address,MyIPEndPoint.Address))
+			if (Equals(remIPE.Address, MyIPEndPoint?.Address))
 			{
 				if (IsDebugging)
-					Console.WriteLine("udpcom class <<<<<<My Data<<<<<< {2} (from {0}) : {1}", remIPE, BitConverter.ToString(ba), ((IPEndPoint)UCR.Client.LocalEndPoint));
+					Console.WriteLine("udpcom class <<<<<<My Data<<<<<< {2} (from {0}) : {1}", remIPE, BitConverter.ToString(ba), UCR?.Client.LocalEndPoint as IPEndPoint);
 			}
 			else
 			{

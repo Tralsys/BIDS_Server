@@ -23,8 +23,11 @@ public class Parser_InfoCmd_StateData_Tests
 	[TestCase("TRIE11", 11, StateDataType.Time_Minute)]
 	[TestCase("TRIE12", 12, StateDataType.Time_Second)]
 	[TestCase("TRIE13", 13, StateDataType.Time_MilliSecond)]
+	[TestCase("TRIE-1", -1, StateDataType.AllData)]
+	[TestCase("TRIE-2", -2, StateDataType.PressureList)]
+	[TestCase("TRIE-3", -3, StateDataType.TimeInString)]
 	[TestCase("TRIE14", 14, StateDataType.Unknown)]
-	[TestCase("TRIE-1", -1, StateDataType.Unknown)]
+	[TestCase("TRIE-4", -4, StateDataType.Unknown)]
 	public void RequestTests(string inputCmd, int expectedRawDataNum, StateDataType expectedDataType)
 	{
 		BIDSCmd_Info_StateData expected = new(
@@ -39,7 +42,7 @@ public class Parser_InfoCmd_StateData_Tests
 	}
 
 	// Valid Cases
-	[TestCase("TRIE-1X1X2X3", -1, StateDataType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
+	[TestCase("TRIE-4X1X2X3", -4, StateDataType.Unknown, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
 	[TestCase("TRIE0X1X2X3", 0, StateDataType.Location, new int[] { 1, 2, 3 }, new double[] { 1, 2, 3 })]
 	[TestCase("TRIE0X1.2X2.3X3.4", 0, StateDataType.Location, new int[] { 1, 2, 3 }, new double[] { 1.2, 2.3, 3.4 })]
 	public void ResponseTests(string inputCmd, int expectedRawDataNum, StateDataType expectedDataType, int[] expectDataInt, double[] expectDataDouble)

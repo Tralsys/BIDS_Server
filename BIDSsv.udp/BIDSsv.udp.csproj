@@ -1,71 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>TR.BIDSsv.udp</AssemblyName>
-    <RootNamespace>TR.BIDSsv</RootNamespace>
-		<Version>1.0.1.1</Version>
-    <Authors>Tetsu Otter</Authors>
-    <Company>Tech Otter</Company>
-    <Product>BIDS Project</Product>
-    <Copyright>Copyright 2019 Tetsu Otter</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <SignAssembly>false</SignAssembly>
-    <Platforms>AnyCPU;x86;x64</Platforms>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>It is a communication module using UDP/IP, inherits IBIDSsv interface to use on BIDSsv.</Description>
-    <PackageReleaseNotes># 1.0.1.1
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<AssemblyName>TR.BIDSsv.udp</AssemblyName>
+		<RootNamespace>TR.BIDSsv</RootNamespace>
+		<Nullable>enable</Nullable>
+		<Version>1.1.0</Version>
+		<Authors>Tetsu Otter</Authors>
+		<Company>Tech Otter</Company>
+		<Product>BIDS Project</Product>
+		<Copyright>Copyright 2019 Tetsu Otter</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/TetsuOtter/BIDS_Server</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/TetsuOtter/BIDS_Server</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<SignAssembly>false</SignAssembly>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<Description>It is a communication module using UDP/IP, inherits IBIDSsv interface to use on BIDSsv.</Description>
+		<PackageReleaseNotes># 1.0.1.1
 published to nuget.org</PackageReleaseNotes>
-    <Configurations>Release;Debug</Configurations>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
-    <ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
-  </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy /I/Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)BIDS_Server\bin\$(PlatformName)\$(ConfigurationName)\mods\&quot;" />
-	</Target>
+		<Configurations>Release;Debug</Configurations>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
+		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
+	</ItemGroup>
 </Project>

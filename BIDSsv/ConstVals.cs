@@ -3,6 +3,8 @@
 	/// <summary>BIDSsvで使用する定数値が含まれます.</summary>
 	public static class ConstVals
 	{
+		public static readonly int DefPNum = 14147;
+
 		/// <summary>BIDSで使用するコマンドの最小サイズ</summary>
 		public static readonly int CMD_LEN_MIN = 4;//バージョンアップによって変わる可能性があるため, constは使用しない
 		/// <summary>BIDSで使用するコマンドの最大サイズ</summary>
@@ -361,7 +363,7 @@
 			y,
 			/// <summary>z</summary>
 			z
-			
+
 		}
 	}
 }
