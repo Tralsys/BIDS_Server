@@ -59,7 +59,7 @@ public interface IBIDSBinaryData : IBIDSCmd
 	public interface IState : IBIDSBinaryData
 	{
 		double Location_m { get; }
-		float Speed_km { get; }
+		float Speed_kmph { get; }
 		float ElectricCurrent_A { get; }
 		float LineVoltage_V { get; }
 		int Time_ms { get; }

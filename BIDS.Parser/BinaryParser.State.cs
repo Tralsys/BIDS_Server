@@ -2,7 +2,7 @@
 
 public record BIDSBinaryData_State(
 	double Location_m,
-	float Speed_km,
+	float Speed_kmph,
 	float ElectricCurrent_A,
 	float LineVoltage_V,
 	int Time_ms,
@@ -51,7 +51,7 @@ public record BIDSBinaryData_State(
 
 		BitConverter.GetBytes(Location_m)
 			.CopyTo(bytes[0..]);
-		BitConverter.GetBytes(Speed_km)
+		BitConverter.GetBytes(Speed_kmph)
 			.CopyTo(bytes[8..]);
 		BitConverter.GetBytes(ElectricCurrent_A)
 			.CopyTo(bytes[12..]);
