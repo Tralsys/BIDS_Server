@@ -55,6 +55,9 @@ public partial class BIDSServerCore
 				if (cmd is IStringBIDSCmd scmd)
 					returnCmd = OnControlCmdGot.HandleRequest(SMem, scmd, Version);
 				break;
+
+			case IBIDSBinaryData binCmd:
+				return OnBinaryCmdGot.HandleCommand(SMem, binCmd);
 		}
 
 		if (returnCmd is not null)
