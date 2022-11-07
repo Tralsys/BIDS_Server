@@ -8,6 +8,8 @@ public partial class Parser : IParser
 
 	public static Parser Default { get; } = new();
 
+	BinaryParser BinaryParser { get; } = new();
+
 	public IStringBIDSCmd From(string str)
 		=> From(str.AsSpan());
 	public IStringBIDSCmd From(ReadOnlySpan<char> str)
@@ -47,7 +49,7 @@ public partial class Parser : IParser
 		}
 		else
 		{
-			return new ParseError(ErrorType.NotBIDSCmd);
+			return BinaryParser.From(bytes);
 		}
 	}
 
