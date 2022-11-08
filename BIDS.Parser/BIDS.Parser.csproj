@@ -8,4 +8,7 @@
 		<Version>1.1.0</Version>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BIDS.Parser.Variable\BIDS.Parser.Variable.csproj" />
+  </ItemGroup>
 </Project>
