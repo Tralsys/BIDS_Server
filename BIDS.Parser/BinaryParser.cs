@@ -1,10 +1,14 @@
-﻿namespace BIDS.Parser;
+﻿using BIDS.Parser.Variable;
+
+namespace BIDS.Parser;
 
 public partial class BinaryParser : IBinaryParser
 {
 	const int HEADER_LEN = 4;
 
 	internal const byte INFO_CMD_TYPE_VALUE = (byte)'b';
+
+	public VariableCmdParser VariableCmdParser { get; } = new();
 
 	public IBIDSBinaryData From(ReadOnlySpan<byte> bytes)
 	{
