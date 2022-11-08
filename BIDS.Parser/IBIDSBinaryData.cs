@@ -1,4 +1,6 @@
-﻿namespace BIDS.Parser;
+﻿using BIDS.Parser.Variable;
+
+namespace BIDS.Parser;
 
 public interface IBIDSBinaryData : IBIDSCmd
 {
@@ -84,5 +86,16 @@ public interface IBIDSBinaryData : IBIDSCmd
 	{
 		byte BiasNum { get; }
 		int[] DataArray { get; }
+	}
+
+	public interface IVariableStructureRegister : IBIDSBinaryData
+	{
+		VariableStructure Structure { get; }
+	}
+
+	public interface IVariablePayload : IBIDSBinaryData
+	{
+		VariableStructure? Structure { get; }
+		VariableStructurePayload Payload { get; }
 	}
 }
