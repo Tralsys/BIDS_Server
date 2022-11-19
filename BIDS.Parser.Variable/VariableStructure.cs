@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace BIDS.Parser.Variable;
 
-public record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.IDataRecord> Records) : IVariableCmdResult
+public partial record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.IDataRecord> Records) : IVariableCmdResult
 {
 	public interface IDataRecord
 	{
