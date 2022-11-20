@@ -33,9 +33,13 @@ public partial record VariableStructure
 		{
 			IEnumerable<byte> arr = BitConverter.GetBytes(this.ValueArray?.Length ?? 0);
 
-			if (this.ValueArray is not null)
+			if (this.ValueArray is byte[] byteArray)
+				arr = arr.Concat(byteArray);
+			else if (this.ValueArray is not null)
+			{
 				foreach (var v in this.ValueArray)
 					arr = arr.Concat(this.ElemType.GetBytes(v));
+			}
 
 			return arr;
 		}
