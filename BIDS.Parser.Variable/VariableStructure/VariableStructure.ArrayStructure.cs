@@ -25,9 +25,11 @@ public partial record VariableStructure
 				};
 			}
 
-			object?[] array = new object?[arrayLength];
+			if (ElemType.GetSpecifiedTypeArray(arrayLength) is not Array array)
+				throw new Exception($"Cannot create array with type {ElemType}");
+
 			for (int i = 0; i < arrayLength; i++)
-				array[i] = this.ElemType.GetValueAndMoveNext(ref bytes);
+				array.SetValue(this.ElemType.GetValueAndMoveNext(ref bytes), i);
 
 			return this with
 			{
