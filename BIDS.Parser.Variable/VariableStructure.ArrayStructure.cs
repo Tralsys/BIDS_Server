@@ -14,6 +14,17 @@ public partial record VariableStructure
 		{
 			int arrayLength = Utils.GetInt32AndMove(ref bytes);
 
+			if (ElemType == VariableDataType.UInt8)
+			{
+				byte[] content = bytes[..arrayLength].ToArray();
+				bytes = bytes[arrayLength..];
+
+				return this with
+				{
+					ValueArray = content
+				};
+			}
+
 			object?[] array = new object?[arrayLength];
 			for (int i = 0; i < arrayLength; i++)
 				array[i] = this.ElemType.GetValueAndMoveNext(ref bytes);
