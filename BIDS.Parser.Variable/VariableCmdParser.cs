@@ -36,7 +36,7 @@ public class VariableCmdParser
 		};
 	}
 
-	internal static VariableStructure ParseDataTypeRegisterCommand(ReadOnlySpan<byte> bytes)
+	public static VariableStructure ParseDataTypeRegisterCommand(ReadOnlySpan<byte> bytes)
 	{
 		if (bytes.Length < 9)
 			throw new ArgumentException("`bytes` length must be more than 9 (dataType{4} _ elemDataType{4} _ elemName{1..})");
