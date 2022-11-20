@@ -31,16 +31,17 @@ public static partial class Utils
 		{
 			VariableDataType.Boolean => BitConverter.GetBytes((bool)(obj ?? false)),
 
-			VariableDataType.Int8 => BitConverter.GetBytes((sbyte)(obj ?? 0)),
+			VariableDataType.Int8 => new byte[] { Convert.ToByte((sbyte)(obj ?? 0)) },
 			VariableDataType.Int16 => BitConverter.GetBytes((short)(obj ?? 0)),
 			VariableDataType.Int32 => BitConverter.GetBytes((int)(obj ?? 0)),
 			VariableDataType.Int64 => BitConverter.GetBytes((long)(obj ?? 0)),
 
-			VariableDataType.UInt8 => BitConverter.GetBytes((byte)(obj ?? 0)),
+			VariableDataType.UInt8 => new byte[] { (byte)(obj ?? 0) },
 			VariableDataType.UInt16 => BitConverter.GetBytes((ushort)(obj ?? 0)),
 			VariableDataType.UInt32 => BitConverter.GetBytes((uint)(obj ?? 0)),
 			VariableDataType.UInt64 => BitConverter.GetBytes((ulong)(obj ?? 0)),
 
+			VariableDataType.Float16 => BitConverter.GetBytes((Half)(obj ?? default(Half))),
 			VariableDataType.Float32 => BitConverter.GetBytes((float)(obj ?? 0)),
 			VariableDataType.Float64 => BitConverter.GetBytes((double)(obj ?? 0)),
 
