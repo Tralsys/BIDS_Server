@@ -6,7 +6,7 @@ namespace BIDS.Parser.Variable;
 
 public partial record VariableStructure
 {
-	public record ArrayStructure(VariableDataType ElemType, string Name, object?[]? ValueArray = null) : IDataRecord
+	public record ArrayStructure(VariableDataType ElemType, string Name, Array? ValueArray = null) : IDataRecord
 	{
 		VariableDataType IDataRecord.Type => VariableDataType.Array;
 
