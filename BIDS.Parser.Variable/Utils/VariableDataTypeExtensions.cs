@@ -41,6 +41,7 @@ public static partial class Utils
 			VariableDataType.UInt32 => BitConverter.GetBytes((uint)(obj ?? 0)),
 			VariableDataType.UInt64 => BitConverter.GetBytes((ulong)(obj ?? 0)),
 
+			VariableDataType.Float16 => BitConverter.GetBytes((Half)(obj ?? default(Half))),
 			VariableDataType.Float32 => BitConverter.GetBytes((float)(obj ?? 0)),
 			VariableDataType.Float64 => BitConverter.GetBytes((double)(obj ?? 0)),
 
