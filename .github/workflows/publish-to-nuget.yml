@@ -61,7 +61,7 @@ jobs:
         echo "VERSION=$Version" >> $env:GITHUB_OUTPUT
 
         $AssemblyName = $csproj.Project.PropertyGroup.AssemblyName
-        if(![string]::IsNullOrEmpty($Version))
+        if(![string]::IsNullOrEmpty($AssemblyName))
         {
           $AssemblyName = '${{ inputs.project }}'
         }
