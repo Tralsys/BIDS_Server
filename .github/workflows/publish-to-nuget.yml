@@ -1,0 +1,87 @@
+name: Publish to nuget
+run-name: Publish ${{ inputs.project }} to nuget
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'project name to publish'
+        required: true
+        type: choice
+        options:
+          - BIDS.Parser
+          - BIDS.Parser.Variable
+          - BIDSsv
+          - IBIDSsv
+
+jobs:
+  publish-nuget:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get Version
+      id: get-version
+      shell: pwsh
+      run: |
+        $Version = $(([xml](Get-Content ./${{ inputs.project }}/${{ inputs.project }}.csproj)).Project.PropertyGroup.Version)
+        if([string]::IsNullOrEmpty($Version))
+        {
+          echo "Default version was set"
+          $Version = '1.0.0'
+        }
+        else
+        {
+          $VersionCore,$PreReleaseEtc = $Version.Split('-', 2)
+          $Major,$Minor,$Build,$Revision = $VersionCore.Split('.', 4)
+
+          If ([string]::IsNullOrEmpty($Major))
+          {
+            Write-Error "Major Version Not Found"
+            exit 1
+          }
+
+          $Minor = [string]::IsNullOrEmpty($Minor) ? 0 : [int]$Minor
+          $Build = [string]::IsNullOrEmpty($Build) ? 0 : [int]$Build
+          $Revision = [string]::IsNullOrEmpty($Revision) ? 0 : [int]$Revision
+
+          If (![string]::IsNullOrEmpty($PreReleaseEtc))
+          {
+            $PreReleaseEtc = "-$PreReleaseEtc"
+          }
+          $Revision = $Revision -le 0 ? '' : ".$Revision"
+          
+          $Version = "$Major.$Minor.$Build$Revision$PreReleaseEtc"
+        }
+
+        echo "Version ... '$Version'"
+        echo "VERSION=$Version" >> $env:GITHUB_OUTPUT
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Install dependencies
+      run: dotnet restore ${{ inputs.project }}
+
+    - name: Build
+      run: dotnet build ${{ inputs.project }} -c Release --no-restore
+
+    - name: Pack
+      run: dotnet pack ${{ inputs.project }} -c Release --no-build -o dst
+
+    - name: publish to nuget.org
+      run: >
+        dotnet nuget push
+        dst/${{ inputs.project }}.${{ steps.get-version.outputs.VERSION }}.nupkg
+        --source https://api.nuget.org/v3/index.json
+        --api-key ${{ secrets.NUGET_API_KEY }}
+
+    - name: show version to summary
+      run: |
+        echo "### Publish Success :rocket:" >> $env:GITHUB_STEP_SUMMARY
+        echo "The project ``${{ inputs.project }}`` (version: ``${{ steps.get-version.outputs.VERSION }}``) was successfully published to nuget.org" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "see: https://www.nuget.org/packages/${{ inputs.project }}/${{ steps.get-version.outputs.VERSION }}" >> $env:GITHUB_STEP_SUMMARY
