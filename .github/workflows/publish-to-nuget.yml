@@ -63,7 +63,7 @@ jobs:
       shell: pwsh
       run: |
         $AssemblyName = $(([xml](Get-Content ./${{ inputs.project }}/${{ inputs.project }}.csproj)).Project.PropertyGroup.AssemblyName)
-        if([string]::IsNullOrEmpty($Version))
+        if(![string]::IsNullOrEmpty($Version))
         {
           $AssemblyName = '${{ inputs.project }}'
         }
