@@ -275,4 +275,32 @@ public class ParseDataTypeRegisterCommandTests
 
 		Assert.That(actual.Records, Is.EquivalentTo(expected));
 	}
+
+	[Test]
+	public void StructureNameTest()
+	{
+		static IEnumerable<byte> getBytes(int type, string name)
+			=> BitConverter.GetBytes(type).Concat(System.Text.Encoding.UTF8.GetBytes(name)).Append((byte)0x00);
+		byte[] arr =
+		{
+			// Command Type: Register Structure
+			0,
+			0,
+			0,
+			0,
+
+			// Structure Name: "abcd"
+			(byte)'a',
+			(byte)'b',
+			(byte)'c',
+			(byte)'d',
+			0,
+		};
+
+		arr = arr.Concat(getBytes(1, "a")).ToArray();
+
+		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
+
+		Assert.That(actual.Name, Is.EqualTo("abcd"));
+	}
 }
