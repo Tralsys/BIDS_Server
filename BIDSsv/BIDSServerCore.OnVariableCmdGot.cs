@@ -13,6 +13,8 @@ public partial class BIDSServerCore
 	VariableSMemNameManager VariableSMemNames { get; } = new();
 	Dictionary<string, VariableSMem> VariableSMems { get; } = new();
 
+	public Dictionary<string, VariableStructure.IDataRecord> DataRecords { get; } = new();
+
 	// TODO: NO_SMEM_MODEへの対応
 
 	public byte[]? OnVariableStructureRegisterCmdGot(VariableStructure Structure, IParser parser)
@@ -40,6 +42,9 @@ public partial class BIDSServerCore
 			throw new KeyNotFoundException($"The structure `{name}` not found");
 
 		smem.WriteToSMemFromPayload(Payload);
+
+		foreach (var v in Payload)
+			DataRecords[v.Key] = v.Value;
 
 		return null;
 	}
