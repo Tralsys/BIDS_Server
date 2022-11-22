@@ -30,7 +30,7 @@ public record VariableStructureRegister(
 
 public record VariablePayload(
 	VariableStructurePayload Payload,
-	VariableStructure? Structure = null
+	VariableStructure Structure
 ) : IBIDSBinaryData.IVariablePayload
 {
 	public byte RawCommandType { get; } = BinaryParser.VARIABLE_CMD_TYPE_VALUE;
@@ -67,7 +67,7 @@ public partial class BinaryParser
 		{
 			VariableStructure v => new VariableStructureRegister(v),
 
-			VariableStructurePayload v => new VariablePayload(v),
+			VariableStructurePayload v => new VariablePayload(v, VariableCmdParser.DataTypeDict[v.DataTypeId]),
 
 			VariableCmdKeyNotFound v => new BIDSBinaryData_Error(BIDSBinaryDataErrorType.UnknownVariableDataKey),
 

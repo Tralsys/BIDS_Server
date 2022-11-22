@@ -95,7 +95,7 @@ public interface IBIDSBinaryData : IBIDSCmd
 
 	public interface IVariablePayload : IBIDSBinaryData
 	{
-		VariableStructure? Structure { get; }
+		VariableStructure Structure { get; }
 		VariableStructurePayload Payload { get; }
 	}
 }
