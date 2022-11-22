@@ -28,9 +28,9 @@ public partial record VariableStructure(int DataTypeId, string Name, IReadOnlyLi
 	{
 		IEnumerable<byte> bytes = BitConverter.GetBytes(this.DataTypeId);
 
-		byte[] nameBytes = Encoding.UTF8.GetBytes(Name);
+		byte[] nameBytes = Encoding.UTF8.GetBytes(Name.Trim('\0'));
 		bytes = bytes
-			.Concat(BitConverter.GetBytes((short)nameBytes.Length))
+			.Concat(nameBytes)
 			.Concat(new byte[] { 0 });
 
 		foreach (var v in this.Records)
