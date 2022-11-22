@@ -114,11 +114,15 @@ public class ParseDataTypeRegisterCommandTests
 	}, VariableDataType.Float64, "float64")]
 	public void SingleFieldTest(int type, byte[] name, VariableDataType expectedDataType, string expectedName)
 	{
-		byte[] arr = new byte[8 + name.Length];
+		// Command Type + Structure(Structure Name + DataRecord(Data Type + name))
+		byte[] arr = new byte[8 + 1 + name.Length];
 
 		int i = 0;
+		// Command Type: Register Structure
 		foreach (var v in BitConverter.GetBytes(0))
 			arr[i++] = v;
+		// Structure Name (string.Empty)
+		arr[i++] = 0;
 		foreach (var v in BitConverter.GetBytes(type))
 			arr[i++] = v;
 		foreach (var v in name)
@@ -126,7 +130,8 @@ public class ParseDataTypeRegisterCommandTests
 
 		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
 
-		Assert.That(actual.Records.Count, Is.EqualTo(1));
+		Assert.That(actual.Name, Is.EqualTo(string.Empty));
+		Assert.That(actual.Records, Has.Count.EqualTo(1));
 
 		Assert.That(actual.Records[0], Is.EqualTo(
 			new VariableStructure.DataRecord(expectedDataType, expectedName, null))
@@ -138,21 +143,28 @@ public class ParseDataTypeRegisterCommandTests
 	{
 		byte[] arr = new byte[]
 		{
+			// Command Type: Register Structure
 			0,
 			0,
 			0,
 			0,
 
+			// Structure Name: string.Empty
+			0,
+
+			// IDataRecord.DataType: array
 			17,
 			0,
 			0,
 			0,
 
+			// ArrayStructure.ElementDataType: Int32
 			3,
 			0,
 			0,
 			0,
 
+			// IDataRecord.Name: "a"
 			(byte)'a',
 			(byte)'\0',
 		};
@@ -171,22 +183,28 @@ public class ParseDataTypeRegisterCommandTests
 	{
 		byte[] arr =
 		{
+			// Command Type: Register Structure
 			0,
 			0,
 			0,
 			0,
 
+			// Structure Name: string.Empty
+			0,
+
+			// IDataRecord.Type: Boolean
 			0,
 			0,
 			0,
 			0,
 
+			// IDataRecord.Name: string.Empty
 			0,
 		};
 
 		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
 
-		Assert.That(actual.Records.Count, Is.EqualTo(1));
+		Assert.That(actual.Records, Has.Count.EqualTo(1));
 
 		Assert.That(actual.Records[0], Is.EqualTo(
 			new VariableStructure.DataRecord(VariableDataType.Boolean, "", null))
@@ -201,9 +219,13 @@ public class ParseDataTypeRegisterCommandTests
 
 		byte[] arr =
 		{
+			// Command Type: Register Structure
 			0,
 			0,
 			0,
+			0,
+
+			// Structure Name: string.Empty
 			0,
 		};
 
@@ -252,5 +274,33 @@ public class ParseDataTypeRegisterCommandTests
 		};
 
 		Assert.That(actual.Records, Is.EquivalentTo(expected));
+	}
+
+	[Test]
+	public void StructureNameTest()
+	{
+		static IEnumerable<byte> getBytes(int type, string name)
+			=> BitConverter.GetBytes(type).Concat(System.Text.Encoding.UTF8.GetBytes(name)).Append((byte)0x00);
+		byte[] arr =
+		{
+			// Command Type: Register Structure
+			0,
+			0,
+			0,
+			0,
+
+			// Structure Name: "abcd"
+			(byte)'a',
+			(byte)'b',
+			(byte)'c',
+			(byte)'d',
+			0,
+		};
+
+		arr = arr.Concat(getBytes(1, "a")).ToArray();
+
+		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
+
+		Assert.That(actual.Name, Is.EqualTo("abcd"));
 	}
 }

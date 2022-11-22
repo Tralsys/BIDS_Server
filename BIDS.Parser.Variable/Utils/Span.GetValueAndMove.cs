@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace BIDS.Parser.Variable;
 
@@ -109,4 +110,20 @@ public static partial class Utils
 		return v;
 	}
 	#endregion
+
+	static public string GetStringAndMove(ref ReadOnlySpan<byte> span)
+	{
+		int stringLength = 0;
+		while (stringLength < span.Length && span[stringLength] != 0)
+			stringLength++;
+
+		string returnString = Encoding.UTF8.GetString(span[..stringLength]);
+
+		if (stringLength == span.Length)
+			span = span[stringLength..];
+		else
+			span = span[(stringLength + 1)..];
+
+		return returnString;
+	}
 }

@@ -36,7 +36,8 @@ public class VariableStructureTests
 	[TestCase(VariableDataType.Float64, "float64", new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF4, 0x3F }, 1.25)]
 	public void SingleRecordTest(VariableDataType type, string name, byte[] bytes, object? expected)
 	{
-		VariableStructure structure = new(0, new List<VariableStructure.IDataRecord>()
+		string structureName = "SampleStrcuture";
+		VariableStructure structure = new(0, structureName, new List<VariableStructure.IDataRecord>()
 		{
 			new VariableStructure.DataRecord(type, name, null)
 		});
@@ -52,7 +53,8 @@ public class VariableStructureTests
 	{
 		VariableDataType type = VariableDataType.Int8;
 		string name = "array";
-		VariableStructure structure = new(0, new List<VariableStructure.IDataRecord>()
+		string structureName = "SampleStrcuture";
+		VariableStructure structure = new(0, structureName, new List<VariableStructure.IDataRecord>()
 		{
 			new VariableStructure.ArrayStructure(type, name, null)
 		});
@@ -95,7 +97,8 @@ public class VariableStructureTests
 	[Test]
 	public void MultiRecordTest()
 	{
-		VariableStructure structure = new(0, new List<VariableStructure.IDataRecord>()
+		string structureName = "SampleStrcuture";
+		VariableStructure structure = new(0, structureName, new List<VariableStructure.IDataRecord>()
 		{
 			new VariableStructure.DataRecord(VariableDataType.Boolean, "Bool", null),
 			new VariableStructure.ArrayStructure(VariableDataType.UInt8, "Array", null),

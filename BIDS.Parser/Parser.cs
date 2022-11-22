@@ -1,4 +1,5 @@
 ﻿using BIDS.Parser.Internals;
+using BIDS.Parser.Variable;
 
 namespace BIDS.Parser;
 
@@ -8,7 +9,14 @@ public partial class Parser : IParser
 
 	public static Parser Default { get; } = new();
 
-	BinaryParser BinaryParser { get; } = new();
+	BinaryParser BinaryParser { get; }
+
+	public Parser() : this(new Dictionary<int, VariableStructure>()) { }
+
+	public Parser(IReadOnlyDictionary<int, VariableStructure> dataTypeDict)
+	{
+		BinaryParser = new(dataTypeDict);
+	}
 
 	public IStringBIDSCmd From(string str)
 		=> From(str.AsSpan());

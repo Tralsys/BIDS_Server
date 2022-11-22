@@ -6,6 +6,10 @@ public enum BIDSBinaryDataErrorType
 	FewLength,
 	UnknownCommandType,
 	UnknownDataType,
+
+	NotBIDSCommand,
+
+	UnknownVariableDataKey,
 }
 
 public record BIDSBinaryData_Error(

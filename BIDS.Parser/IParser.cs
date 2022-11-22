@@ -1,4 +1,6 @@
-﻿namespace BIDS.Parser;
+﻿using BIDS.Parser.Variable;
+
+namespace BIDS.Parser;
 
 public interface IParser
 {
@@ -13,6 +15,8 @@ public interface IParser
 
 public interface IBinaryParser
 {
+	VariableCmdParser VariableCmdParser { get; }
+
 	IBIDSBinaryData From(byte[] bytes) => From(bytes.AsSpan());
 	IBIDSBinaryData From(ReadOnlySpan<byte> bytes);
 }

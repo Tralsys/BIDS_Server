@@ -1,10 +1,22 @@
-﻿namespace BIDS.Parser;
+﻿using BIDS.Parser.Variable;
+
+namespace BIDS.Parser;
 
 public partial class BinaryParser : IBinaryParser
 {
 	const int HEADER_LEN = 4;
 
 	internal const byte INFO_CMD_TYPE_VALUE = (byte)'b';
+	internal const byte VARIABLE_CMD_TYPE_VALUE = (byte)'v';
+
+	public VariableCmdParser VariableCmdParser { get; }
+
+	public BinaryParser() : this(new Dictionary<int, VariableStructure>()) { }
+
+	public BinaryParser(IReadOnlyDictionary<int, VariableStructure> dataTypeDict)
+	{
+		VariableCmdParser = new(dataTypeDict);
+	}
 
 	public IBIDSBinaryData From(ReadOnlySpan<byte> bytes)
 	{
@@ -33,13 +45,15 @@ public partial class BinaryParser : IBinaryParser
 					_ => new BIDSBinaryData_Error(BIDSBinaryDataErrorType.UnknownDataType)
 				},
 
+				// Variable Command系の処理用関数を別途実装して、それを呼ぶ
+				VARIABLE_CMD_TYPE_VALUE => OnVariableCmdGot(contents),
+
 				_ => new BIDSBinaryData_Error(BIDSBinaryDataErrorType.UnknownCommandType)
 			};
 		}
 		else
 		{
-			// 可変長データ
-			throw new NotImplementedException();
+			return new BIDSBinaryData_Error(BIDSBinaryDataErrorType.NotBIDSCommand);
 		}
 	}
 }

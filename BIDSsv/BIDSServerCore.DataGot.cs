@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 
 using BIDS.Parser;
@@ -19,13 +18,13 @@ public partial class BIDSServerCore
 
 		var result = parser.From(e.Bytes);
 
-		var responseToSend = OnDataGot(result);
+		var responseToSend = OnDataGot(result, parser);
 
 		if (responseToSend is not null)
 			sv.Print(responseToSend);
 	}
 
-	private byte[]? OnDataGot(IBIDSCmd cmd)
+	private byte[]? OnDataGot(IBIDSCmd cmd, IParser parser)
 	{
 		string? returnCmd = null;
 
@@ -55,6 +54,12 @@ public partial class BIDSServerCore
 				if (cmd is IStringBIDSCmd scmd)
 					returnCmd = OnControlCmdGot.HandleRequest(SMem, scmd, Version);
 				break;
+
+			case IBIDSBinaryData.IVariableStructureRegister regCmd:
+				return OnVariableStructureRegisterCmdGot(regCmd.Structure, parser);
+
+			case IBIDSBinaryData.IVariablePayload payloadCmd:
+				return OnVariablePayloadCmdGot(payloadCmd.Structure.Name, payloadCmd.Payload);
 
 			case IBIDSBinaryData binCmd:
 				return OnBinaryCmdGot.HandleCommand(SMem, binCmd);

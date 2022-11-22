@@ -16,7 +16,12 @@ public record ValiableCmdError();
 
 public class VariableCmdParser
 {
-	Dictionary<int, VariableStructure> DataTypeDict { get; } = new();
+	public IReadOnlyDictionary<int, VariableStructure> DataTypeDict { get; }
+
+	public VariableCmdParser(IReadOnlyDictionary<int, VariableStructure> dataTypeDict)
+	{
+		DataTypeDict = dataTypeDict;
+	}
 
 	public IVariableCmdResult From(ReadOnlySpan<byte> gotData)
 	{
@@ -48,6 +53,9 @@ public class VariableCmdParser
 
 		int cmdDataType = Utils.GetInt32AndMove(ref bytes);
 
+
+		string structureName = Utils.GetStringAndMove(ref bytes);
+
 		while (bytes.Length >= 5)
 		{
 			// 各フィールドのデータ型番号を取得する
@@ -60,23 +68,14 @@ public class VariableCmdParser
 
 			// 変数名(フィールド名/データ名)を取得する。
 			// NULL文字に到達するか、あるいはSpanを全て読み切ったら終了
-			int dataNameLen = 0;
-			while (dataNameLen < bytes.Length && bytes[dataNameLen] != 0)
-				dataNameLen++;
-
-			string dataName = Encoding.UTF8.GetString(bytes[..dataNameLen]);
+			string dataName = Utils.GetStringAndMove(ref bytes);
 
 			if (arrayElemDataType is VariableDataType elemDataType)
 				records.Add(new VariableStructure.ArrayStructure(elemDataType, dataName));
 			else
 				records.Add(new VariableStructure.DataRecord(dataType, dataName));
-
-			// NULL文字分進めてチェックする
-			if (bytes.Length <= (dataNameLen + 1))
-				break;
-			bytes = bytes[(dataNameLen + 1)..];
 		}
 
-		return new VariableStructure(cmdDataType, records);
+		return new VariableStructure(cmdDataType, structureName, records);
 	}
 }

@@ -6,7 +6,7 @@
 		<AssemblyName>TR.BIDSsv</AssemblyName>
 		<RootNamespace>TR.BIDSsv</RootNamespace>
 		<Nullable>enable</Nullable>
-		<Version>1.1.0</Version>
+		<Version>1.2.0</Version>
 		<Authors>Tetsu Otter</Authors>
 		<Company>Tech Otter</Company>
 		<Product>BIDS Project</Product>
@@ -26,6 +26,7 @@ uploaded to nuget</PackageReleaseNotes>
 	<ItemGroup>
 		<PackageReference Include="IAtsPI" Version="1.0.0.2" />
 		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.1.0" />
+		<PackageReference Include="TR.BIDSSMemLib.Variable" Version="1.1.0-beta1.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
