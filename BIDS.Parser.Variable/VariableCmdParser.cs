@@ -16,7 +16,12 @@ public record ValiableCmdError();
 
 public class VariableCmdParser
 {
-	Dictionary<int, VariableStructure> DataTypeDict { get; } = new();
+	public IReadOnlyDictionary<int, VariableStructure> DataTypeDict { get; }
+
+	public VariableCmdParser(IReadOnlyDictionary<int, VariableStructure> dataTypeDict)
+	{
+		DataTypeDict = dataTypeDict;
+	}
 
 	public IVariableCmdResult From(ReadOnlySpan<byte> gotData)
 	{
