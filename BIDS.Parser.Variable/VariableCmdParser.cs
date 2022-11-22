@@ -48,6 +48,9 @@ public class VariableCmdParser
 
 		int cmdDataType = Utils.GetInt32AndMove(ref bytes);
 
+
+		string structureName = Utils.GetStringAndMove(ref bytes);
+
 		while (bytes.Length >= 5)
 		{
 			// 各フィールドのデータ型番号を取得する
@@ -68,6 +71,6 @@ public class VariableCmdParser
 				records.Add(new VariableStructure.DataRecord(dataType, dataName));
 		}
 
-		return new VariableStructure(cmdDataType, records);
+		return new VariableStructure(cmdDataType, structureName, records);
 	}
 }

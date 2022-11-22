@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace BIDS.Parser.Variable;
 
-public partial record VariableStructure(int DataTypeId, IReadOnlyList<VariableStructure.IDataRecord> Records) : IVariableCmdResult
+public partial record VariableStructure(int DataTypeId, string Name, IReadOnlyList<VariableStructure.IDataRecord> Records) : IVariableCmdResult
 {
 	/// <summary>この構造を用いて、指定のバイト配列を解析する</summary>
 	/// <param name="bytes">受け取ったデータ</param>
@@ -26,6 +27,11 @@ public partial record VariableStructure(int DataTypeId, IReadOnlyList<VariableSt
 	public IEnumerable<byte> GetStructureBytes()
 	{
 		IEnumerable<byte> bytes = BitConverter.GetBytes(this.DataTypeId);
+
+		byte[] nameBytes = Encoding.UTF8.GetBytes(Name);
+		bytes = bytes
+			.Concat(BitConverter.GetBytes((short)nameBytes.Length))
+			.Concat(new byte[] { 0 });
 
 		foreach (var v in this.Records)
 			bytes = bytes.Concat(v.GetStructureBytes());
