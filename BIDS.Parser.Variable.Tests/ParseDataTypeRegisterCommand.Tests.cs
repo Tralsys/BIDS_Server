@@ -131,7 +131,7 @@ public class ParseDataTypeRegisterCommandTests
 		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
 
 		Assert.That(actual.Name, Is.EqualTo(string.Empty));
-		Assert.That(actual.Records.Count, Is.EqualTo(1));
+		Assert.That(actual.Records, Has.Count.EqualTo(1));
 
 		Assert.That(actual.Records[0], Is.EqualTo(
 			new VariableStructure.DataRecord(expectedDataType, expectedName, null))
@@ -204,7 +204,7 @@ public class ParseDataTypeRegisterCommandTests
 
 		var actual = VariableCmdParser.ParseDataTypeRegisterCommand(arr.AsSpan());
 
-		Assert.That(actual.Records.Count, Is.EqualTo(1));
+		Assert.That(actual.Records, Has.Count.EqualTo(1));
 
 		Assert.That(actual.Records[0], Is.EqualTo(
 			new VariableStructure.DataRecord(VariableDataType.Boolean, "", null))
