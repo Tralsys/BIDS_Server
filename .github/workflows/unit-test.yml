@@ -27,6 +27,8 @@ jobs:
           - net6.0
         include:
           - project: BIDS.Parser.Variable.Tests
+            os: ubuntu-latest
+            dotnet-version: '6.0.x'
             framework: netcoreapp3.0
     steps:
       - uses: actions/checkout@v3
