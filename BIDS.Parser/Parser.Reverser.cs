@@ -13,7 +13,7 @@ public record BIDSCmd_ReverserControl(
 			ReverserPos.Forward => "F",
 			ReverserPos.Neutral => "N",
 			ReverserPos.Backward => "B",
-			_ => throw new NotSupportedException($"{ToCommandStr} Method is not supported when the value of {ReverserPos} is {ReverserPos.Unknown}")
+			_ => throw new NotSupportedException($"{nameof(ToCommandStr)} Method is not supported when the value of {ReverserPos} is {ReverserPos.Unknown}")
 		});
 }
 
