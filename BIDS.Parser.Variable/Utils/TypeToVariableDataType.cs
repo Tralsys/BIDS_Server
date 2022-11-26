@@ -31,7 +31,9 @@ public static partial class Utils
 				TypeCode.Single => VariableDataType.Float32,
 				TypeCode.Double => VariableDataType.Float64,
 
+#if NET5_0_OR_GREATER
 				TypeCode.Object when type == typeof(Half) => VariableDataType.Float16,
+#endif
 
 				TypeCode.String => VariableDataType.Array,
 

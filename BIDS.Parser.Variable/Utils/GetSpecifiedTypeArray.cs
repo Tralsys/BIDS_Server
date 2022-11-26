@@ -19,7 +19,9 @@ public static partial class Utils
 			VariableDataType.UInt32 => new uint[length],
 			VariableDataType.UInt64 => new ulong[length],
 
+#if NET5_0_OR_GREATER
 			VariableDataType.Float16 => new Half[length],
+#endif
 			VariableDataType.Float32 => new float[length],
 			VariableDataType.Float64 => new double[length],
 

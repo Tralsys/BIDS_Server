@@ -19,7 +19,9 @@ public static partial class Utils
 			VariableDataType.UInt32 => Utils.GetUInt32AndMove(ref bytes),
 			VariableDataType.UInt64 => Utils.GetUInt64AndMove(ref bytes),
 
+#if NET5_0_OR_GREATER
 			VariableDataType.Float16 => Utils.GetFloat16AndMove(ref bytes),
+#endif
 			VariableDataType.Float32 => Utils.GetFloat32AndMove(ref bytes),
 			VariableDataType.Float64 => Utils.GetFloat64AndMove(ref bytes),
 
@@ -41,7 +43,9 @@ public static partial class Utils
 			VariableDataType.UInt32 => BitConverter.GetBytes((uint)(obj ?? 0)),
 			VariableDataType.UInt64 => BitConverter.GetBytes((ulong)(obj ?? 0)),
 
+#if NET5_0_OR_GREATER
 			VariableDataType.Float16 => BitConverter.GetBytes((Half)(obj ?? default(Half))),
+#endif
 			VariableDataType.Float32 => BitConverter.GetBytes((float)(obj ?? 0)),
 			VariableDataType.Float64 => BitConverter.GetBytes((double)(obj ?? 0)),
 
