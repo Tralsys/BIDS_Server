@@ -13,7 +13,9 @@ public class TypeToVariableDataTypeTests
 	[TestCase(typeof(ulong), VariableDataType.UInt64)]
 	[TestCase(typeof(float), VariableDataType.Float32)]
 	[TestCase(typeof(double), VariableDataType.Float64)]
+#if NET5_0_OR_GREATER
 	[TestCase(typeof(Half), VariableDataType.Float16)]
+#endif
 	[TestCase(typeof(string), VariableDataType.Array)]
 	[TestCase(typeof(object[]), VariableDataType.Array)]
 	public void NormalCaseTests(Type type, VariableDataType expectedVariableDataType)
