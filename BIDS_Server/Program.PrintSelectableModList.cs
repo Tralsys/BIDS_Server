@@ -12,7 +12,6 @@ partial class Program
 			string[] fs = LSMod();
 			if (fs?.Length > 0)
 			{
-				int i = 0;
 				foreach (var v in fs)
 				{
 					string[] cn = v.Split('.');

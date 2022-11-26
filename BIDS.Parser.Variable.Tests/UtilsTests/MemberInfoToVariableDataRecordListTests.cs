@@ -7,7 +7,7 @@ public class MemberInfoToVariableDataRecordListTests
 	class SampleBaseClass
 	{
 		public int SampleBaseIntProperty { get; }
-		public long SampleBaseLongField;
+		public long SampleBaseLongField = 0;
 
 		private int PrivateBaseIntProperty { get; }
 		protected string ProtectedBaseStringField = string.Empty;
@@ -16,7 +16,7 @@ public class MemberInfoToVariableDataRecordListTests
 		public event EventHandler? BasePublicEvent;
 		private event EventHandler? BasePrivateEvent;
 
-		public void BasePublicMethod() => BasePrivateEvent?.Invoke(this, new());
+		public void BasePublicMethod() => BasePublicEvent?.Invoke(this, new());
 		private void BasePrivateMethod() => BasePrivateEvent?.Invoke(this, new());
 
 		static public byte PublicBaseStaticCharProperty { get; }
@@ -25,7 +25,7 @@ public class MemberInfoToVariableDataRecordListTests
 	class SampleClass : SampleBaseClass
 	{
 		public int SampleIntProperty { get; }
-		public long[]? SampleLongArrayField;
+		public long[]? SampleLongArrayField = Array.Empty<long>();
 
 		private int PrivateIntProperty { get; }
 		protected string ProtectedStringField = string.Empty;

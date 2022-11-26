@@ -12,7 +12,7 @@ public record BIDSCmd_KeyControl(
 		{
 			KeyControlType.Pressed => 'P',
 			KeyControlType.Released => 'R',
-			_ => throw new NotSupportedException($"{ToCommandStr} Method is not supported when the value of {this.ControlType} is {KeyControlType.Unknown}")
+			_ => throw new NotSupportedException($"{nameof(ToCommandStr)} Method is not supported when the value of {this.ControlType} is {KeyControlType.Unknown}")
 		});
 }
 

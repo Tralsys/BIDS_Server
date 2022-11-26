@@ -89,12 +89,14 @@ public static partial class Utils
 	#endregion
 
 	#region Floating Point Number
+#if NET5_0_OR_GREATER
 	static public System.Half GetFloat16AndMove(ref ReadOnlySpan<byte> span)
 	{
 		var v = BitConverter.ToHalf(span[..2]);
 		span = span[2..];
 		return v;
 	}
+#endif
 
 	static public float GetFloat32AndMove(ref ReadOnlySpan<byte> span)
 	{

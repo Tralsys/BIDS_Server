@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-		<Version>1.2.0</Version>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BIDS.Parser.Variable\BIDS.Parser.Variable.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+		<LangVersion>10.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Version>1.2.1</Version>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BIDS.Parser.Variable\BIDS.Parser.Variable.csproj" />
+	</ItemGroup>
 </Project>
