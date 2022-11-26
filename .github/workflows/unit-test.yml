@@ -16,13 +16,13 @@ jobs:
 
     strategy:
       matrix:
+        project:
+          - BIDS.Parser.Tests
+          - BIDS.Parser.Variable.Tests
         os:
           - ubuntu-latest
         dotnet-version:
           - '6.0.x'
-        project:
-          - BIDS.Parser.Tests
-          - BIDS.Parser.Variable.Tests
         framework:
           - net6.0
         include:
