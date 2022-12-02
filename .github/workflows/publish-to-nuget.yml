@@ -10,7 +10,6 @@ on:
         type: choice
         options:
           - BIDS.Parser
-          - BIDS.Parser.Variable
           - BIDSsv
           - IBIDSsv
 
