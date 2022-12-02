@@ -7,9 +7,16 @@ public static partial class Utils
 {
 	static public System.Boolean GetBooleanAndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToBoolean(span[..1]);
+		ReadOnlySpan<byte> targetSpan = span[0..1];
 		span = span[1..];
-		return v;
+
+		return BitConverter.ToBoolean(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	#region Signed Integer
@@ -22,31 +29,59 @@ public static partial class Utils
 
 	static public System.Int16 GetInt16AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToInt16(span[..2]);
+		ReadOnlySpan<byte> targetSpan = span[0..2];
 		span = span[2..];
-		return v;
+
+		return BitConverter.ToInt16(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	static public System.Int32 GetInt32AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToInt32(span[..4]);
+		ReadOnlySpan<byte> targetSpan = span[0..4];
 		span = span[4..];
-		return v;
+
+		return BitConverter.ToInt32(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	static public System.Int64 GetInt64AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToInt64(span[..8]);
+		ReadOnlySpan<byte> targetSpan = span[0..8];
 		span = span[8..];
-		return v;
+
+		return BitConverter.ToInt64(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	// TODO: C#でInt128がサポートされ次第、Int128を使用した実装にする。
 	static public System.Int64 GetInt128AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToInt64(span[..16]);
+		ReadOnlySpan<byte> targetSpan = span[0..16];
 		span = span[16..];
-		return v;
+
+		return BitConverter.ToInt64(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 	#endregion
 
@@ -60,31 +95,59 @@ public static partial class Utils
 
 	static public System.UInt16 GetUInt16AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToUInt16(span[..2]);
+		ReadOnlySpan<byte> targetSpan = span[0..2];
 		span = span[2..];
-		return v;
+
+		return BitConverter.ToUInt16(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	static public System.UInt32 GetUInt32AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToUInt32(span[..4]);
+		ReadOnlySpan<byte> targetSpan = span[0..4];
 		span = span[4..];
-		return v;
+
+		return BitConverter.ToUInt32(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	static public System.UInt64 GetUInt64AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToUInt64(span[..8]);
+		ReadOnlySpan<byte> targetSpan = span[0..8];
 		span = span[8..];
-		return v;
+
+		return BitConverter.ToUInt64(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	// TODO: C#でUInt128がサポートされ次第、Int128を使用した実装にする。
 	static public System.UInt64 GetUInt128AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToUInt64(span[..16]);
+		ReadOnlySpan<byte> targetSpan = span[0..16];
 		span = span[16..];
-		return v;
+
+		return BitConverter.ToUInt64(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 	#endregion
 
@@ -92,7 +155,7 @@ public static partial class Utils
 #if NET5_0_OR_GREATER
 	static public System.Half GetFloat16AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToHalf(span[..2]);
+		var v = BitConverter.ToHalf(span[0..2]);
 		span = span[2..];
 		return v;
 	}
@@ -100,16 +163,30 @@ public static partial class Utils
 
 	static public float GetFloat32AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToSingle(span[..4]);
+		ReadOnlySpan<byte> targetSpan = span[0..4];
 		span = span[4..];
-		return v;
+
+		return BitConverter.ToSingle(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 
 	static public double GetFloat64AndMove(ref ReadOnlySpan<byte> span)
 	{
-		var v = BitConverter.ToDouble(span[..8]);
+		ReadOnlySpan<byte> targetSpan = span[0..8];
 		span = span[8..];
-		return v;
+
+		return BitConverter.ToDouble(
+			targetSpan
+#if NETSTANDARD2_0
+				.ToArray(),
+			0
+#endif
+		);
 	}
 	#endregion
 
@@ -119,7 +196,12 @@ public static partial class Utils
 		while (stringLength < span.Length && span[stringLength] != 0)
 			stringLength++;
 
-		string returnString = Encoding.UTF8.GetString(span[..stringLength]);
+		string returnString = Encoding.UTF8.GetString(
+			span[0..stringLength]
+#if NETSTANDARD2_0
+				.ToArray()
+#endif
+		);
 
 		if (stringLength == span.Length)
 			span = span[stringLength..];
