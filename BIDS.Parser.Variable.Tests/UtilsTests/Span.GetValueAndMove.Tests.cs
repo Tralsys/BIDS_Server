@@ -6,7 +6,13 @@ public class Span_GetValueAndMoveTests
 	{
 		Assert.That(actual, Is.EqualTo(expected));
 
-		Assert.That(afterProcessingSpan.ToArray(), Is.EquivalentTo(input[size..]));
+		Assert.That(afterProcessingSpan.ToArray(), Is.EquivalentTo(
+#if NET5_0_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+			input[size..]
+#else
+			input.Skip(size)
+#endif
+		));
 	}
 
 	[TestCase(new byte[] { 0, 1, 2, 3 }, false)]
