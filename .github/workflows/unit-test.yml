@@ -30,6 +30,10 @@ jobs:
             os: ubuntu-latest
             dotnet-version: '6.0.x'
             framework: netcoreapp3.0
+          - project: BIDS.Parser.Variable.Tests
+            os: ubuntu-latest
+            dotnet-version: '6.0.x'
+            framework: netcoreapp2.1
     steps:
       - uses: actions/checkout@v3
 
