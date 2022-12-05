@@ -25,8 +25,8 @@ uploaded to nuget</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="IAtsPI" Version="1.0.0.2" />
-		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.1.0" />
-		<PackageReference Include="TR.BIDSSMemLib.Variable" Version="1.2.0" />
+		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.2.0.1" />
+		<PackageReference Include="TR.BIDSSMemLib.Variable" Version="1.2.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
