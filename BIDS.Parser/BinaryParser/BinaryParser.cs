@@ -9,14 +9,7 @@ public partial class BinaryParser : IBinaryParser
 	internal const byte INFO_CMD_TYPE_VALUE = (byte)'b';
 	internal const byte VARIABLE_CMD_TYPE_VALUE = (byte)'v';
 
-	public VariableCmdParser VariableCmdParser { get; }
-
-	public BinaryParser() : this(new Dictionary<int, VariableStructure>()) { }
-
-	public BinaryParser(IReadOnlyDictionary<int, VariableStructure> dataTypeDict)
-	{
-		VariableCmdParser = new(dataTypeDict);
-	}
+	public VariableCmdParser VariableCmdParser { get; } = new();
 
 	public IBIDSBinaryData From(ReadOnlySpan<byte> bytes)
 	{

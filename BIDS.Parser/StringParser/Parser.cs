@@ -9,14 +9,7 @@ public partial class Parser : IParser
 
 	public static Parser Default { get; } = new();
 
-	BinaryParser BinaryParser { get; }
-
-	public Parser() : this(new Dictionary<int, VariableStructure>()) { }
-
-	public Parser(IReadOnlyDictionary<int, VariableStructure> dataTypeDict)
-	{
-		BinaryParser = new(dataTypeDict);
-	}
+	BinaryParser BinaryParser { get; } = new();
 
 	public IStringBIDSCmd From(string str)
 		=> From(str.AsSpan());
