@@ -16,9 +16,6 @@
 		<Version>1.1.0.0</Version>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.1.0" />
-	</ItemGroup>
-	<ItemGroup>
 		<ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
 		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
 	</ItemGroup>
