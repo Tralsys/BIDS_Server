@@ -4,7 +4,7 @@ using TR;
 
 namespace BIDS_Server.ConsolePrintOnly;
 
-class Program
+partial class Program
 {
 	static void Main(string[] args)
 	{
