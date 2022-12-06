@@ -39,6 +39,12 @@ public partial class BIDSServerCore
 		SMem.ReadStart(SMemLib.ARNum.All, Interval);
 
 		SMem.SMC_BSMDChanged += SMem_SMC_BSMDChanged;
+
+		// Variable SMem Reader
+		Reader = new(Interval);
+		Reader.NameAdded += Reader_NameAdded;
+		Reader.ValueChanged += Reader_ValueChanged;
+		Reader.Run();
 	}
 
 	public bool AddMod(in IBIDSsv sv)
