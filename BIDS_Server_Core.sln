@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBIDSsv", "IBIDSsv\IBIDSsv.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDS_Server", "BIDS_Server\BIDS_Server.csproj", "{80C3E9A8-0050-49A1-981F-C83614B2E205}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BIDS_Server.ConsolePrintOnly", "BIDS_Server.ConsolePrintOnly\BIDS_Server.ConsolePrintOnly.csproj", "{5AC38935-63CC-44A2-89D3-11F80E4133D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{80C3E9A8-0050-49A1-981F-C83614B2E205}.Release|x86.Build.0 = Release|Any CPU
 		{80C3E9A8-0050-49A1-981F-C83614B2E205}.Release|x64.ActiveCfg = Release|Any CPU
 		{80C3E9A8-0050-49A1-981F-C83614B2E205}.Release|x64.Build.0 = Release|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Release|x86.Build.0 = Release|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{5AC38935-63CC-44A2-89D3-11F80E4133D7}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
