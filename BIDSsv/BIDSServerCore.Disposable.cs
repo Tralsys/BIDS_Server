@@ -15,6 +15,7 @@ public partial class BIDSServerCore : IDisposable
 				ClearMod();
 
 				SMem.ReadStop(SMemLib.ARNum.All);
+				Reader.Dispose();
 			}
 
 			disposedValue = true;
