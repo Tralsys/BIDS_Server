@@ -102,7 +102,7 @@ public class RandomValueGenerator
 			_ => throw new NotSupportedException($"The Type {type} is not supported")
 		};
 
-	public T[] GetArray<T>(int length, Func<T> Generator)
+	public static T[] GetArray<T>(int length, Func<T> Generator)
 	{
 		T[] arr = new T[length];
 
