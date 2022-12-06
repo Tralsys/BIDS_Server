@@ -51,6 +51,11 @@ public class ConsolePrintMod : IBIDSsv
 	public void Print(in byte[] data)
 		=> Log(Convert.ToHexString(data), BitConverter.ToInt32(data[0..4]) == 0 ? ConsoleColor.Green : ConsoleColor.Blue);
 
+	public void DataGotEventInvoke(byte[] bytes)
+	{
+		DataGot?.Invoke(this, new(bytes));
+	}
+
 	public void WriteHelp(in string args)
 	{
 	}

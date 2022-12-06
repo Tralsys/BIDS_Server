@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using TR;
 
 namespace BIDS_Server.ConsolePrintOnly;
@@ -14,7 +15,17 @@ class Program
 		sv.AddMod(Mod01);
 		sv.AddMod(Mod02);
 
-		while (Console.ReadLine() is not (null or "exit" or "quit")) ;
+		while (true)
+		{
+			string? s = Console.ReadLine();
+			if (s is null or "exit" or "quit")
+				return;
+
+			if (s.StartsWith("0x"))
+				Mod01.DataGotEventInvoke(Convert.FromHexString(s[2..]));
+			else
+				Mod01.DataGotEventInvoke(Encoding.UTF8.GetBytes(s));
+		}
 	}
 }
 
