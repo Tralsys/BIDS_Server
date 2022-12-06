@@ -53,6 +53,7 @@ public class ConsolePrintMod : IBIDSsv
 
 	public void DataGotEventInvoke(byte[] bytes)
 	{
+		Log(Convert.ToHexString(bytes), ConsoleColor.Gray);
 		DataGot?.Invoke(this, new(bytes));
 	}
 
