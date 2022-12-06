@@ -29,7 +29,7 @@ public partial class BIDSServerCore
 			?? OnNewNameDetected(e.Structure);
 
 		IBIDSBinaryData payload = new VariablePayload(e.RawPayload, structure);
-		byte[] cmd = payload.GetBytes();
+		byte[] cmd = payload.GetBytesWithHeader();
 
 		foreach (var mod in _ServerParserDic.Keys)
 		{
@@ -69,7 +69,7 @@ public partial class BIDSServerCore
 		}
 
 		IBIDSBinaryData registerCmd = new VariableStructureRegister(structure);
-		byte[] cmd = registerCmd.GetBytes().ToArray();
+		byte[] cmd = registerCmd.GetBytesWithHeader().ToArray();
 
 		foreach (var mod in _ServerParserDic.Keys)
 		{
@@ -103,7 +103,7 @@ public partial class BIDSServerCore
 		VariableStructure? structure = VariableStructureList.Find(v => v.Name == name);
 
 		if (structure is null)
-			return (new BIDSBinaryData_Error(BIDSBinaryDataErrorType.UnknownVariableDataKey) as IBIDSBinaryData).GetBytes();
+			return (new BIDSBinaryData_Error(BIDSBinaryDataErrorType.UnknownVariableDataKey) as IBIDSBinaryData).GetBytesWithHeader();
 
 		VariableSMemWatcher.ChangedValues? changedValues = Reader.AddNewStructure(structure);
 

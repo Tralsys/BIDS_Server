@@ -36,7 +36,7 @@ partial class Program
 
 				IBIDSBinaryData registerCmd = new VariableStructureRegister(structure);
 
-				Mod01.DataGotEventInvoke(registerCmd.GetBytes());
+				Mod01.DataGotEventInvoke(registerCmd.GetBytesWithHeader());
 				variableStructures.Add(structure);
 			}
 			else if (s is "update")
@@ -53,7 +53,7 @@ partial class Program
 				Log(AppendSMemStructure(new("Updating:\n"), payload.Values));
 
 				IBIDSBinaryData payloadCmd = new VariablePayload(payload, structure);
-				Mod01.DataGotEventInvoke(payloadCmd.GetBytes());
+				Mod01.DataGotEventInvoke(payloadCmd.GetBytesWithHeader());
 			}
 			else if (s.StartsWith("0x"))
 				Mod01.DataGotEventInvoke(Convert.FromHexString(s[2..]));
