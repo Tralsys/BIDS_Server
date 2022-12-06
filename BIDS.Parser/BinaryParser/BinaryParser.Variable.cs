@@ -1,3 +1,4 @@
+using System.Linq;
 using BIDS.Parser.Variable;
 
 namespace BIDS.Parser;
@@ -13,11 +14,14 @@ public record VariableStructureRegister(
 	public byte RawDataType { get; } = RAW_DATA_TYPE;
 
 	// TODO: VariableStructure側を書き直して、効率良くLengthを取得できるようにする
-	public int ContentLength => Structure.GetStructureBytes().Count();
+	public int ContentLength => this.GetBytes().Count();
+
+	IEnumerable<byte> GetBytes()
+		=> new byte[sizeof(int)].Concat(Structure.GetStructureBytes());
 
 	public bool TryWriteToSpan(Span<byte> bytes)
 	{
-		byte[] arr = Structure.GetStructureBytes().ToArray();
+		byte[] arr = this.GetBytes().ToArray();
 
 		if (bytes.Length < arr.Length)
 			return false;
