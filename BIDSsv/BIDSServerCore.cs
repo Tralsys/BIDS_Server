@@ -109,7 +109,7 @@ public partial class BIDSServerCore
 		// 正常に実装されていれば、MOD側で2回Disposeされることは無い。
 		sv.Dispose();
 
-		return _ServerParserDic.Remove(sv, out IParser? parser) && _VariableStructureDic.Remove(parser);
+		return _ServerParserDic.Remove(sv, out IParser? parser);
 	}
 
 	public void ClearMod()
