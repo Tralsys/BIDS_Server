@@ -49,7 +49,7 @@ public class ConsolePrintMod : IBIDSsv
 		=> Log(data, ConsoleColor.Magenta);
 
 	public void Print(in byte[] data)
-		=> Log(Convert.ToHexString(data), ConsoleColor.Blue);
+		=> Log(Convert.ToHexString(data), BitConverter.ToInt32(data[0..4]) == 0 ? ConsoleColor.Green : ConsoleColor.Blue);
 
 	public void WriteHelp(in string args)
 	{
