@@ -105,7 +105,7 @@ public partial class BIDSServerCore
 		if (structure is null)
 			return (new BIDSBinaryData_Error(BIDSBinaryDataErrorType.UnknownVariableDataKey) as IBIDSBinaryData).GetBytesWithHeader();
 
-		VariableSMemWatcher.ChangedValues? changedValues = Reader.AddNewStructure(structure);
+		VariableSMemWatcher.ChangedValues? changedValues = Reader.ApplyNewValue(structure, Payload);
 
 		if (changedValues is not null)
 			OnValueUpdateDetected(changedValues, mod);
