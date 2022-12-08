@@ -21,7 +21,7 @@ partial class Program
 			}
 			else
 			{
-				Console.WriteLine("There are no modules in the mods folder.");
+				Console.WriteLine($"There are no modules in the mods folder. ({targetDirectory.FullName})");
 			}
 		}
 		catch (Exception e)
