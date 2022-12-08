@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 
 namespace BIDS_Server;
 
@@ -29,27 +30,17 @@ partial class Program
 		}
 	}
 
+	static DirectoryInfo targetDirectory => new(Path.Combine(Directory.GetCurrentDirectory(), "mods"));
 	static string[] LSMod()
 	{
-		string[] fl;
-		try
+		if (!targetDirectory.Exists)
 		{
-			fl = Directory.GetFiles(Path.Combine("mods", "*.dll"));
-
-			if (fl.Length > 0)
-			{
-				for (int i = 0; i < fl.Length; i++)
-					fl[i] = fl[i].Replace("mods" + Path.DirectorySeparatorChar, string.Empty);
-			}
-
-			return fl;
-		}
-		catch (DirectoryNotFoundException)
-		{
-			Directory.CreateDirectory(@"mods");
-			Console.WriteLine("Created \"mods\" folder.");
+			targetDirectory.Create();
+			Console.WriteLine($"Created \"mods\" folder. ({targetDirectory.FullName})");
 		}
 
-		return Array.Empty<string>();
+		FileInfo[] fileInfoArr = targetDirectory.GetFiles("*.dll");
+
+		return fileInfoArr.Select(v => v.Name).ToArray();
 	}
 }
