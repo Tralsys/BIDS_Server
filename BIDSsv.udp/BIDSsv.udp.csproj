@@ -24,9 +24,6 @@ published to nuget.org</PackageReleaseNotes>
 		<Configurations>Release;Debug</Configurations>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
-	</ItemGroup>
-	<ItemGroup>
 		<ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
 		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />
 	</ItemGroup>

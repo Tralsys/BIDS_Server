@@ -18,7 +18,6 @@
 		<Configurations>Release;Debug</Configurations>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
 		<PackageReference Include="System.IO.Ports" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
