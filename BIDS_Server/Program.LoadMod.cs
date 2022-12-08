@@ -84,7 +84,8 @@ partial class Program
 				if (t.IsInterface)
 					continue;
 
-				if (Activator.CreateInstance(t) is IBIDSsv ibs)
+				if (t.IsAssignableTo(typeof(IBIDSsv))
+					&& Activator.CreateInstance(t) is IBIDSsv ibs)
 					return ibs;
 			}
 		}
