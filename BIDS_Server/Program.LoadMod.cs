@@ -62,7 +62,8 @@ partial class Program
 		Assembly? a;
 		try
 		{
-			a = Assembly.LoadFrom(@"mods\" + (fname ?? string.Empty));
+			string filePath = Path.Combine(targetDirectory.FullName, fname);
+			a = Assembly.LoadFrom(filePath);
 		}
 		catch (FileNotFoundException)
 		{
