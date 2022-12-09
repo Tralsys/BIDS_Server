@@ -33,12 +33,12 @@ namespace TR.BIDSsv
 
 		private const string BINARY_DATA_HEADER = "B64E";
 		private const string SERIAL_SETTING_HEADER = "S";
-
-		object Locker = new object();
+		readonly object Locker = new object();
 
 		string ReadBuf = string.Empty;
+
 		/// <summary>使用するSerial IF</summary>
-		SerialPort serial;
+		readonly SerialPort serial;
 		#endregion
 
 		/// <summary>インスタンスを初期化します.</summary>
@@ -46,7 +46,7 @@ namespace TR.BIDSsv
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public Serial_DeviceCom(in SerialPort ser)
 		{
-			if (ser == null) throw new ArgumentNullException();
+			if (ser == null) throw new ArgumentNullException(nameof(ser));
 
 			serial = ser;
 
@@ -59,7 +59,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("Serial_DeviceCom intialize : Serial Port Open Error=>{0}", e);
+				Log($"Serial Port Open Error=>{e}");
 				return;
 			}
 
@@ -85,12 +85,12 @@ namespace TR.BIDSsv
 									}
 									else
 									{
-										Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
+										Log(e, "AliveCmdCheck");
 									}
 								}
 								catch (Exception e)
 								{
-									Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
+									Log(e, "AliveCmdCheck");
 									return;
 								}
 							}
@@ -109,8 +109,12 @@ namespace TR.BIDSsv
 			SerialPort sp = (SerialPort)sender;
 			try
 			{
-				if (!sp.IsOpen) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived => Serial Already Closed.");
-				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived : CanRead:{0}, CanWrite:{1}", sp.BaseStream.CanRead, sp.BaseStream.CanWrite);
+				if (!sp.IsOpen)
+					Log("Serial Already Closed.");
+
+				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite)
+					Log($"Read or Write not allowed: CanRead:{sp.BaseStream.CanRead}, CanWrite:{sp.BaseStream.CanWrite}");
+
 				lock (Locker)
 				{
 					try
@@ -125,13 +129,16 @@ namespace TR.BIDSsv
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived ReadExisting : {0}", ex);
+				Log($"ReadExisting : {ex}");
 			}
+
 			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
 			Task.Run(async () =>
 			{
 
-				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
+				if (IsDebugging)
+					Log(gotData);
+
 				string[] sa;
 				try
 				{
@@ -139,7 +146,7 @@ namespace TR.BIDSsv
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
+					Log($"StringSplit : {ex}");
 					return;
 				}
 				if (sa.Length <= 0)
@@ -169,7 +176,7 @@ namespace TR.BIDSsv
 								}
 								catch (Exception ex)
 								{
-									Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
+									Log($"BinaryDataReceieved Error : {ex}");
 								}
 							});
 					else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[ind]));
@@ -181,7 +188,7 @@ namespace TR.BIDSsv
 						}
 						catch (Exception ex)
 						{
-							Console.WriteLine("Serial_DataCom.Serial_DataReceived() StringDatReceived.Invoke Error : {0}", ex);
+							Log($"StringDatReceived.Invoke Error : {ex}");
 						}
 					});
 				}
@@ -205,7 +212,9 @@ namespace TR.BIDSsv
 			if (string.IsNullOrWhiteSpace(s)) return false;
 			try
 			{
-				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.PrintString() : DataSend=>{0}", s);
+				if (IsDebugging)
+					Log(s);
+
 				lock (Locker)
 				{
 					try
@@ -214,7 +223,7 @@ namespace TR.BIDSsv
 					}
 					catch (TimeoutException)
 					{
-						Console.WriteLine("\tTimeOut ({0})", s);
+						Log($"\tTimeOut ({s})");
 						if (ReConnectWhenTimedOut)
 						{
 							ReConnect();
@@ -223,11 +232,12 @@ namespace TR.BIDSsv
 						return false;
 					}
 				}
+
 				return true;
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("Serial_DeviceCom.PrintString({0}) : {1}", s, e);
+				Log($"Error with ({s}) : {e}");
 				return false;
 			}
 		}
@@ -248,7 +258,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("Serial_DeviceCom.PrintBinary() : {0}", e);
+				Log(e);
 				return false;
 			}
 		}
@@ -259,14 +269,14 @@ namespace TR.BIDSsv
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		async void ReConnect()
 		{
-			Console.WriteLine("Reconnect doing...");
+			Log("Reconnect doing...");
 			try
 			{
 				if (serial?.IsOpen == true) serial.Close();
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("SerialPort Close Failed. : {0}", e);
+				Log($"SerialPort Close Failed. : {e}");
 				return;
 			}
 
@@ -278,10 +288,13 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("SerialPort ReOpen Failed. : {0}", e);
+				Log($"SerialPort ReOpen Failed. : {e}");
 				return;
 			}
 		}
+
+		private static void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({nameof(Serial_DeviceCom)}.{memberName}): {obj}");
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには

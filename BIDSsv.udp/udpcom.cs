@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -56,7 +55,7 @@ namespace TR.BIDSsv
 			}
 			catch (ObjectDisposedException)
 			{
-				Console.WriteLine("udpcom ::: ReadingMethod => ObjectDisposed.");
+				Log("ObjectDisposed.");
 			}
 		}
 
@@ -66,12 +65,12 @@ namespace TR.BIDSsv
 			if (Equals(remIPE.Address, MyIPEndPoint?.Address))
 			{
 				if (IsDebugging)
-					Console.WriteLine("udpcom class <<<<<<My Data<<<<<< {2} (from {0}) : {1}", remIPE, BitConverter.ToString(ba), UCR?.Client.LocalEndPoint as IPEndPoint);
+					Log($"<<<<<<My Data<<<<<< {UCR?.Client.LocalEndPoint as IPEndPoint} (from {remIPE}) : {BitConverter.ToString(ba)}");
 			}
 			else
 			{
 				if (IsDebugging)
-					Console.WriteLine("udpcom class <<< {0} : {1}", remIPE, BitConverter.ToString(ba));
+					Log($"<<< {remIPE} : {BitConverter.ToString(ba)}");
 
 				if (ba?.Length > 0)
 					_ = Task.Run(() => DataGotEv?.Invoke(null, new UDPGotEvArgs(ba)));
@@ -86,15 +85,19 @@ namespace TR.BIDSsv
 			else
 			{
 				if (IsDebugging)
-					Console.WriteLine("udpcom class >>> failed.");
+					Log(">>> failed.");
+
 				return false;
 			}
 
 			if (IsDebugging)
-				Console.WriteLine("udpcom class >>> {0} : {1}", UCW.Client.RemoteEndPoint, BitConverter.ToString(ba));
+				Log($">>> {UCW.Client.RemoteEndPoint} : {BitConverter.ToString(ba)}");
 
 			return true;
 		}
+
+		private static void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({nameof(udpcom)}.{memberName}): {obj}");
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには

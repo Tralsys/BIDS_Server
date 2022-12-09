@@ -116,9 +116,13 @@ namespace TR.BIDSsv
 						}
 					}
 				}
-				catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
+				catch (Exception e)
+				{
+					Log(e);
+				}
 			}
-			Console.WriteLine("{0} : Connect try ... read_on>{1}:{2} send_to>{3}:{4}", Name, lip, lport, rip, rport);
+
+			Log($"Connect try ... read_on>{lip}:{lport} send_to>{rip}:{rport}");
 			udpc = new udpcom(new IPEndPoint(lip, lport), new IPEndPoint(rip, rport));
 			udpc.DataGotEv += Udpc_DataGotEv;
 			return true;
@@ -134,7 +138,9 @@ namespace TR.BIDSsv
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Print(in string data)
 		{
-			if (IsDebug) Console.WriteLine("{0} >> {1}", Name, data);
+			if (IsDebug)
+				Log($">> {data}");
+
 			if (string.IsNullOrWhiteSpace(data)) return;
 
 			try
@@ -143,7 +149,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : {1}", Name, e);
+				Log(e);
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
@@ -175,6 +181,9 @@ namespace TR.BIDSsv
 		public void OnPanelDChanged(in int[] data) { }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void OnSoundDChanged(in int[] data) { }
+
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには

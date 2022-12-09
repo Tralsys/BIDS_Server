@@ -8,6 +8,7 @@ using TR;
 using TR.BIDSsv;
 using TR.BIDSSMemLib;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace BIDSsv.tcpcl
 {
@@ -125,7 +126,10 @@ namespace BIDSsv.tcpcl
 						}
 					}
 				}
-				catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
+				catch (Exception e)
+				{
+					Log(e);
+				}
 			}
 
 			TD = new Task(LoopDoing);
@@ -141,7 +145,7 @@ namespace BIDSsv.tcpcl
 				TC = new TcpClient(SvAddr, PortNum);
 				IPEndPoint? rie = TC.Client.RemoteEndPoint as IPEndPoint;
 				IPEndPoint? lie = TC.Client.LocalEndPoint as IPEndPoint;
-				Console.WriteLine("{0} : Connected to Addr:{1} Port:{2}, from Addr:{3} Port:{4}", Name, rie?.Address, rie?.Port, lie?.Address, lie?.Port);
+				Log($"Connected to Addr={rie?.Address} Port={rie?.Port}, from Addr={lie?.Address} Port={lie?.Port}");
 				NS = TC?.GetStream();
 				if (NS is not null)
 				{
@@ -152,7 +156,7 @@ namespace BIDSsv.tcpcl
 				//Reconnect Process
 				if (rie?.Port == ConstVals.DefPNum)
 				{
-					Console.WriteLine("{0} : Reconnect Process Start.", Name);
+					Log("Reconnect Process Start.");
 					try
 					{
 						Print("TRV" + Version.ToString() + "\n");
@@ -192,19 +196,18 @@ namespace BIDSsv.tcpcl
 						}
 						IPEndPoint? rier = TC?.Client.RemoteEndPoint as IPEndPoint;
 						IPEndPoint? lier = TC?.Client.LocalEndPoint as IPEndPoint;
-						Console.WriteLine("{0} : Reconnect Success to Addr={1} Port={2}, from Addr={3} Port={4}", Name, rier?.Address, rier?.Port, lier?.Address, lier?.Port);
+						Log($"Reconnect Success to Addr={rier?.Address} Port={rier?.Port}, from Addr={lier?.Address} Port={lier?.Port}");
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("{0} : ReConnect Process Failed.\n{1}", Name, e);
+						Log("ReConnect Process Failed.\n{e}");
 					}
 				}
 				//Reconnect Process End
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(Name + " : TcpClient Open Failed");
-				Console.WriteLine(e);
+				Log($"TcpClient Open Failed\n{e}");
 
 				Dispose();
 				return;
@@ -231,7 +234,9 @@ namespace BIDSsv.tcpcl
 		public void Dispose()
 		{
 			IsLooping = false;
-			if (TD?.IsCompleted == false && TD?.Wait(5000) == false) Console.WriteLine(Name + " : Thread Closing Failed");
+			if (TD?.IsCompleted == false && TD?.Wait(5000) == false)
+				Log("Thread Closing Failed");
+
 			NS?.Dispose();
 			TC?.Dispose();
 			IsDisposed = true;
@@ -246,7 +251,9 @@ namespace BIDSsv.tcpcl
 		public void Print(in string data)
 		{
 			if (TC?.Connected != true || NS?.CanWrite != true) return;
-			if (IsDebug) Console.Write("{0} >> {1}", Name, data);
+			if (IsDebug)
+				Console.Write($">> {data}");
+
 			try
 			{
 				byte[] wbytes = Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n"));
@@ -255,8 +262,7 @@ namespace BIDSsv.tcpcl
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("In Writing Process, An Error has occured on " + Name);
-				Console.WriteLine(e);
+				Log($"In Writing Process, An Error has occured\n{e}");
 			}
 		}
 		public void Print(in byte[] data)
@@ -278,7 +284,7 @@ namespace BIDSsv.tcpcl
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
+				Log($"Error has occured at data waiting process\n{e}");
 			}
 			if (!IsLooping) return Array.Empty<byte>();
 			byte[] b = new byte[1];
@@ -318,5 +324,8 @@ namespace BIDSsv.tcpcl
 			Console.WriteLine("Copyright (C) Tetsu Otter 2019");
 			foreach (string s in ArgInfo) Console.WriteLine(s);
 		}
+
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 }

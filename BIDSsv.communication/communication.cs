@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TR.BIDSSMemLib;
 
@@ -61,7 +62,10 @@ namespace TR.BIDSsv
 						}
 					}
 				}
-				catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
+				catch (Exception e)
+				{
+					Log($"Error has occured.\n{e}");
+				}
 			}
 			try
 			{
@@ -70,7 +74,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine($"{Name} : {e}");
+				Log($"Error has occured.\n{e}");
 				return false;
 			}
 			UC?.BeginReceive(ReceivedDoing, UC);
@@ -92,12 +96,14 @@ namespace TR.BIDSsv
 			}
 			catch (SocketException e)
 			{
-				if (!Equals(sexc?.ErrorCode, e.ErrorCode)) Console.WriteLine($"{Name} : Receieve Error({e.ErrorCode}) => {e}");
+				if (!Equals(sexc?.ErrorCode, e.ErrorCode))
+					Log($"Receieve Error({e.ErrorCode}) => {e}");
+
 				sexc = e;
 			}
 			catch (ObjectDisposedException)
 			{
-				Console.WriteLine("{0} (ReceivedDoing) : This connection is already closed.", Name);
+				Log("This connection is already closed.");
 				Dispose();
 				return;
 			}
@@ -177,5 +183,8 @@ namespace TR.BIDSsv
 			Console.WriteLine("Copyright (C) Tetsu Otter 2019");
 			foreach (string s in ArgInfo) Console.WriteLine(s);
 		}
+
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 }

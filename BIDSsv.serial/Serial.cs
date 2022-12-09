@@ -203,7 +203,7 @@ namespace TR.BIDSsv
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
+						Log($"arg({sa[i]}) Error: {e}");
 						continue;
 					}
 				}
@@ -212,7 +212,7 @@ namespace TR.BIDSsv
 			{
 				sdc = new Serial_DeviceCom(SP);
 
-				Console.WriteLine(Name + " : " + sdc.IsOpen);
+				Log($"IsOpen?: {sdc.IsOpen}");
 
 				sdc.StringDataReceived += Sdc_StringDataReceived;
 				sdc.BinaryDataReceived += Sdc_BinaryDataReceived;
@@ -221,7 +221,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : an exception has occured in the init section.\n{1}", Name, e);
+				Log($"an exception has occured in the init section.\n{e}");
 				return false;
 			}
 			sdc.ReConnectWhenTimedOut = ReConnectWhenTimedOut;
@@ -282,6 +282,8 @@ namespace TR.BIDSsv
 			if (IsBinaryAllowed) sdc?.PrintBinary(data);
 		}
 
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには

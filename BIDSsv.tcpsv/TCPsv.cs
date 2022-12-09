@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 
@@ -122,11 +122,14 @@ namespace TR.BIDSsv
 						}
 					}
 				}
-				catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
+				catch (Exception e)
+				{
+					Log(e);
+				}
 			}
 			TL = new TcpListener(IPAddress.Any, PortNum);
 			TL.Start();
-			Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, ((IPEndPoint)TL.LocalEndpoint).Port);
+			Log($"Connection Waiting Start => Addr:{((IPEndPoint)TL.LocalEndpoint).Address}, Port:{((IPEndPoint)TL.LocalEndpoint).Port}");
 			TD = PortNum != ConstVals.DefPNum ? new Task(ReadDoing) : new Task(ConnectDoing);
 
 			TD.Start();
@@ -144,7 +147,7 @@ namespace TR.BIDSsv
 			IPEndPoint? ep = TL?.LocalEndpoint as IPEndPoint;
 
 			PortNum = ep?.Port ?? ConstVals.DefPNum;
-			Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ep?.Address, PortNum);
+			Log($"Connection Waiting Start => Addr:{ep?.Address}, Port:{PortNum}");
 
 			TD = new Task(ReadDoing);
 
@@ -154,7 +157,9 @@ namespace TR.BIDSsv
 		public void Dispose()
 		{
 			IsLooping = false;
-			if (TD?.IsCompleted == false && TD?.Wait(5000) == false) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
+			if (TD?.IsCompleted == false && TD?.Wait(5000) == false)
+				Log("ReadThread is not closed.  It may cause some bugs.");
+
 			NS?.Dispose();
 			TC?.Dispose();
 			TL?.Stop();
@@ -180,7 +185,7 @@ namespace TR.BIDSsv
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("{0} : ConnectDoing Failed.\n{1}", Name, e);
+					Log($"ConnectDoing Failed.\n{e}");
 				}
 				string gs = await Read();
 				if (gs.StartsWith("TRV"))//要変更 専用コマンドを用意すること.
@@ -197,7 +202,7 @@ namespace TR.BIDSsv
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("{0} : Version Check Failed.\n{1}", Name, e);
+						Log($"Version Check Failed.\n{e}");
 					}
 				}
 				else
@@ -218,13 +223,12 @@ namespace TR.BIDSsv
 			{
 				TC = TL?.AcceptTcpClient();
 				IPEndPoint? rep = TC?.Client.RemoteEndPoint as IPEndPoint;
-				Console.WriteLine(Name + " : " + "Connected => Addr:{0}, Port:{1}", rep?.Address, rep?.Port);
+				Log($"Connected => Addr:{rep?.Address}, Port:{rep?.Port}");
 				NS = TC?.GetStream();
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("In connection waiting process, An Error has occured on " + Name);
-				Console.WriteLine(e);
+				Log($"In connection waiting process, An Error has occured\n{e}");
 			}
 			_ = Task.Run(async () =>
 				{
@@ -258,7 +262,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
+				Log($"Error has occured at data waiting process\n{e}");
 			}
 			if (!IsLooping) return Array.Empty<byte>();
 			byte[] b = new byte[1];
@@ -288,7 +292,9 @@ namespace TR.BIDSsv
 		public void Print(in string data)
 		{
 			if (TC?.Connected != true || NS?.CanWrite != true) return;
-			if (IsDebug) Console.WriteLine("{0} >> {1}", Name, data);
+			if (IsDebug)
+				Log($">> {data}");
+
 			try
 			{
 				byte[] wbytes = Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n"));
@@ -296,8 +302,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("In Writing Process, An Error has occured on " + Name);
-				Console.WriteLine(e);
+				Log($"In Writing Process, An Error has occured\n{e}");
 			}
 		}
 		public void Print(in byte[] data)
@@ -324,5 +329,8 @@ namespace TR.BIDSsv
 			Console.WriteLine("Copyright (C) Tetsu Otter 2019");
 			foreach (string s in ArgInfo) Console.WriteLine(s);
 		}
+
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 }

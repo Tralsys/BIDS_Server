@@ -43,7 +43,7 @@ namespace BIDSsv.testmod
 			DateTime dt = DateTime.UtcNow;
 			Name += (dt.Minute * 60 * 1000 * dt.Second * 1000 + dt.Millisecond).ToString();
 			LogFileName = string.Format("BsvTest.{0}.log", dt.ToString("yyyyMMdd.HHmmss.ffff"));
-			Console.WriteLine("BIDSsv Test Mod\tVersion : {0}\tName : {1}\tFName : {2}", ModVersion, Name, LogFileName);
+			Log($"BIDSsv Test Mod\tVersion : {ModVersion}\tName : {Name}\tFName : {LogFileName}");
 			try
 			{
 				swr = new StreamWriter(LogFileName);
@@ -52,7 +52,7 @@ namespace BIDSsv.testmod
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0}.Connect : {1}", Name, e);
+				Log(e);
 				return false;
 			}
 
@@ -94,7 +94,7 @@ namespace BIDSsv.testmod
 								if (saa.Length < 2)
 								{
 									AppendText(string.Format("Too Less Args to do ONCE : sa[{0}]", i));
-									Console.WriteLine("{0} : Too Less Args to do ONCE: sa[{0}]", i);
+									Log($"Too Less Args to do ONCE: sa[{i}]");
 									break;
 								}
 								else
@@ -122,7 +122,7 @@ namespace BIDSsv.testmod
 									catch (Exception e)
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
-										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
+										Log($"Exceotion throwed at Parsing Process : {e}");
 										break;
 									}
 
@@ -134,7 +134,7 @@ namespace BIDSsv.testmod
 									catch (Exception e)
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
-										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
+										Log($"Exceotion throwed at Parsing Process : {e}");
 										break;
 									}
 									CSTL.Add(cst);
@@ -144,7 +144,7 @@ namespace BIDSsv.testmod
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
+						Log($"arg({sa[i]}) Error : {e}");
 						continue;
 					}
 				}
@@ -168,14 +168,14 @@ namespace BIDSsv.testmod
 				}
 				catch (ObjectDisposedException)
 				{
-					Console.WriteLine("{0} : StreamWriter Already Closed ({1})", Name, s);
+					Log($"StreamWriter Already Closed ({s})");
 					return;
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("{0}.AppendText({1}) : {2}", Name, s, e);
+					Log($"arg({s}) : {e}");
 					Dispose();
-					Console.WriteLine("{0} : Close this instance.", Name);
+					Log("Close this instance.");
 					return;
 				}
 				finally
@@ -199,7 +199,7 @@ namespace BIDSsv.testmod
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0}.SendCMD2sv({1}) : {2}", Name, cmd, e);
+				Log(e);
 				return false;
 			}
 		}
@@ -285,6 +285,8 @@ namespace BIDSsv.testmod
 		public void Dispose() => Dispose(true);
 		#endregion
 
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 
 	internal class CMDSendTimer : IDisposable
@@ -311,11 +313,14 @@ namespace BIDSsv.testmod
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("CMDSender(interval:{0}, cmd:{1}) init : {2}", interval, cmd, e);
+				Log($"CMDSender(interval:{interval}, cmd:{cmd}) init : {e}");
 				Dispose();
 				return;
 			}
 		}
+
+		private static void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({nameof(CMDSendTimer)}.{memberName}): {obj}");
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 重複する呼び出しを検出するには
