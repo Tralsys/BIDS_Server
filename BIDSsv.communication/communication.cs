@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
+
 using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
@@ -36,26 +37,21 @@ namespace TR.BIDSsv
 						switch (saa[0])
 						{
 							case "A":
-								if (saa.Length > 1) IsWriteable = IPAddress.TryParse(saa[1], out Addr);
-								break;
 							case "Addr":
 								if (saa.Length > 1) IsWriteable = IPAddress.TryParse(saa[1], out Addr);
 								break;
+
 							case "N":
-								if (saa.Length > 1) Name = saa[1];
-								break;
 							case "Name":
 								if (saa.Length > 1) Name = saa[1];
 								break;
+
 							case "P":
-								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
-								break;
 							case "Port":
 								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
 								break;
+
 							case "RemotePort":
-								if (saa.Length > 1) RemotePNum = int.Parse(saa[1]);
-								break;
 							case "RP":
 								if (saa.Length > 1) RemotePNum = int.Parse(saa[1]);
 								break;
@@ -70,13 +66,16 @@ namespace TR.BIDSsv
 			try
 			{
 				UC = new UdpClient(new IPEndPoint(IPAddress.Any, PortNum));
-				if (Addr is not null && Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
+
+				if (Addr is not null && Addr != IPAddress.Any)
+					UC?.Connect(Addr, RemotePNum);
 			}
 			catch (Exception e)
 			{
 				Log($"Error has occured.\n{e}");
 				return false;
 			}
+
 			UC?.BeginReceive(ReceivedDoing, UC);
 			return true;
 		}
@@ -113,19 +112,21 @@ namespace TR.BIDSsv
 
 		protected virtual void Dispose(bool tf)
 		{
-			if (!tf) UC?.Close();
+			if (!tf)
+				UC?.Close();
 			UC?.Dispose();
 			IsDisposed = true;
 			Disposed?.Invoke(this, new());
 		}
+
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		int[] PDA = new int[256];
-		int[] SDA = new int[256];
+		readonly int[] PDA = new int[256];
+		readonly int[] SDA = new int[256];
 		int oldT = 0;
 		public void OnBSMDChanged(in BIDSSharedMemoryData data)
 		{
@@ -156,8 +157,6 @@ namespace TR.BIDSsv
 			Buffer.BlockCopy(data, 0, SDA, 0, Math.Min(256, data.Length) * sizeof(int));
 			if (data.Length < 256) Array.Clear(SDA, data.Length, 256 - data.Length);
 		}
-
-
 
 		public void Print(in string data) => Print(Encoding.Default.GetBytes(data));
 

@@ -48,77 +48,34 @@ namespace TR.BIDSsv
 						switch (saa[0])
 						{
 							case "E":
-								switch (int.Parse(saa[1]))
+								Enc = int.Parse(saa[1]) switch
 								{
-									case 0:
-										Enc = Encoding.Default;
-										break;
-									case 1:
-										Enc = Encoding.ASCII;
-										break;
-									case 2:
-										Enc = Encoding.Unicode;
-										break;
-									case 3:
-										Enc = Encoding.UTF8;
-										break;
-									case 4:
-										Enc = Encoding.UTF32;
-										break;
-									default:
-										Enc = Encoding.Default;
-										break;
-								}
+									0 => Encoding.Default,
+									1 => Encoding.ASCII,
+									2 => Encoding.Unicode,
+									3 => Encoding.UTF8,
+									4 => Encoding.UTF32,
+									_ => Encoding.Default,
+								};
 								break;
-							case "Encoding":
-								switch (int.Parse(saa[1]))
-								{
-									case 0:
-										Enc = Encoding.Default;
-										break;
-									case 1:
-										Enc = Encoding.ASCII;
-										break;
-									case 2:
-										Enc = Encoding.Unicode;
-										break;
-									case 3:
-										Enc = Encoding.UTF8;
-										break;
-									case 4:
-										Enc = Encoding.UTF32;
-										break;
-									default:
-										Enc = Encoding.Default;
-										break;
-								}
-								break;
+
 							case "N":
-								if (saa.Length > 1) Name = saa[1];
-								break;
 							case "Name":
 								if (saa.Length > 1) Name = saa[1];
 								break;
 							case "P":
-								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
-								break;
 							case "Port":
 								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
 								break;
 
 							case "RTO":
-								RTO = int.Parse(saa[1]);
-								break;
 							case "ReadTimeout":
 								RTO = int.Parse(saa[1]);
 								break;
 							case "WTO":
-								WTO = int.Parse(saa[1]);
-								break;
 							case "WriteTimeout":
 								WTO = int.Parse(saa[1]);
 								break;
-
 						}
 					}
 				}
@@ -171,8 +128,12 @@ namespace TR.BIDSsv
 		{
 			while (IsLooping)
 			{
-				while (IsLooping && TL?.Pending() == false) await Task.Delay(1);
-				if (!IsLooping) continue;
+				while (IsLooping && TL?.Pending() == false)
+					await Task.Delay(1);
+
+				if (!IsLooping)
+					continue;
+
 				try
 				{
 					TC = TL?.AcceptTcpClient();
@@ -187,7 +148,9 @@ namespace TR.BIDSsv
 				{
 					Log($"ConnectDoing Failed.\n{e}");
 				}
+
 				string gs = await Read();
+
 				if (gs.StartsWith("TRV"))//要変更 専用コマンドを用意すること.
 				{
 					try
@@ -209,6 +172,7 @@ namespace TR.BIDSsv
 				{
 					Print("TRE\n");//Error を入れる
 				}
+
 				NS?.Close();
 				NS?.Dispose();
 				TC?.Close();
@@ -230,11 +194,12 @@ namespace TR.BIDSsv
 			{
 				Log($"In connection waiting process, An Error has occured\n{e}");
 			}
+
 			_ = Task.Run(async () =>
-				{
-					while (TC?.Connected == true) await Task.Delay(1);
-					IsLooping = false;
-				});
+			{
+				while (TC?.Connected == true) await Task.Delay(1);
+				IsLooping = false;
+			});
 
 			while (IsLooping)
 			{
@@ -243,12 +208,10 @@ namespace TR.BIDSsv
 
 				DataGot?.Invoke(this, new(await ReadByte()));
 			}
+
 			NS?.Close();
 			TC?.Close();
-
 		}
-
-
 
 		List<byte> RBytesLRec = new List<byte>();
 		async Task<string> Read() => Enc.GetString(await ReadByte()).Replace("\n", string.Empty);
@@ -258,32 +221,42 @@ namespace TR.BIDSsv
 			List<byte> RBytesL = RBytesLRec;
 			try
 			{
-				while (NS?.DataAvailable == false && IsLooping) await Task.Delay(1);
+				while (NS?.DataAvailable == false && IsLooping)
+					await Task.Delay(1);
 			}
 			catch (Exception e)
 			{
 				Log($"Error has occured at data waiting process\n{e}");
 			}
-			if (!IsLooping) return Array.Empty<byte>();
-			byte[] b = new byte[1];
+
+			if (!IsLooping)
+				return Array.Empty<byte>();
+
+			byte[] b = new byte[4096];
 			int nsreadr = 0;
 
 			while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
 			{
-				b = new byte[1];
-				nsreadr = await NS.ReadAsync(b, 0, 1);
-				if (nsreadr <= 0) break;
-				RBytesL.Add(b[0]);
+				nsreadr = await NS.ReadAsync(b.AsMemory());
+				if (nsreadr <= 0)
+					break;
+
+				RBytesL.AddRange(b[0..nsreadr]);
 			}
 
 			if (!RBytesL.Contains((byte)'\n'))
 			{
-				if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
-				else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-				return Array.Empty<byte>();
+				if (RBytesLRec.Count == 0)
+					RBytesLRec = RBytesL;
+				else
+					RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
+				return
+					Array.Empty<byte>();
 			}
+
 			return RBytesL.ToArray();
 		}
+
 		public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
 		public void OnOpenDChanged(in OpenD data) { }
 		public void OnPanelDChanged(in int[] data) { }
@@ -311,7 +284,6 @@ namespace TR.BIDSsv
 
 			if (data?.Length > 0) NS?.Write(data, 0, data.Length);
 		}
-
 
 		readonly string[] ArgInfo = new string[]
 		{

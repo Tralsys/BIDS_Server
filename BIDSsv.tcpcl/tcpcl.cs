@@ -46,83 +46,38 @@ namespace BIDSsv.tcpcl
 						switch (saa[0])
 						{
 							case "A":
-								if (saa.Length > 1) SvAddr = saa[1];
-								break;
 							case "Address":
 								if (saa.Length > 1) SvAddr = saa[1];
 								break;
 							case "E":
-								switch (int.Parse(saa[1]))
+								Enc = int.Parse(saa[1]) switch
 								{
-									case 0:
-										Enc = Encoding.Default;
-										break;
-									case 1:
-										Enc = Encoding.ASCII;
-										break;
-									case 2:
-										Enc = Encoding.Unicode;
-										break;
-									case 3:
-										Enc = Encoding.UTF8;
-										break;
-									case 4:
-										Enc = Encoding.UTF32;
-										break;
-									default:
-										Enc = Encoding.Default;
-										break;
-								}
+									0 => Encoding.Default,
+									1 => Encoding.ASCII,
+									2 => Encoding.Unicode,
+									3 => Encoding.UTF8,
+									4 => Encoding.UTF32,
+									_ => Encoding.Default,
+								};
 								break;
-							case "Encoding":
-								switch (int.Parse(saa[1]))
-								{
-									case 0:
-										Enc = Encoding.Default;
-										break;
-									case 1:
-										Enc = Encoding.ASCII;
-										break;
-									case 2:
-										Enc = Encoding.Unicode;
-										break;
-									case 3:
-										Enc = Encoding.UTF8;
-										break;
-									case 4:
-										Enc = Encoding.UTF32;
-										break;
-									default:
-										Enc = Encoding.Default;
-										break;
-								}
-								break;
+
 							case "N":
-								if (saa.Length > 1) Name = saa[1];
-								break;
 							case "Name":
 								if (saa.Length > 1) Name = saa[1];
 								break;
 							case "P":
-								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
-								break;
 							case "Port":
 								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
 								break;
 
 							case "RTO":
-								RTO = int.Parse(saa[1]);
-								break;
 							case "ReadTimeout":
 								RTO = int.Parse(saa[1]);
 								break;
 							case "WTO":
-								WTO = int.Parse(saa[1]);
-								break;
 							case "WriteTimeout":
 								WTO = int.Parse(saa[1]);
 								break;
-
 						}
 					}
 				}
@@ -215,15 +170,17 @@ namespace BIDSsv.tcpcl
 
 			_ = Task.Run(async () =>
 			{
-				while (TC?.Connected == true) await Task.Delay(1);
+				while (TC?.Connected == true)
+					await Task.Delay(1);
+
 				IsLooping = false;
 			});
 
 
 			while (IsLooping)
 			{
-				if (TC?.Connected != true) continue;
-				if (NS?.CanRead != true) continue;
+				if (TC?.Connected != true || NS?.CanRead != true)
+					continue;
 
 				DataGot?.Invoke(this, new(await ReadByte()));
 			}
@@ -250,7 +207,9 @@ namespace BIDSsv.tcpcl
 
 		public void Print(in string data)
 		{
-			if (TC?.Connected != true || NS?.CanWrite != true) return;
+			if (TC?.Connected != true || NS?.CanWrite != true)
+				return;
+
 			if (IsDebug)
 				Console.Write($">> {data}");
 
@@ -267,9 +226,11 @@ namespace BIDSsv.tcpcl
 		}
 		public void Print(in byte[] data)
 		{
-			if (TC?.Connected != true || NS?.CanWrite != true) return;
+			if (TC?.Connected != true || NS?.CanWrite != true)
+				return;
 
-			if (data?.Length > 0) NS?.Write(data, 0, data.Length);
+			if (data?.Length > 0)
+				NS?.Write(data, 0, data.Length);
 		}
 
 		List<byte> RBytesLRec = new List<byte>();
@@ -280,30 +241,39 @@ namespace BIDSsv.tcpcl
 			List<byte> RBytesL = RBytesLRec;
 			try
 			{
-				while (NS?.DataAvailable == false && IsLooping) await Task.Delay(1);
+				while (NS?.DataAvailable == false && IsLooping)
+					await Task.Delay(1);
 			}
 			catch (Exception e)
 			{
 				Log($"Error has occured at data waiting process\n{e}");
 			}
-			if (!IsLooping) return Array.Empty<byte>();
-			byte[] b = new byte[1];
+
+			if (!IsLooping)
+				return Array.Empty<byte>();
+
+			byte[] b = new byte[4096];
 			int nsreadr = 0;
 
 			while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
 			{
-				b = new byte[1];
-				nsreadr = await NS.ReadAsync(b, 0, 1);
-				if (nsreadr <= 0) break;
-				RBytesL.Add(b[0]);
+				nsreadr = await NS.ReadAsync(b.AsMemory());
+				if (nsreadr <= 0)
+					break;
+
+				RBytesL.AddRange(b[0..nsreadr]);
 			}
 
 			if (!RBytesL.Contains((byte)'\n'))
 			{
-				if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
-				else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-				return Array.Empty<byte>();
+				if (RBytesLRec.Count == 0)
+					RBytesLRec = RBytesL;
+				else
+					RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
+				return
+					Array.Empty<byte>();
 			}
+
 			return RBytesL.ToArray();
 		}
 

@@ -2,6 +2,7 @@
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
 using System.Text;
+
 using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
@@ -54,114 +55,60 @@ namespace TR.BIDSsv
 							case "B":
 								SP.BaudRate = int.Parse(saa[1]);
 								break;
+
 							case "BaudRate":
 								SP.BaudRate = int.Parse(saa[1]);
 								break;
+
 							case "BS":
 								IsBinaryAllowed = true;
 								break;
+
 							case "BinarySender":
 								IsBinaryAllowed = true;
 								break;
+
 							case "DataBits":
 								SP.DataBits = int.Parse(saa[1]);
 								break;
+
 							case "DTR":
 								SP.DtrEnable = saa[1] == "1";
 								break;
+
 							case "E":
-								switch (int.Parse(saa[1]))
-								{
-									case 0:
-										SP.Encoding = Encoding.Default;
-										break;
-									case 1:
-										SP.Encoding = Encoding.ASCII;
-										break;
-									case 2:
-										SP.Encoding = Encoding.Unicode;
-										break;
-									case 3:
-										SP.Encoding = Encoding.UTF8;
-										break;
-									case 4:
-										SP.Encoding = Encoding.UTF32;
-										break;
-									default:
-										SP.Encoding = Encoding.Default;
-										break;
-								}
-								break;
 							case "Encoding":
-								switch (int.Parse(saa[1]))
+								SP.Encoding = int.Parse(saa[1]) switch
 								{
-									case 0:
-										SP.Encoding = Encoding.Default;
-										break;
-									case 1:
-										SP.Encoding = Encoding.ASCII;
-										break;
-									case 2:
-										SP.Encoding = Encoding.Unicode;
-										break;
-									case 3:
-										SP.Encoding = Encoding.UTF8;
-										break;
-									case 4:
-										SP.Encoding = Encoding.UTF32;
-										break;
-									default:
-										SP.Encoding = Encoding.Default;
-										break;
-								}
+									0 => Encoding.Default,
+									1 => Encoding.ASCII,
+									2 => Encoding.Unicode,
+									3 => Encoding.UTF8,
+									4 => Encoding.UTF32,
+									_ => Encoding.Default,
+								};
 								break;
+
 							case "HandShake":
 								SP.Handshake = (Handshake)int.Parse(saa[1]);
 								break;
+
 							case "N":
-								Name = saa[1];
-								break;
 							case "Name":
 								Name = saa[1];
 								break;
+
 							case "NL":
-								switch (int.Parse(saa[1]))
-								{
-									case 1:
-										SP.NewLine = "\r";
-										break;
-									case 2:
-										SP.NewLine = "\r\n";
-										break;
-									default:
-										SP.NewLine = "\n";
-										break;
-								}
-								break;
 							case "NewLine":
-								switch (int.Parse(saa[1]))
+								SP.NewLine = int.Parse(saa[1]) switch
 								{
-									case 1:
-										SP.NewLine = "\r";
-										break;
-									case 2:
-										SP.NewLine = "\r\n";
-										break;
-									default:
-										SP.NewLine = "\n";
-										break;
-								}
+									1 => "\r",
+									2 => "\r\n",
+									_ => "\n",
+								};
 								break;
+
 							case "P":
-								try
-								{
-									SP.PortName = "COM" + int.Parse(saa[1]);
-								}
-								catch (FormatException)
-								{
-									SP.PortName = saa[1];
-								}
-								break;
 							case "Port":
 								try
 								{
@@ -172,30 +119,33 @@ namespace TR.BIDSsv
 									SP.PortName = saa[1];
 								}
 								break;
+
 							case "Parity":
 								SP.Parity = (Parity)int.Parse(saa[1]);
 								break;
+
 							case "RTO":
-								SP.ReadTimeout = int.Parse(saa[1]);
-								break;
 							case "ReadTimeout":
 								SP.ReadTimeout = int.Parse(saa[1]);
 								break;
+
 							case "RTS":
 								SP.RtsEnable = saa[1] == "1";
 								break;
+
 							case "RCWTO":
 								ReConnectWhenTimedOut = saa[1] == "1";
 								break;
+
 							case "StopBits":
 								SP.StopBits = (StopBits)int.Parse(saa[1]);
 								break;
+
 							case "WTO":
-								SP.WriteTimeout = int.Parse(saa[1]);
-								break;
 							case "WriteTimeout":
 								SP.WriteTimeout = int.Parse(saa[1]);
 								break;
+
 							case "ALVCHK":
 								AliveCMD = saa[1] == "1";
 								break;
@@ -216,8 +166,6 @@ namespace TR.BIDSsv
 
 				sdc.StringDataReceived += Sdc_StringDataReceived;
 				sdc.BinaryDataReceived += Sdc_BinaryDataReceived;
-
-
 			}
 			catch (Exception e)
 			{
@@ -229,17 +177,14 @@ namespace TR.BIDSsv
 			return sdc.IsOpen;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void Sdc_BinaryDataReceived(object? sender, byte[] e) => DataGot?.Invoke(this, new(e));
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void Sdc_StringDataReceived(object? sender, string e) => DataGot?.Invoke(this, new((sdc?.Enc ?? Encoding.Default).GetBytes(e)));
 
 		public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
 		public void OnOpenDChanged(in OpenD data) { }
 		public void OnPanelDChanged(in int[] data) { }
 		public void OnSoundDChanged(in int[] data) { }
-
 
 		readonly string[] ArgInfo = new string[]
 		{
@@ -270,13 +215,10 @@ namespace TR.BIDSsv
 
 		}
 
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Print(in string data) => sdc?.PrintString(data);
 
 		/// <summary>(IsBinaryAllowedがtrueの場合のみ)Binaryデータを送信します.</summary>
 		/// <param name="data">送信するデータ</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Print(in byte[] data)
 		{
 			if (IsBinaryAllowed) sdc?.PrintBinary(data);
@@ -286,20 +228,12 @@ namespace TR.BIDSsv
 			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 
 		#region IDisposable Support
-		private bool disposedValue = false; // 重複する呼び出しを検出するには
+		private bool disposedValue = false;
 
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposedValue)
 			{
-				if (disposing)
-				{
-					// TODO: マネージ状態を破棄します (マネージ オブジェクト)。
-				}
-
-				// TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
-				// TODO: 大きなフィールドを null に設定します。
-
 				sdc?.Dispose();
 
 				disposedValue = true;
@@ -308,20 +242,10 @@ namespace TR.BIDSsv
 			}
 		}
 
-		// TODO: 上の Dispose(bool disposing) にアンマネージ リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします。
-		// ~Serial()
-		// {
-		//   // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
-		//   Dispose(false);
-		// }
-
-		// このコードは、破棄可能なパターンを正しく実装できるように追加されました。
 		public void Dispose()
 		{
-			// このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
 			Dispose(true);
-			// TODO: 上のファイナライザーがオーバーライドされる場合は、次の行のコメントを解除してください。
-			// GC.SuppressFinalize(this);
+			GC.SuppressFinalize(this);
 		}
 		#endregion
 	}
