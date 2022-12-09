@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using TR.BIDSSMemLib;
 
@@ -48,85 +48,45 @@ namespace TR.BIDSsv
 						switch (saa[0])
 						{
 							case "E":
-								switch (int.Parse(saa[1]))
+								Enc = int.Parse(saa[1]) switch
 								{
-									case 0:
-										Enc = Encoding.Default;
-										break;
-									case 1:
-										Enc = Encoding.ASCII;
-										break;
-									case 2:
-										Enc = Encoding.Unicode;
-										break;
-									case 3:
-										Enc = Encoding.UTF8;
-										break;
-									case 4:
-										Enc = Encoding.UTF32;
-										break;
-									default:
-										Enc = Encoding.Default;
-										break;
-								}
+									0 => Encoding.Default,
+									1 => Encoding.ASCII,
+									2 => Encoding.Unicode,
+									3 => Encoding.UTF8,
+									4 => Encoding.UTF32,
+									_ => Encoding.Default,
+								};
 								break;
-							case "Encoding":
-								switch (int.Parse(saa[1]))
-								{
-									case 0:
-										Enc = Encoding.Default;
-										break;
-									case 1:
-										Enc = Encoding.ASCII;
-										break;
-									case 2:
-										Enc = Encoding.Unicode;
-										break;
-									case 3:
-										Enc = Encoding.UTF8;
-										break;
-									case 4:
-										Enc = Encoding.UTF32;
-										break;
-									default:
-										Enc = Encoding.Default;
-										break;
-								}
-								break;
+
 							case "N":
-								if (saa.Length > 1) Name = saa[1];
-								break;
 							case "Name":
 								if (saa.Length > 1) Name = saa[1];
 								break;
 							case "P":
-								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
-								break;
 							case "Port":
 								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
 								break;
 
 							case "RTO":
-								RTO = int.Parse(saa[1]);
-								break;
 							case "ReadTimeout":
 								RTO = int.Parse(saa[1]);
 								break;
 							case "WTO":
-								WTO = int.Parse(saa[1]);
-								break;
 							case "WriteTimeout":
 								WTO = int.Parse(saa[1]);
 								break;
-
 						}
 					}
 				}
-				catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
+				catch (Exception e)
+				{
+					Log(e);
+				}
 			}
 			TL = new TcpListener(IPAddress.Any, PortNum);
 			TL.Start();
-			Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ((IPEndPoint)TL.LocalEndpoint).Address, ((IPEndPoint)TL.LocalEndpoint).Port);
+			Log($"Connection Waiting Start => Addr:{((IPEndPoint)TL.LocalEndpoint).Address}, Port:{((IPEndPoint)TL.LocalEndpoint).Port}");
 			TD = PortNum != ConstVals.DefPNum ? new Task(ReadDoing) : new Task(ConnectDoing);
 
 			TD.Start();
@@ -144,7 +104,7 @@ namespace TR.BIDSsv
 			IPEndPoint? ep = TL?.LocalEndpoint as IPEndPoint;
 
 			PortNum = ep?.Port ?? ConstVals.DefPNum;
-			Console.WriteLine(Name + " : " + "Connection Waiting Start => Addr:{0}, Port:{1}", ep?.Address, PortNum);
+			Log($"Connection Waiting Start => Addr:{ep?.Address}, Port:{PortNum}");
 
 			TD = new Task(ReadDoing);
 
@@ -154,7 +114,9 @@ namespace TR.BIDSsv
 		public void Dispose()
 		{
 			IsLooping = false;
-			if (TD?.IsCompleted == false && TD?.Wait(5000) == false) Console.WriteLine(Name + " : " + "ReadThread is not closed.  It may cause some bugs.");
+			if (TD?.IsCompleted == false && TD?.Wait(5000) == false)
+				Log("ReadThread is not closed.  It may cause some bugs.");
+
 			NS?.Dispose();
 			TC?.Dispose();
 			TL?.Stop();
@@ -166,8 +128,12 @@ namespace TR.BIDSsv
 		{
 			while (IsLooping)
 			{
-				while (IsLooping && TL?.Pending() == false) await Task.Delay(1);
-				if (!IsLooping) continue;
+				while (IsLooping && TL?.Pending() == false)
+					await Task.Delay(1);
+
+				if (!IsLooping)
+					continue;
+
 				try
 				{
 					TC = TL?.AcceptTcpClient();
@@ -180,9 +146,11 @@ namespace TR.BIDSsv
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("{0} : ConnectDoing Failed.\n{1}", Name, e);
+					Log($"ConnectDoing Failed.\n{e}");
 				}
+
 				string gs = await Read();
+
 				if (gs.StartsWith("TRV"))//要変更 専用コマンドを用意すること.
 				{
 					try
@@ -197,13 +165,14 @@ namespace TR.BIDSsv
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("{0} : Version Check Failed.\n{1}", Name, e);
+						Log($"Version Check Failed.\n{e}");
 					}
 				}
 				else
 				{
 					Print("TRE\n");//Error を入れる
 				}
+
 				NS?.Close();
 				NS?.Dispose();
 				TC?.Close();
@@ -218,19 +187,19 @@ namespace TR.BIDSsv
 			{
 				TC = TL?.AcceptTcpClient();
 				IPEndPoint? rep = TC?.Client.RemoteEndPoint as IPEndPoint;
-				Console.WriteLine(Name + " : " + "Connected => Addr:{0}, Port:{1}", rep?.Address, rep?.Port);
+				Log($"Connected => Addr:{rep?.Address}, Port:{rep?.Port}");
 				NS = TC?.GetStream();
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("In connection waiting process, An Error has occured on " + Name);
-				Console.WriteLine(e);
+				Log($"In connection waiting process, An Error has occured\n{e}");
 			}
+
 			_ = Task.Run(async () =>
-				{
-					while (TC?.Connected == true) await Task.Delay(1);
-					IsLooping = false;
-				});
+			{
+				while (TC?.Connected == true) await Task.Delay(1);
+				IsLooping = false;
+			});
 
 			while (IsLooping)
 			{
@@ -239,12 +208,10 @@ namespace TR.BIDSsv
 
 				DataGot?.Invoke(this, new(await ReadByte()));
 			}
+
 			NS?.Close();
 			TC?.Close();
-
 		}
-
-
 
 		List<byte> RBytesLRec = new List<byte>();
 		async Task<string> Read() => Enc.GetString(await ReadByte()).Replace("\n", string.Empty);
@@ -254,32 +221,42 @@ namespace TR.BIDSsv
 			List<byte> RBytesL = RBytesLRec;
 			try
 			{
-				while (NS?.DataAvailable == false && IsLooping) await Task.Delay(1);
+				while (NS?.DataAvailable == false && IsLooping)
+					await Task.Delay(1);
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0} : Error has occured at data waiting process\n{1}", Name, e);
+				Log($"Error has occured at data waiting process\n{e}");
 			}
-			if (!IsLooping) return Array.Empty<byte>();
-			byte[] b = new byte[1];
+
+			if (!IsLooping)
+				return Array.Empty<byte>();
+
+			byte[] b = new byte[4096];
 			int nsreadr = 0;
 
 			while (NS?.DataAvailable == true && !RBytesL.Contains((byte)'\n'))
 			{
-				b = new byte[1];
-				nsreadr = await NS.ReadAsync(b, 0, 1);
-				if (nsreadr <= 0) break;
-				RBytesL.Add(b[0]);
+				nsreadr = await NS.ReadAsync(b.AsMemory());
+				if (nsreadr <= 0)
+					break;
+
+				RBytesL.AddRange(b[0..nsreadr]);
 			}
 
 			if (!RBytesL.Contains((byte)'\n'))
 			{
-				if (RBytesLRec.Count == 0) RBytesLRec = RBytesL;
-				else RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
-				return Array.Empty<byte>();
+				if (RBytesLRec.Count == 0)
+					RBytesLRec = RBytesL;
+				else
+					RBytesLRec.InsertRange(RBytesLRec.Count - 1, RBytesL);
+				return
+					Array.Empty<byte>();
 			}
+
 			return RBytesL.ToArray();
 		}
+
 		public void OnBSMDChanged(in BIDSSharedMemoryData data) { }
 		public void OnOpenDChanged(in OpenD data) { }
 		public void OnPanelDChanged(in int[] data) { }
@@ -288,7 +265,9 @@ namespace TR.BIDSsv
 		public void Print(in string data)
 		{
 			if (TC?.Connected != true || NS?.CanWrite != true) return;
-			if (IsDebug) Console.WriteLine("{0} >> {1}", Name, data);
+			if (IsDebug)
+				Log($">> {data}");
+
 			try
 			{
 				byte[] wbytes = Enc.GetBytes(data + (data.EndsWith("\n") ? string.Empty : "\n"));
@@ -296,8 +275,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("In Writing Process, An Error has occured on " + Name);
-				Console.WriteLine(e);
+				Log($"In Writing Process, An Error has occured\n{e}");
 			}
 		}
 		public void Print(in byte[] data)
@@ -306,7 +284,6 @@ namespace TR.BIDSsv
 
 			if (data?.Length > 0) NS?.Write(data, 0, data.Length);
 		}
-
 
 		readonly string[] ArgInfo = new string[]
 		{
@@ -324,5 +301,8 @@ namespace TR.BIDSsv
 			Console.WriteLine("Copyright (C) Tetsu Otter 2019");
 			foreach (string s in ArgInfo) Console.WriteLine(s);
 		}
+
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 }

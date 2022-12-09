@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using TR;
 using TR.BIDSSMemLib;
 using TR.BIDSsv;
@@ -30,8 +31,7 @@ namespace BIDSsv.testmod
 		bool IsBinaryAllowed = false;
 		bool IsLoading = false;
 		bool NoLogMode = false;
-
-		List<CMDSendTimer> CSTL = new List<CMDSendTimer>();
+		readonly List<CMDSendTimer> CSTL = new List<CMDSendTimer>();
 
 		public bool Connect(in string args)
 		{
@@ -43,7 +43,7 @@ namespace BIDSsv.testmod
 			DateTime dt = DateTime.UtcNow;
 			Name += (dt.Minute * 60 * 1000 * dt.Second * 1000 + dt.Millisecond).ToString();
 			LogFileName = string.Format("BsvTest.{0}.log", dt.ToString("yyyyMMdd.HHmmss.ffff"));
-			Console.WriteLine("BIDSsv Test Mod\tVersion : {0}\tName : {1}\tFName : {2}", ModVersion, Name, LogFileName);
+			Log($"BIDSsv Test Mod\tVersion : {ModVersion}\tName : {Name}\tFName : {LogFileName}");
 			try
 			{
 				swr = new StreamWriter(LogFileName);
@@ -52,7 +52,7 @@ namespace BIDSsv.testmod
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0}.Connect : {1}", Name, e);
+				Log(e);
 				return false;
 			}
 
@@ -94,7 +94,7 @@ namespace BIDSsv.testmod
 								if (saa.Length < 2)
 								{
 									AppendText(string.Format("Too Less Args to do ONCE : sa[{0}]", i));
-									Console.WriteLine("{0} : Too Less Args to do ONCE: sa[{0}]", i);
+									Log($"Too Less Args to do ONCE: sa[{i}]");
 									break;
 								}
 								else
@@ -122,7 +122,7 @@ namespace BIDSsv.testmod
 									catch (Exception e)
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
-										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
+										Log($"Exceotion throwed at Parsing Process : {e}");
 										break;
 									}
 
@@ -134,7 +134,7 @@ namespace BIDSsv.testmod
 									catch (Exception e)
 									{
 										AppendText(string.Format("Exceotion throwed at Parsing Process : {0}", e));
-										Console.WriteLine("Exceotion throwed at Parsing Process : {0}", e);
+										Log($"Exceotion throwed at Parsing Process : {e}");
 										break;
 									}
 									CSTL.Add(cst);
@@ -144,7 +144,7 @@ namespace BIDSsv.testmod
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("arg({0}) Error : {1}", sa[i], e);
+						Log($"arg({sa[i]}) Error : {e}");
 						continue;
 					}
 				}
@@ -152,43 +152,53 @@ namespace BIDSsv.testmod
 			return true;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		private void AppendText(string s)
 		{
+			if (string.IsNullOrWhiteSpace(s))
+				return;
+
+			if (NoLogMode || disposing || swr == null || swr_lock == null)
+				return;
+
 			DateTime dt = DateTime.UtcNow;
-			Task.Run(async () =>
-			{
-				if (NoLogMode || disposing || swr == null || swr_lock == null) return;
-				if (string.IsNullOrWhiteSpace(s)) return;
-				try
-				{
-					await swr_lock.WaitAsync();
-					if (IsDisposed || disposedValue) return;
-					await swr.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
-				}
-				catch (ObjectDisposedException)
-				{
-					Console.WriteLine("{0} : StreamWriter Already Closed ({1})", Name, s);
-					return;
-				}
-				catch (Exception e)
-				{
-					Console.WriteLine("{0}.AppendText({1}) : {2}", Name, s, e);
-					Dispose();
-					Console.WriteLine("{0} : Close this instance.", Name);
-					return;
-				}
-				finally
-				{
-					swr_lock?.Release();
-				}
-			});
+			Task.Run(() => AppendText(s, dt));
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		private async Task AppendText(string s, DateTime dt)
+		{
+			if (NoLogMode || disposing || swr == null || swr_lock == null)
+				return;
+
+			try
+			{
+				await swr_lock.WaitAsync();
+
+				if (IsDisposed || disposedValue)
+					return;
+
+				await swr.WriteLineAsync(dt.ToString("HH:mm:ss.fffff,\t") + s);
+			}
+			catch (ObjectDisposedException)
+			{
+				Log($"StreamWriter Already Closed ({s})");
+			}
+			catch (Exception e)
+			{
+				Log($"arg({s}) : {e}");
+				Dispose();
+				Log("Close this instance.");
+			}
+			finally
+			{
+				swr_lock?.Release();
+			}
+		}
+
 		public bool SendCMD2sv(string cmd)
 		{
-			if (string.IsNullOrWhiteSpace(cmd)) return false;
+			if (string.IsNullOrWhiteSpace(cmd))
+				return false;
+
 			try
 			{
 				AppendText("Send : " + cmd);
@@ -199,7 +209,7 @@ namespace BIDSsv.testmod
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("{0}.SendCMD2sv({1}) : {2}", Name, cmd, e);
+				Log(e);
 				return false;
 			}
 		}
@@ -211,16 +221,15 @@ namespace BIDSsv.testmod
 		public void OnSoundDChanged(in int[] data) { }
 		#endregion
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public void Print(in string data) => AppendText("Got : " + data);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+
 		public void Print(in byte[] data)
 		{
 			if (!IsBinaryAllowed) return;
 			AppendText("GotB: " + BitConverter.ToString(data));
 		}
 
-		string[] helps = new string[]
+		readonly string[] helps = new string[]
 		{
 			"BIDSsv Test Mod",
 			"Version : " + ModVersion.ToString(),
@@ -247,10 +256,9 @@ namespace BIDSsv.testmod
 		private bool disposedValue = false;
 		private bool disposing = false;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		protected virtual async void Dispose(bool disposing)
 		{
-			disposing = true;
+			this.disposing = true;
 			if (!disposedValue)
 			{
 				if (disposing)
@@ -281,28 +289,37 @@ namespace BIDSsv.testmod
 			IsDisposed = true;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public void Dispose() => Dispose(true);
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 		#endregion
 
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 
 	internal class CMDSendTimer : IDisposable
 	{
-		TimeSpan IntervalTS = new TimeSpan(0, 0, 0, 0, 10);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+		readonly TimeSpan IntervalTS = new TimeSpan(0, 0, 0, 0, 10);
+
 		internal CMDSendTimer(modif mif, in int interval, string cmd)
 		{
-			if (mif == null) throw new ArgumentNullException();
+			if (mif == null) throw new ArgumentNullException(nameof(mif));
 			IntervalTS = interval <= 0 ? new TimeSpan(1 - interval) : new TimeSpan(0, 0, 0, 0, interval);
 
 			bool OnCmpleted = false;
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+
 			void LoopReader()
 			{
-				if (OnCmpleted || mif?.IsDisposed != false || disposedValue) return;
+				if (OnCmpleted || mif?.IsDisposed != false || disposedValue)
+					return;
+
 				Task.Delay(IntervalTS).GetAwaiter().OnCompleted(LoopReader);
-				if (mif?.SendCMD2sv(cmd) != true) OnCmpleted = true;
+
+				if (mif?.SendCMD2sv(cmd) != true)
+					OnCmpleted = true;
 			}
 
 			try
@@ -311,29 +328,21 @@ namespace BIDSsv.testmod
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("CMDSender(interval:{0}, cmd:{1}) init : {2}", interval, cmd, e);
+				Log($"CMDSender(interval:{interval}, cmd:{cmd}) init : {e}");
 				Dispose();
 				return;
 			}
 		}
 
+		private static void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({nameof(CMDSendTimer)}.{memberName}): {obj}");
+
 		#region IDisposable Support
-		private bool disposedValue = false; // 重複する呼び出しを検出するには
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		protected virtual void Dispose(bool disposing)
+		bool disposedValue = false;
+		public void Dispose()
 		{
-			if (!disposedValue)
-			{
-				//if (disposing){}// TODO: マネージ状態を破棄します (マネージ オブジェクト)。
-
-				disposedValue = true;
-			}
+			disposedValue = true;
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
-		public void Dispose() => Dispose(true);
-
 		#endregion
 	}
 }

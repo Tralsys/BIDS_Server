@@ -27,26 +27,26 @@ namespace TR.BIDSsv
 		public bool ReConnectWhenTimedOut { get; set; } = false;
 		/// <summary>1秒の間隔をあけて, 生存報告をNULL文字送出にて行う.</summary>
 		public bool IamAliveCMD { get; set; } = false;
-		private Task? AliveCMDTask = null;
+		private readonly Task? AliveCMDTask = null;
 		private readonly TimeSpan AliveCMDTimeSpan = new TimeSpan(0, 0, 1);
 		private readonly TimeSpan ReConnectTimeSpan = new TimeSpan(0, 0, 0, 0, 100);
 
 		private const string BINARY_DATA_HEADER = "B64E";
 		private const string SERIAL_SETTING_HEADER = "S";
-
-		object Locker = new object();
+		readonly object Locker = new object();
 
 		string ReadBuf = string.Empty;
+
 		/// <summary>使用するSerial IF</summary>
-		SerialPort serial;
+		readonly SerialPort serial;
 		#endregion
 
 		/// <summary>インスタンスを初期化します.</summary>
 		/// <param name="ser">使用するシリアルインターフェイス</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public Serial_DeviceCom(in SerialPort ser)
 		{
-			if (ser == null) throw new ArgumentNullException();
+			if (ser is null)
+				throw new ArgumentNullException(nameof(ser));
 
 			serial = ser;
 
@@ -59,7 +59,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("Serial_DeviceCom intialize : Serial Port Open Error=>{0}", e);
+				Log($"Serial Port Open Error=>{e}");
 				return;
 			}
 
@@ -85,12 +85,12 @@ namespace TR.BIDSsv
 									}
 									else
 									{
-										Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
+										Log(e, "AliveCmdCheck");
 									}
 								}
 								catch (Exception e)
 								{
-									Console.WriteLine("Serial_DeviceCom.AliveCMDCheck : {0}", e);
+									Log(e, "AliveCmdCheck");
 									return;
 								}
 							}
@@ -102,15 +102,19 @@ namespace TR.BIDSsv
 			serial.DataReceived += Serial_DataReceived;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
+
 		private void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			string gotData = string.Empty;
 			SerialPort sp = (SerialPort)sender;
 			try
 			{
-				if (!sp.IsOpen) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived => Serial Already Closed.");
-				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived : CanRead:{0}, CanWrite:{1}", sp.BaseStream.CanRead, sp.BaseStream.CanWrite);
+				if (!sp.IsOpen)
+					Log("Serial Already Closed.");
+
+				if (!sp.BaseStream.CanRead || !sp.BaseStream.CanWrite)
+					Log($"Read or Write not allowed: CanRead:{sp.BaseStream.CanRead}, CanWrite:{sp.BaseStream.CanWrite}");
+
 				lock (Locker)
 				{
 					try
@@ -125,13 +129,18 @@ namespace TR.BIDSsv
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Serial_DeviceCom.Serial_DataReceived ReadExisting : {0}", ex);
+				Log($"ReadExisting : {ex}");
 			}
-			if (string.IsNullOrWhiteSpace(gotData)) return;//要素なし
+
+			if (string.IsNullOrWhiteSpace(gotData))
+				return;//要素なし
+
 			Task.Run(async () =>
 			{
 
-				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.Serial_DataReceived() : DataGot=>{0}", gotData);
+				if (IsDebugging)
+					Log(gotData);
+
 				string[] sa;
 				try
 				{
@@ -139,7 +148,7 @@ namespace TR.BIDSsv
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("Serial_DeviceCom.Serial_DataReceived StringSplit : {0}", ex);
+					Log($"StringSplit : {ex}");
 					return;
 				}
 				if (sa.Length <= 0)
@@ -169,10 +178,11 @@ namespace TR.BIDSsv
 								}
 								catch (Exception ex)
 								{
-									Console.WriteLine("Serial_DataCom.Serial_DataReceived() BinaryDataReceieved Error : {0}", ex);
+									Log($"BinaryDataReceieved Error : {ex}");
 								}
 							});
-					else if (sa[i].StartsWith(SERIAL_SETTING_HEADER)) await Task.Run(() => Serial_Setting(sa[ind]));
+					else if (sa[i].StartsWith(SERIAL_SETTING_HEADER))
+						await Task.Run(() => Serial_Setting(sa[ind]));
 					else _ = Task.Run(() =>
 					{
 						try
@@ -181,14 +191,13 @@ namespace TR.BIDSsv
 						}
 						catch (Exception ex)
 						{
-							Console.WriteLine("Serial_DataCom.Serial_DataReceived() StringDatReceived.Invoke Error : {0}", ex);
+							Log($"StringDatReceived.Invoke Error : {ex}");
 						}
 					});
 				}
 			});
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		void Serial_Setting(string cmd)
 		{
 
@@ -198,14 +207,16 @@ namespace TR.BIDSsv
 		/// <summary>文字列を出力</summary>
 		/// <param name="s">出力する文字列</param>
 		/// <returns>出力に成功したかどうか</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public bool PrintString(string s)
 		{
-			if (!IsOpen) return false;//null or openしてないなら実行しない.
-			if (string.IsNullOrWhiteSpace(s)) return false;
+			if (!IsOpen || string.IsNullOrWhiteSpace(s))
+				return false;//null or openしてないなら実行しない.
+
 			try
 			{
-				if (IsDebugging) Console.WriteLine("Serial_DeviceCom.PrintString() : DataSend=>{0}", s);
+				if (IsDebugging)
+					Log(s);
+
 				lock (Locker)
 				{
 					try
@@ -214,7 +225,7 @@ namespace TR.BIDSsv
 					}
 					catch (TimeoutException)
 					{
-						Console.WriteLine("\tTimeOut ({0})", s);
+						Log($"\tTimeOut ({s})");
 						if (ReConnectWhenTimedOut)
 						{
 							ReConnect();
@@ -223,11 +234,12 @@ namespace TR.BIDSsv
 						return false;
 					}
 				}
+
 				return true;
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("Serial_DeviceCom.PrintString({0}) : {1}", s, e);
+				Log($"Error with ({s}) : {e}");
 				return false;
 			}
 		}
@@ -237,7 +249,6 @@ namespace TR.BIDSsv
 		/// <param name="offset">出力開始位置(nullで既定値"0")</param>
 		/// <param name="length">出力するByte Arrayの長さ(nullで既定値"ba.length")</param>
 		/// <returns>出力に成功したかどうか</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public bool PrintBinary(byte[] ba, int? offset = null, int? length = null)
 		{
 			if (!IsOpen) return false;//null or openしてないなら実行しない.
@@ -248,7 +259,7 @@ namespace TR.BIDSsv
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("Serial_DeviceCom.PrintBinary() : {0}", e);
+				Log(e);
 				return false;
 			}
 		}
@@ -256,17 +267,17 @@ namespace TR.BIDSsv
 
 
 		/// <summary>ロックは呼び出し元で取得してください.</summary>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		async void ReConnect()
 		{
-			Console.WriteLine("Reconnect doing...");
+			Log("Reconnect doing...");
 			try
 			{
-				if (serial?.IsOpen == true) serial.Close();
+				if (serial?.IsOpen == true)
+					serial.Close();
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("SerialPort Close Failed. : {0}", e);
+				Log($"SerialPort Close Failed. : {e}");
 				return;
 			}
 
@@ -274,17 +285,21 @@ namespace TR.BIDSsv
 
 			try
 			{
-				if (serial?.IsOpen == false) serial.Open();
+				if (serial?.IsOpen == false)
+					serial.Open();
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("SerialPort ReOpen Failed. : {0}", e);
+				Log($"SerialPort ReOpen Failed. : {e}");
 				return;
 			}
 		}
 
+		private static void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({nameof(Serial_DeviceCom)}.{memberName}): {obj}");
+
 		#region IDisposable Support
-		private bool disposedValue = false; // 重複する呼び出しを検出するには
+		private bool disposedValue = false;
 		private bool disposingValue = false;
 
 		protected virtual void Dispose(bool disposing)
@@ -294,11 +309,8 @@ namespace TR.BIDSsv
 			{
 				if (disposing)
 				{
-					// TODO: マネージ状態を破棄します (マネージ オブジェクト)。
 				}
 
-				// TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
-				// TODO: 大きなフィールドを null に設定します。
 				lock (Locker)
 				{
 					serial?.Dispose();
@@ -307,20 +319,10 @@ namespace TR.BIDSsv
 			}
 		}
 
-		// TODO: 上の Dispose(bool disposing) にアンマネージ リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします。
-		// ~Serial_DeviceCom()
-		// {
-		//   // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
-		//   Dispose(false);
-		// }
-
-		// このコードは、破棄可能なパターンを正しく実装できるように追加されました。
 		public void Dispose()
 		{
-			// このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
 			Dispose(true);
-			// TODO: 上のファイナライザーがオーバーライドされる場合は、次の行のコメントを解除してください。
-			// GC.SuppressFinalize(this);
+			GC.SuppressFinalize(this);
 		}
 		#endregion
 

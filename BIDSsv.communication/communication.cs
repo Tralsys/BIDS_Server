@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
+
 using TR.BIDSSMemLib;
 
 namespace TR.BIDSsv
@@ -35,44 +37,45 @@ namespace TR.BIDSsv
 						switch (saa[0])
 						{
 							case "A":
-								if (saa.Length > 1) IsWriteable = IPAddress.TryParse(saa[1], out Addr);
-								break;
 							case "Addr":
 								if (saa.Length > 1) IsWriteable = IPAddress.TryParse(saa[1], out Addr);
 								break;
+
 							case "N":
-								if (saa.Length > 1) Name = saa[1];
-								break;
 							case "Name":
 								if (saa.Length > 1) Name = saa[1];
 								break;
+
 							case "P":
-								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
-								break;
 							case "Port":
 								if (saa.Length > 1) PortNum = int.Parse(saa[1]);
 								break;
+
 							case "RemotePort":
-								if (saa.Length > 1) RemotePNum = int.Parse(saa[1]);
-								break;
 							case "RP":
 								if (saa.Length > 1) RemotePNum = int.Parse(saa[1]);
 								break;
 						}
 					}
 				}
-				catch (Exception e) { Console.WriteLine("Error has occured on " + Name); Console.WriteLine(e); }
+				catch (Exception e)
+				{
+					Log($"Error has occured.\n{e}");
+				}
 			}
 			try
 			{
 				UC = new UdpClient(new IPEndPoint(IPAddress.Any, PortNum));
-				if (Addr is not null && Addr != IPAddress.Any) UC?.Connect(Addr, RemotePNum);
+
+				if (Addr is not null && Addr != IPAddress.Any)
+					UC?.Connect(Addr, RemotePNum);
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine($"{Name} : {e}");
+				Log($"Error has occured.\n{e}");
 				return false;
 			}
+
 			UC?.BeginReceive(ReceivedDoing, UC);
 			return true;
 		}
@@ -92,12 +95,14 @@ namespace TR.BIDSsv
 			}
 			catch (SocketException e)
 			{
-				if (!Equals(sexc?.ErrorCode, e.ErrorCode)) Console.WriteLine($"{Name} : Receieve Error({e.ErrorCode}) => {e}");
+				if (!Equals(sexc?.ErrorCode, e.ErrorCode))
+					Log($"Receieve Error({e.ErrorCode}) => {e}");
+
 				sexc = e;
 			}
 			catch (ObjectDisposedException)
 			{
-				Console.WriteLine("{0} (ReceivedDoing) : This connection is already closed.", Name);
+				Log("This connection is already closed.");
 				Dispose();
 				return;
 			}
@@ -107,19 +112,21 @@ namespace TR.BIDSsv
 
 		protected virtual void Dispose(bool tf)
 		{
-			if (!tf) UC?.Close();
+			if (!tf)
+				UC?.Close();
 			UC?.Dispose();
 			IsDisposed = true;
 			Disposed?.Invoke(this, new());
 		}
+
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		int[] PDA = new int[256];
-		int[] SDA = new int[256];
+		readonly int[] PDA = new int[256];
+		readonly int[] SDA = new int[256];
 		int oldT = 0;
 		public void OnBSMDChanged(in BIDSSharedMemoryData data)
 		{
@@ -151,8 +158,6 @@ namespace TR.BIDSsv
 			if (data.Length < 256) Array.Clear(SDA, data.Length, 256 - data.Length);
 		}
 
-
-
 		public void Print(in string data) => Print(Encoding.Default.GetBytes(data));
 
 		public void Print(in byte[] data)
@@ -177,5 +182,8 @@ namespace TR.BIDSsv
 			Console.WriteLine("Copyright (C) Tetsu Otter 2019");
 			foreach (string s in ArgInfo) Console.WriteLine(s);
 		}
+
+		private void Log(object obj, [CallerMemberName] string? memberName = null)
+			=> Console.WriteLine($"[{DateTime.Now:HH:mm:ss.ffff}]({Name}.{memberName}): {obj}");
 	}
 }
