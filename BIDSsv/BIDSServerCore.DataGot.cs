@@ -18,13 +18,13 @@ public partial class BIDSServerCore
 
 		var result = parser.From(e.Bytes);
 
-		var responseToSend = OnDataGot(result, parser);
+		var responseToSend = OnDataGot(result, sv);
 
 		if (responseToSend is not null)
 			sv.Print(responseToSend);
 	}
 
-	private byte[]? OnDataGot(IBIDSCmd cmd, IParser parser)
+	private byte[]? OnDataGot(IBIDSCmd cmd, IBIDSsv sender)
 	{
 		string? returnCmd = null;
 
@@ -56,10 +56,10 @@ public partial class BIDSServerCore
 				break;
 
 			case IBIDSBinaryData.IVariableStructureRegister regCmd:
-				return OnVariableStructureRegisterCmdGot(regCmd.Structure, parser);
+				return OnVariableStructureRegisterCmdGot(regCmd.Structure, sender);
 
 			case IBIDSBinaryData.IVariablePayload payloadCmd:
-				return OnVariablePayloadCmdGot(payloadCmd.Structure.Name, payloadCmd.Payload);
+				return OnVariablePayloadCmdGot(payloadCmd.Structure.Name, payloadCmd.Payload, sender);
 
 			case IBIDSBinaryData binCmd:
 				return OnBinaryCmdGot.HandleCommand(SMem, binCmd);

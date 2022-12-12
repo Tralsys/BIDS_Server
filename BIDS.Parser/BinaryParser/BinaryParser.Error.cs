@@ -10,6 +10,7 @@ public enum BIDSBinaryDataErrorType
 	NotBIDSCommand,
 
 	UnknownVariableDataKey,
+	UnknownVariableDataName,
 }
 
 public record BIDSBinaryData_Error(

@@ -27,11 +27,11 @@ public partial class BIDSServerCore
 		var OD = SMem.OpenData;
 
 		if (!Equals(e.OldValue.SpecData, e.NewValue.SpecData))
-			ASPtr(AutoSendSetting.BasicConst(e.NewValue.SpecData, OD, Version));
+			ASPtr(GetBIDSBinaryData_Spec(e.NewValue.SpecData, Version, (short)OD.SelfBCount).GetBytesWithHeader());
 		if (!Equals(e.OldValue.StateData, e.NewValue.StateData))
-			ASPtr(AutoSendSetting.BasicCommon(e.NewValue.StateData, e.NewValue.IsDoorClosed ? ConstVals.TRUE_VALUE : ConstVals.FALSE_VALUE));
+			ASPtr(GetBIDSBinaryData_State(e.NewValue.StateData, 0, e.NewValue.IsDoorClosed).GetBytesWithHeader());
 		if (!Equals(e.NewValue.HandleData, e.OldValue.HandleData))
-			ASPtr(AutoSendSetting.BasicHandle(e.NewValue.HandleData, OD.SelfBPosition));
+			ASPtr(GetBIDSBinaryData_Handle(e.NewValue.HandleData, OD.SelfBPosition).GetBytesWithHeader());
 
 		Parallel.ForEach(ASList, (kvp) =>
 		{
@@ -103,4 +103,37 @@ public partial class BIDSServerCore
 			}
 		});
 	}
+
+	static IBIDSBinaryData GetBIDSBinaryData_Spec(in Spec v, in int version, in short selfBrake)
+		=> new BIDSBinaryData_Spec(
+			Version: version,
+			Brake: (short)v.B,
+			Power: (short)v.P,
+			ATSCheckPos: (short)v.A,
+			B67Pos: (short)v.J,
+			CarCount: (short)v.C,
+			SelfBrake: selfBrake
+		);
+	static IBIDSBinaryData GetBIDSBinaryData_State(in State v, in int SigNum, in bool isDoorClosed)
+		=> new BIDSBinaryData_State(
+			Location_m: v.Z,
+			Speed_kmph: v.V,
+			ElectricCurrent_A: v.I,
+			LineVoltage_V: 0,
+			Time_ms: v.T,
+			BCPressure_kPa: v.BC,
+			MRPressure_kPa: v.MR,
+			ERPressure_kPa: v.ER,
+			BPPressure_kPa: v.BP,
+			SAPPressure_kPa: v.SAP,
+			NextSignalState: SigNum,
+			IsDoorClosed: (byte)(isDoorClosed ? 1 : 0)
+		);
+	static IBIDSBinaryData GetBIDSBinaryData_Handle(in Hand v, int selfBrake)
+		=> new BIDSBinaryData_Handle(
+			Power: v.P,
+			Brake: v.B,
+			Reverser: v.R,
+			SelfBrake: selfBrake
+		);
 }

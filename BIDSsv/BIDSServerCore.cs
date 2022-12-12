@@ -28,7 +28,6 @@ public partial class BIDSServerCore
 
 	public IReadOnlyDictionary<IBIDSsv, IParser> ServerParserDic => _ServerParserDic;
 	Dictionary<IBIDSsv, IParser> _ServerParserDic { get; } = new();
-	Dictionary<IParser, Dictionary<int, VariableStructure>> _VariableStructureDic { get; } = new();
 
 	public BIDSServerCore(int Interval = 2, bool isNoSMemMode = false, bool isNoEventMode = false)
 	{
@@ -40,12 +39,17 @@ public partial class BIDSServerCore
 		SMem.ReadStart(SMemLib.ARNum.All, Interval);
 
 		SMem.SMC_BSMDChanged += SMem_SMC_BSMDChanged;
+
+		// Variable SMem Reader
+		Reader = new(Interval);
+		Reader.NameAdded += Reader_NameAdded;
+		Reader.ValueChanged += Reader_ValueChanged;
+		Reader.Run();
 	}
 
 	public bool AddMod(in IBIDSsv sv)
 	{
-		Dictionary<int, VariableStructure> variableStrcutreDic = new();
-		Parser parser = new(variableStrcutreDic);
+		Parser parser = new();
 		bool isSuccess = _ServerParserDic.TryAdd(sv, parser);
 
 		if (isSuccess)
@@ -58,8 +62,6 @@ public partial class BIDSServerCore
 				manager.AddMod += Manager_AddMod;
 				manager.RemoveMod += Manager_RemoveMod;
 			}
-
-			_VariableStructureDic[parser] = variableStrcutreDic;
 		}
 
 		return isSuccess;
@@ -107,7 +109,7 @@ public partial class BIDSServerCore
 		// 正常に実装されていれば、MOD側で2回Disposeされることは無い。
 		sv.Dispose();
 
-		return _ServerParserDic.Remove(sv, out IParser? parser) && _VariableStructureDic.Remove(parser);
+		return _ServerParserDic.Remove(sv, out IParser? parser);
 	}
 
 	public void ClearMod()

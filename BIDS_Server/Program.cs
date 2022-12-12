@@ -21,9 +21,6 @@ namespace BIDS_Server
 
 
 			program.Run(args);
-
-			Console.WriteLine("Please press any key to exit...");
-			Console.ReadKey();
 		}
 
 		BIDSServerCore SvCore { get; }

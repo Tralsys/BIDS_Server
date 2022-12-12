@@ -62,7 +62,8 @@ partial class Program
 		Assembly? a;
 		try
 		{
-			a = Assembly.LoadFrom(@"mods\" + (fname ?? string.Empty));
+			string filePath = Path.Combine(targetDirectory.FullName, fname);
+			a = Assembly.LoadFrom(filePath);
 		}
 		catch (FileNotFoundException)
 		{
@@ -83,7 +84,8 @@ partial class Program
 				if (t.IsInterface)
 					continue;
 
-				if (Activator.CreateInstance(t) is IBIDSsv ibs)
+				if (t.IsAssignableTo(typeof(IBIDSsv))
+					&& Activator.CreateInstance(t) is IBIDSsv ibs)
 					return ibs;
 			}
 		}

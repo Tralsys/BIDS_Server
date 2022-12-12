@@ -5,7 +5,7 @@
 		<AssemblyName>TR.BIDSsv.communication</AssemblyName>
 		<RootNamespace>TR.BIDSsv</RootNamespace>
 		<Nullable>enable</Nullable>
-		<Version>1.1.0</Version>
+		<Version>1.1.0.1</Version>
 		<Authors>Tetsu Otter</Authors>
 		<Company>Tech Otter</Company>
 		<Product>BIDS Project</Product>
@@ -17,10 +17,6 @@
 		<Platforms>AnyCPU;x86;x64</Platforms>
 		<Configurations>Release;Debug</Configurations>
 	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="TR.BIDSSMemLib.structs" Version="1.0.1" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\BIDSsv\BIDSsv.csproj" />
 		<ProjectReference Include="..\IBIDSsv\IBIDSsv.csproj" />

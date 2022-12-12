@@ -6,8 +6,8 @@ public interface IBIDSBinaryData : IBIDSCmd
 {
 	const int HEADER_LENGTH = 4;
 
-	// `tr` (Big-endianのため、逆順に記載)
-	const short RAW_DATA_IDENTIFIER = (short)0x7274;
+	// `tR`
+	const short RAW_DATA_IDENTIFIER = (short)0x5274;
 
 	byte RawCommandType { get; }
 	byte RawDataType { get; }

@@ -12,9 +12,12 @@ public partial class BIDSServerCore : IDisposable
 		{
 			if (disposing)
 			{
+				SMem.ReadStop(SMemLib.ARNum.All);
+				Reader.Dispose();
+
 				ClearMod();
 
-				SMem.ReadStop(SMemLib.ARNum.All);
+				SMem.Dispose();
 			}
 
 			disposedValue = true;

@@ -23,16 +23,13 @@ public static class OnBinaryCmdGot
 	{
 		// `Version`は、実装方針未定のため無視
 		// `SelfBrake`、対応するフィールドがないため無視する
-		SMem.Write(SMem.BIDSSMemData with
+		SMem.Write(new Spec()
 		{
-			SpecData = new()
-			{
-				B = data.Brake,
-				P = data.Power,
-				A = data.ATSCheckPos,
-				J = data.B67Pos,
-				C = data.CarCount
-			},
+			B = data.Brake,
+			P = data.Power,
+			A = data.ATSCheckPos,
+			J = data.B67Pos,
+			C = data.CarCount
 		});
 
 		return null;
@@ -41,22 +38,20 @@ public static class OnBinaryCmdGot
 	public static byte[]? HandleCommand(in ISMemLib SMem, in IBIDSBinaryData.IState data)
 	{
 		// `LineVoltage_V`と`NextSignalState`は、対応するフィールドが無いため無視する
-		SMem.Write(SMem.BIDSSMemData with
+		SMem.Write(new State()
 		{
-			StateData = new()
-			{
-				Z = data.Location_m,
-				V = data.Speed_kmph,
-				I = data.ElectricCurrent_A,
-				T = data.Time_ms,
-				BC = data.BCPressure_kPa,
-				MR = data.MRPressure_kPa,
-				ER = data.ERPressure_kPa,
-				BP = data.BPPressure_kPa,
-				SAP = data.SAPPressure_kPa,
-			},
-			IsDoorClosed = (data.IsDoorClosed == 1)
+			Z = data.Location_m,
+			V = data.Speed_kmph,
+			I = data.ElectricCurrent_A,
+			T = data.Time_ms,
+			BC = data.BCPressure_kPa,
+			MR = data.MRPressure_kPa,
+			ER = data.ERPressure_kPa,
+			BP = data.BPPressure_kPa,
+			SAP = data.SAPPressure_kPa,
 		});
+
+		SMem.WriteIsDoorClosed(data.IsDoorClosed == 1);
 
 		return null;
 	}
@@ -64,14 +59,11 @@ public static class OnBinaryCmdGot
 	public static byte[]? HandleCommand(in ISMemLib SMem, in IBIDSBinaryData.IHandle data)
 	{
 		// `SelfBrake`は、対応するフィールドがないため無視する
-		SMem.Write(SMem.BIDSSMemData with
+		SMem.Write(new Hand()
 		{
-			HandleData = new()
-			{
-				P = data.Power,
-				B = data.Brake,
-				R = data.Reverser,
-			}
+			P = data.Power,
+			B = data.Brake,
+			R = data.Reverser,
 		});
 
 		return null;
