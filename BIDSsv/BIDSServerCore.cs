@@ -39,6 +39,8 @@ public partial class BIDSServerCore
 		SMem.ReadStart(SMemLib.ARNum.All, Interval);
 
 		SMem.SMC_BSMDChanged += SMem_SMC_BSMDChanged;
+		SMem.SMC_PanelDChanged += SMem_SMC_PanelDChanged;
+		SMem.SMC_SoundDChanged += SMem_SMC_SoundDChanged;
 
 		// Variable SMem Reader
 		Reader = new(Interval);

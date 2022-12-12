@@ -38,6 +38,97 @@ public partial class BIDSServerCore
 		Parallel.ForEach(ASList, (kvp) => ASListCheck_BSMD(kvp.Key, kvp.Value, e));
 	}
 
+	private void SMem_SMC_PanelDChanged(object? sender, ValueChangedEventArgs<int[]> e)
+	{
+		if (ServerParserDic.Count <= 0)
+			return;
+
+		Parallel.ForEach(ServerParserDic.Keys, v => v.OnPanelDChanged(e.NewValue));
+
+		ArrDChangedCheckAndInvoke(e.OldValue, e.NewValue, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (newArray, stepCount) =>
+		{
+			IBIDSBinaryData cmd = new BIDSBinaryData_Panel((byte)stepCount, newArray);
+
+			byte[] ba = cmd.GetBytesWithHeader();
+
+			Parallel.ForEach(ServerParserDic.Keys, v => v.Print(ba));
+		});
+
+		Parallel.ForEach(ASList, (kvp) =>
+		{
+			if (kvp.Key is IBIDSCmd_Info_PanelData v)
+				ASListCheck_ArrayD(v, kvp.Value, e);
+		});
+	}
+
+	private void SMem_SMC_SoundDChanged(object? sender, ValueChangedEventArgs<int[]> e)
+	{
+		if (ServerParserDic.Count <= 0)
+			return;
+
+		Parallel.ForEach(ServerParserDic.Keys, v => v.OnSoundDChanged(e.NewValue));
+
+		ArrDChangedCheckAndInvoke(e.OldValue, e.NewValue, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (newArray, stepCount) =>
+		{
+			IBIDSBinaryData cmd = new BIDSBinaryData_Sound((byte)stepCount, newArray);
+
+			byte[] ba = cmd.GetBytesWithHeader();
+
+			Parallel.ForEach(ServerParserDic.Keys, v => v.Print(ba));
+		});
+
+		Parallel.ForEach(ASList, (kvp) =>
+		{
+			if (kvp.Key is IBIDSCmd_Info_SoundData v)
+				ASListCheck_ArrayD(v, kvp.Value, e);
+		});
+	}
+
+	static void ArrDChangedCheckAndInvoke(int[] OldArray, int[] NewArray, int OneTimePrintCount, Action<int[], int> onChanged)
+	{
+		int arrayLengthToPrint = Math.Max(OldArray.Length, NewArray.Length);
+		if (arrayLengthToPrint % OneTimePrintCount != 0)
+			arrayLengthToPrint = ((int)Math.Floor((double)arrayLengthToPrint / OneTimePrintCount) + 1) * OneTimePrintCount;
+
+		Parallel.For(0, arrayLengthToPrint / OneTimePrintCount, (stepCount) =>
+		{
+			int topIndex = stepCount * OneTimePrintCount;
+
+			int[] oldArray_Copy = new int[OneTimePrintCount];
+			int[] newArray_Copy = new int[OneTimePrintCount];
+			Buffer.BlockCopy(OldArray, topIndex * sizeof(int), oldArray_Copy, 0, Math.Min(OldArray.Length - topIndex, OneTimePrintCount) * sizeof(int));
+			Buffer.BlockCopy(NewArray, topIndex * sizeof(int), newArray_Copy, 0, Math.Min(NewArray.Length - topIndex, OneTimePrintCount) * sizeof(int));
+
+			if (!UFunc.ArrayEqual(OldArray, NewArray))
+			{
+				onChanged.Invoke(newArray_Copy, stepCount);
+			}
+		});
+	}
+
+	static void ASListCheck_ArrayD<T>(T gotCmd, List<IBIDSsv> requestingModList, ValueChangedEventArgs<int[]> e) where T : IBIDSCmd_Info_ArrayData
+	{
+		if (requestingModList.Count <= 0)
+			return;
+
+		bool isUpdated = false;
+		foreach (var index in gotCmd.IndexList)
+		{
+			if (e.OldValue[index] != e.NewValue[index])
+			{
+				isUpdated = true;
+				break;
+			}
+		}
+
+		if (!isUpdated)
+			return;
+
+		string? cmd = gotCmd.GenerateCommand(panel: e.NewValue, sound: e.NewValue);
+		if (!string.IsNullOrEmpty(cmd))
+			requestingModList.ForEach(v => v.Print(cmd));
+	}
+
 	static void ASListCheck_BSMD(IBIDSCmd_Info gotCmd, List<IBIDSsv> requestingModList, ValueChangedEventArgs<BIDSSharedMemoryData> e)
 	{
 		if (requestingModList.Count <= 0)
