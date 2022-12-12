@@ -25,7 +25,7 @@ uploaded to nuget</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="IAtsPI" Version="1.0.0.2" />
-		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.2.1" />
+		<PackageReference Include="TR.BIDSSMemLib.rw" Version="2.2.1.4" />
 		<PackageReference Include="TR.VariableSMemMonitor.Core" Version="1.5.0" />
 	</ItemGroup>
 	<ItemGroup>
