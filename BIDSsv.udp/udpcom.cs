@@ -56,6 +56,10 @@ namespace TR.BIDSsv
 			{
 				Log("ObjectDisposed.");
 			}
+			catch (SocketException ex)
+			{
+				Log($"Some Socket Exception was thrown ... {ex}");
+			}
 		}
 
 		private void DataReceived(byte[] ba, in IPEndPoint remIPE)
