@@ -12,10 +12,10 @@ public partial class BIDSServerCore : IDisposable
 		{
 			if (disposing)
 			{
-				ClearMod();
-
 				SMem.ReadStop(SMemLib.ARNum.All);
 				Reader.Dispose();
+
+				ClearMod();
 
 				SMem.Dispose();
 			}
