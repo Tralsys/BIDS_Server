@@ -31,10 +31,10 @@ namespace TR.BIDSsv
 		public bool Connect(in string args)
 		{
 			string[] sa = args.Replace(" ", string.Empty).Split(new string[2] { "-", "/" }, StringSplitOptions.RemoveEmptyEntries);
-			IPAddress remoteIp = IPAddress.Broadcast;
-			IPAddress localIp = IPAddress.Any;
-			ushort remotePort = (ushort)ConstVals.DefPNum;
-			ushort localPort = (ushort)ConstVals.DefPNum;
+			IPAddress? sendToIP = null;
+			IPAddress? sendFromIP = null;
+			ushort sendToPort = (ushort)ConstVals.DefPNum;
+			ushort readOnPort = (ushort)ConstVals.DefPNum;
 			for (int i = 0; i < sa.Length; i++)
 			{
 				string[] saa = sa[i].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -60,21 +60,27 @@ namespace TR.BIDSsv
 							case "Name":
 								if (saa.Length > 1) Name = saa[1];
 								break;
-							case "RIP":
-							case "RemoteIP":
-								if (saa.Length > 1) remoteIp = IPAddress.Parse(saa[1]);
+
+							case "DstIP":
+							case "ToIP":
+							case "SendToIP":
+								if (saa.Length > 1) sendToIP = IPAddress.Parse(saa[1]);
 								break;
-							case "LIP":
-							case "LocalIP":
-								if (saa.Length > 1) localIp = IPAddress.Parse(saa[1]);
+
+							case "SrcIP":
+							case "SendFromIP":
+								if (saa.Length > 1) sendFromIP = IPAddress.Parse(saa[1]);
 								break;
-							case "RPort":
-							case "RemotePort":
-								if (saa.Length > 1) remotePort = ushort.Parse(saa[1]);
+
+							case "DstPort":
+							case "ToPort":
+							case "SendToPort":
+								if (saa.Length > 1) sendToPort = ushort.Parse(saa[1]);
 								break;
-							case "LPort":
-							case "LocalPort":
-								if (saa.Length > 1) localPort = ushort.Parse(saa[1]);
+
+							case "ReadPort":
+							case "ReadOnPort":
+								if (saa.Length > 1) readOnPort = ushort.Parse(saa[1]);
 								break;
 						}
 					}
@@ -85,8 +91,8 @@ namespace TR.BIDSsv
 				}
 			}
 
-			Log($"Connect try ... read_on>{localIp}:{localPort} send_to>{remoteIp}:{remotePort}");
-			udpc = new udpcom(new IPEndPoint(localIp, localPort), new IPEndPoint(remoteIp, remotePort));
+			udpc = new udpcom(sendFromIP, sendToIP, sendToPort, readOnPort);
+
 			udpc.DataGotEv += Udpc_DataGotEv;
 			return true;
 		}
@@ -121,10 +127,10 @@ namespace TR.BIDSsv
 			"Argument Format ... [Header(\"-\" or \"/\")][SettingName(B, P etc...)][Separater(\":\")][Setting(38400, 2 etc...)]",
 			"  -E or -Encoding : Set the Encoding Option.  Default:0  If you want More info about this argument, please read the source code.",
 			"  -N or -Name : Set the Instance Name.  Default:\"udp\"  If you don't set this option, this program maybe cause some bugs.",
-			"  -RIP or -RemoteIP : Set the IP Address to communicate with.  If you don't set this option, this program starts broadcast communication.",
-			"  -LIP or -LocalIP : Set the IP Address to send from.",
-			$"  -RPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"{ConstVals.DefPNum}\" (default port)",
-			$"  -LPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"{ConstVals.DefPNum}\" (default port)"
+			"  -DstIP or -SendToIP : Set the IP Address to communicate with.  If you don't set this option, this program starts broadcast communication.",
+			"  -SrcIP or -SendFromIP : Set the IP Address to send from.",
+			$"  -DstPort or -SendToPort : Set the Remote Port Number to connect.  If you don't set this option, this program uses \"{ConstVals.DefPNum}\" (default port)",
+			$"  -ReadOnPort : Set the Local Port Number to read.  If you don't set this option, this program uses \"{ConstVals.DefPNum}\" (default port)"
 		};
 
 		public void WriteHelp(in string args)
