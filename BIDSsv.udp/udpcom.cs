@@ -71,7 +71,7 @@ namespace TR.BIDSsv
 					Log($"<<< {remIPE} : {BitConverter.ToString(ba)}");
 
 				if (ba?.Length > 0)
-					_ = Task.Run(() => DataGotEv?.Invoke(null, new UDPGotEvArgs(ba)));
+					DataGotEv?.Invoke(null, new UDPGotEvArgs(ba));
 			}
 		}
 
