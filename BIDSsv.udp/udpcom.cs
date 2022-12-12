@@ -40,6 +40,8 @@ namespace TR.BIDSsv
 
 			_ = Task.Run(ReadingMethod);
 			UCW.Connect(Dst ?? new IPEndPoint(IPAddress.Broadcast, pt));
+
+			Log($"Reader listening on: {UCR.Client.LocalEndPoint} / Writer print from: {UCW.Client.LocalEndPoint}");
 		}
 
 		private void ReadingMethod()
