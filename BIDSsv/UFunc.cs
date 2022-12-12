@@ -633,6 +633,20 @@ namespace TR.BIDSsv
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]//関数のインライン展開を積極的にやってもらう.
 		public static bool ArrayEqual<T>(in this (T[], T[]) ar, in int item1ind = 0, in int item2ind = 0, in int len = -1) => ArrayEqual<T>(ar.Item1, item1ind, ar.Item2, item2ind, len);
+
+		public static bool ArrayEqual(in ReadOnlySpan<int> arr1, in ReadOnlySpan<int> arr2)
+		{
+			if (arr1.Length != arr2.Length)
+				return false;
+
+			for (int i = 0; i < arr1.Length; i++)
+			{
+				if (arr1[i] != arr2[i])
+					return false;
+			}
+
+			return true;
+		}
 #endif
 	}
 }
