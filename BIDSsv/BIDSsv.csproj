@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
 		<LangVersion>preview</LangVersion>
 		<AssemblyName>TR.BIDSsv</AssemblyName>
 		<RootNamespace>TR.BIDSsv</RootNamespace>
 		<Nullable>enable</Nullable>
-		<Version>1.3.0</Version>
+		<Version>1.3.0.1</Version>
 		<Authors>Tetsu Otter</Authors>
 		<Company>Tech Otter</Company>
 		<Product>BIDS Project</Product>
