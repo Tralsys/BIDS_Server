@@ -41,6 +41,7 @@ public partial class BIDSServerCore
 				{
 					// 何らかのデータを持ったコマンド
 					// => Responseコマンド
+					SMem.WriteIsEnabled(true);
 					returnCmd = OnResponseCmdGot.SetValue(SMem, infoCmd);
 				}
 				break;
@@ -62,6 +63,7 @@ public partial class BIDSServerCore
 				return OnVariablePayloadCmdGot(payloadCmd.Structure.Name, payloadCmd.Payload, sender);
 
 			case IBIDSBinaryData binCmd:
+				SMem.WriteIsEnabled(true);
 				return OnBinaryCmdGot.HandleCommand(SMem, binCmd);
 		}
 
