@@ -11,7 +11,7 @@ namespace BIDS_Server
   class Program
   {
     static bool IsLooping = true;
-    const string VerNumStr = "012";
+    const string VerNumStr = "012.1";
     static void Main(string[] args)
     {
       Console.WriteLine("BIDS Server Application");
