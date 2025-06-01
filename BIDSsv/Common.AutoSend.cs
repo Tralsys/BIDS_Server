@@ -240,7 +240,7 @@ namespace TR.BIDSsv
             if (e.OldArray.Length <= i) Num = e.NewArray[i];
             else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
 
-            if (Num != null) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL, i, Num.ToString()), i, ConstVals.DTYPE_PANEL});
+            if (Num != null) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL, i, Num.ToString()), i, ConstVals.DTYPE_PANEL);
           });
         },
         () =>
