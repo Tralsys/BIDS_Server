@@ -223,34 +223,34 @@ namespace TR.BIDSsv
 
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
-      if (!IsStarted || (svlist?.Count > 0)) return;
+      if (!IsStarted || !(svlist?.Count > 0)) return;
       Task.Run(() => Parallel.Invoke(
-        () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnSoundDChanged(in e.NewArray)),
+        () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray)),
         () =>
         {
           if (AutoSendSetting.BasicPanelAS)
-            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicSound(na, i)));
+            ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_BIN_ARR_PRINT_COUNT, (na, i) => ASPtr(AutoSendSetting.BasicPanel(na, i)));
         },
         () =>
         {
-          if (!(SDAutoList?.Count > 0)) return;
+          if (!(PDAutoList?.Count > 0)) return;
           Parallel.For(0, Math.Max(e.OldArray.Length, e.NewArray.Length), (i) =>
           {
             int? Num = null;
             if (e.OldArray.Length <= i) Num = e.NewArray[i];
             else if (e.NewArray.Length > i && e.OldArray[i] != e.NewArray[i]) Num = e.NewArray[i];
 
-            if (Num != null) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND, i, Num.ToString()), i, ConstVals.DTYPE_SOUND);
+            if (Num != null) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL, i, Num.ToString()), i, ConstVals.DTYPE_PANEL);
           });
         },
         () =>
         {
-          if (!(SDAutoList?.Count > 0)) return;
-          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.SOUND_ARR_PRINT_COUNT,
+          if (!(PDAutoList?.Count > 0)) return;
+          ArrDChangedCheck(e.OldArray, e.NewArray, ConstVals.PANEL_ARR_PRINT_COUNT,
             (_, i) =>
             {
               string s = null;
-              if (Get_TRI_Data(out s, ConstVals.DTYPE_SOUND_ARR, i, true)) SDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_SOUND_ARR, i, s), i, ConstVals.DTYPE_SOUND_ARR);
+              if (Get_TRI_Data(out s, ConstVals.DTYPE_PANEL_ARR, i, true)) PDAutoList.PrintValue(UFunc.BIDSCMDMaker(ConstVals.CMD_INFOREQ, ConstVals.DTYPE_PANEL_ARR, i, s), i, ConstVals.DTYPE_PANEL_ARR);
             });
         }));
     }
