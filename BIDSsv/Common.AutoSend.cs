@@ -223,7 +223,7 @@ namespace TR.BIDSsv
 
     private static void Common_PanelDChanged(object sender, SMemLib.ArrayDChangedEArgs e)
     {
-      if (!IsStarted || (svlist?.Count > 0)) return;
+      if (!IsStarted || !(svlist?.Count > 0)) return;
       Task.Run(() => Parallel.Invoke(
         () => Parallel.For(0, svlist.Count, (i) => svlist[i].OnPanelDChanged(in e.NewArray)),
         () =>
